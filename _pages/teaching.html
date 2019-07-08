@@ -10,3 +10,23 @@ author_profile: true
 {% for post in site.teaching reversed %}
   {% include archive-single.html %}
 {% endfor %}
+
+
+<h1>Technical Notes</h1>
+The topics I have written these notes about are biased towards my interests and also their relevance to my research. I write them primarily as a way of educating myself but I thought I would share them in case anyone finds them useful. These notes contain no original work by me but rather are an amalgamation of things I have read and courses that I have taken. Caution, these notes may contain typos and errors, feel free to reach out if you find any!
+
+<h2>Continious optimisation</h2>
+Continious optimisation studies how to find the minima (lowest point) of a smooth function under smooth constraints. In the unconstrainted case our objective then is
+\[
+\min_{x \in \mathbb{R}^{n}} f(x)
+\]
+where $f: \mathbb{R} ^{n} \rightarrow \mathbb{R}$ is continious. In the constrained case we typically apply an equality, inequality or perhaps geometric constraint (or some combination of these). Points that satisfy these inequalities are called `feasible' points.
+\[
+\min_{x \in \Omega} f(x) \\
+\text{subject to:} \\
+c_i(x) = 0 \; \forall \; i \in E \\
+c_i(x) \geq 0 \; \forall \; i \in I
+\]
+where $f: \mathbb{R}^{n} \rightarrow \mathbb{R}$ is continious, $c_i: \mathbb{R} ^{n} \rightarrow \mathbb{R}$ for all $i \in E \cup I$ are continious and $\Omega$ is a closed convex subset of $\mathbb{R}^n$. Here $E$ is the equality constraints, $I$ the set of inequality constraints and $\Omega$ represents a geometric constraint.
+
+Notes coming soon!
