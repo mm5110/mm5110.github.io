@@ -1,0 +1,27 @@
+---
+title: "Teaching"
+---
+At UCLA I am a Program in Computing (PIC) instructor and teach a number of programming related courses which I have detailed below. In my spare time I am compiling materials for a course I'd one day like to teach which currently I think of as *"Neural networks: theory and practice"*, the aims of which are i) to give students a practical working knowledge of how to design and train neural networks and ii) introduce them to current theories concerning approximation rates, training guarantees, generalization bounds and architecture design from the perspective of Geometric deep learning.
+
+## Current courses
+
+#### PIC16A: Introduction to Python with Data Science Applications
+
+
+#### PIC10A: Introduction programming with C++
+
+
+#### PIC10B: Intermediate C++
+
+
+
+## Past courses
+
+At Oxford I was a Tutor for Information Theory (B8.4) and Theories of Deep Learning (C6.5). 
+
+
+
+<!-- ## For students -->
+
+
+

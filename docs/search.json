@@ -1,0 +1,611 @@
+[
+  {
+    "objectID": "old/markdown_generator/talks.html",
+    "href": "old/markdown_generator/talks.html",
+    "title": "Talks markdown generator for academicpages",
+    "section": "",
+    "text": "Takes a TSV of talks with metadata and converts them for use with academicpages.github.io. This is an interactive Jupyter notebook (see more info here). The core python code is also in talks.py. Run either from the markdown_generator folder after replacing talks.tsv with one containing your data.\nTODO: Make this work with BibTex and other databases, rather than Stuart’s non-standard TSV format and citation style.\nimport pandas as pd\nimport os"
+  },
+  {
+    "objectID": "old/markdown_generator/talks.html#data-format",
+    "href": "old/markdown_generator/talks.html#data-format",
+    "title": "Talks markdown generator for academicpages",
+    "section": "Data format",
+    "text": "Data format\nThe TSV needs to have the following columns: title, type, url_slug, venue, date, location, talk_url, description, with a header at the top. Many of these fields can be blank, but the columns must be in the TSV.\n\nFields that cannot be blank: title, url_slug, date. All else can be blank. type defaults to “Talk”\ndate must be formatted as YYYY-MM-DD.\nurl_slug will be the descriptive part of the .md file and the permalink URL for the page about the paper.\n\nThe .md file will be YYYY-MM-DD-[url_slug].md and the permalink will be https://[yourdomain]/talks/YYYY-MM-DD-[url_slug]\nThe combination of url_slug and date must be unique, as it will be the basis for your filenames\n\n\nThis is how the raw file looks (it doesn’t look pretty, use a spreadsheet or other program to edit and create).\n\n!cat talks.tsv\n\ntitle   type    url_slug    venue   date    location    talk_url    description\nTalk 1 on Relevant Topic in Your Field  Talk    talk-1  UC San Francisco, Department of Testing 2012-03-01  San Francisco, California       This is a description of your talk, which is a markdown files that can be all markdown-ified like any other post. Yay markdown!\nTutorial 1 on Relevant Topic in Your Field  Tutorial    tutorial-1  UC-Berkeley Institute for Testing Science   2013-03-01  Berkeley CA, USA    http://exampleurl.com   This is a description of your tutorial, note the different field in type. This is a markdown files that can be all markdown-ified like any other post. Yay markdown!\nTalk 2 on Relevant Topic in Your Field  Talk    talk-2  London School of Testing    2014-02-01  London, UK  http://example2.com This is a description of your talk, which is a markdown files that can be all markdown-ified like any other post. Yay markdown!\nConference Proceeding talk 3 on Relevant Topic in Your Field    Conference proceedings talk talk-3  Testing Institute of America 2014 Annual Conference 2014-03-01  Los Angeles, CA     This is a description of your conference proceedings talk, note the different field in type. You can put anything in this field."
+  },
+  {
+    "objectID": "old/markdown_generator/talks.html#import-tsv",
+    "href": "old/markdown_generator/talks.html#import-tsv",
+    "title": "Talks markdown generator for academicpages",
+    "section": "Import TSV",
+    "text": "Import TSV\nPandas makes this easy with the read_csv function. We are using a TSV, so we specify the separator as a tab, or \\t.\nI found it important to put this data in a tab-separated values format, because there are a lot of commas in this kind of data and comma-separated values can get messed up. However, you can modify the import statement, as pandas also has read_excel(), read_json(), and others.\n\ntalks = pd.read_csv(\"talks.tsv\", sep=\"\\t\", header=0)\ntalks\n\n\n\n\n\n\n\ntitle\ntype\nurl_slug\nvenue\ndate\nlocation\ntalk_url\ndescription\n\n\n\n\n0\nTalk 1 on Relevant Topic in Your Field\nTalk\ntalk-1\nUC San Francisco, Department of Testing\n2012-03-01\nSan Francisco, California\nNaN\nThis is a description of your talk, which is a...\n\n\n1\nTutorial 1 on Relevant Topic in Your Field\nTutorial\ntutorial-1\nUC-Berkeley Institute for Testing Science\n2013-03-01\nBerkeley CA, USA\nhttp://exampleurl.com\nThis is a description of your tutorial, note t...\n\n\n2\nTalk 2 on Relevant Topic in Your Field\nTalk\ntalk-2\nLondon School of Testing\n2014-02-01\nLondon, UK\nhttp://example2.com\nThis is a description of your talk, which is a...\n\n\n3\nConference Proceeding talk 3 on Relevant Topic...\nConference proceedings talk\ntalk-3\nTesting Institute of America 2014 Annual Confe...\n2014-03-01\nLos Angeles, CA\nNaN\nThis is a description of your conference proce..."
+  },
+  {
+    "objectID": "old/markdown_generator/talks.html#escape-special-characters",
+    "href": "old/markdown_generator/talks.html#escape-special-characters",
+    "title": "Talks markdown generator for academicpages",
+    "section": "Escape special characters",
+    "text": "Escape special characters\nYAML is very picky about how it takes a valid string, so we are replacing single and double quotes (and ampersands) with their HTML encoded equivilents. This makes them look not so readable in raw format, but they are parsed and rendered nicely.\n\nhtml_escape_table = {\n    \"&\": \"&amp;\",\n    '\"': \"&quot;\",\n    \"'\": \"&apos;\"\n    }\n\ndef html_escape(text):\n    if type(text) is str:\n        return \"\".join(html_escape_table.get(c,c) for c in text)\n    else:\n        return \"False\""
+  },
+  {
+    "objectID": "old/markdown_generator/talks.html#creating-the-markdown-files",
+    "href": "old/markdown_generator/talks.html#creating-the-markdown-files",
+    "title": "Talks markdown generator for academicpages",
+    "section": "Creating the markdown files",
+    "text": "Creating the markdown files\nThis is where the heavy lifting is done. This loops through all the rows in the TSV dataframe, then starts to concatentate a big string (md) that contains the markdown for each type. It does the YAML metadata first, then does the description for the individual page.\n\nloc_dict = {}\n\nfor row, item in talks.iterrows():\n    \n    md_filename = str(item.date) + \"-\" + item.url_slug + \".md\"\n    html_filename = str(item.date) + \"-\" + item.url_slug \n    year = item.date[:4]\n    \n    md = \"---\\ntitle: \\\"\"   + item.title + '\"\\n'\n    md += \"collection: talks\" + \"\\n\"\n    \n    if len(str(item.type)) &gt; 3:\n        md += 'type: \"' + item.type + '\"\\n'\n    else:\n        md += 'type: \"Talk\"\\n'\n    \n    md += \"permalink: /talks/\" + html_filename + \"\\n\"\n    \n    if len(str(item.venue)) &gt; 3:\n        md += 'venue: \"' + item.venue + '\"\\n'\n        \n    if len(str(item.location)) &gt; 3:\n        md += \"date: \" + str(item.date) + \"\\n\"\n    \n    if len(str(item.location)) &gt; 3:\n        md += 'location: \"' + str(item.location) + '\"\\n'\n           \n    md += \"---\\n\"\n    \n    \n    if len(str(item.talk_url)) &gt; 3:\n        md += \"\\n[More information here](\" + item.talk_url + \")\\n\" \n        \n    \n    if len(str(item.description)) &gt; 3:\n        md += \"\\n\" + html_escape(item.description) + \"\\n\"\n        \n        \n    md_filename = os.path.basename(md_filename)\n    #print(md)\n    \n    with open(\"../_talks/\" + md_filename, 'w') as f:\n        f.write(md)\n\nThese files are in the talks directory, one directory below where we’re working from.\n\n!ls ../_talks\n\n2012-03-01-talk-1.md      2014-02-01-talk-2.md\n2013-03-01-tutorial-1.md  2014-03-01-talk-3.md\n\n\n\n!cat ../_talks/2013-03-01-tutorial-1.md\n\n---\ntitle: \"Tutorial 1 on Relevant Topic in Your Field\"\ncollection: talks\ntype: \"Tutorial\"\npermalink: /talks/2013-03-01-tutorial-1\nvenue: \"UC-Berkeley Institute for Testing Science\"\ndate: 2013-03-01\nlocation: \"Berkeley CA, USA\"\n---\n\n[More information here](http://exampleurl.com)\n\nThis is a description of your tutorial, note the different field in type. This is a markdown files that can be all markdown-ified like any other post. Yay markdown!"
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html",
+    "href": "old/markdown_generator/publications.html",
+    "title": "Publications markdown generator for academicpages",
+    "section": "",
+    "text": "Takes a TSV of publications with metadata and converts them for use with academicpages.github.io. This is an interactive Jupyter notebook (see more info here). The core python code is also in publications.py. Run either from the markdown_generator folder after replacing publications.tsv with one containing your data.\nTODO: Make this work with BibTex and other databases of citations, rather than Stuart’s non-standard TSV format and citation style."
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html#data-format",
+    "href": "old/markdown_generator/publications.html#data-format",
+    "title": "Publications markdown generator for academicpages",
+    "section": "Data format",
+    "text": "Data format\nThe TSV needs to have the following columns: pub_date, title, venue, excerpt, citation, site_url, and paper_url, with a header at the top.\n\nexcerpt and paper_url can be blank, but the others must have values.\npub_date must be formatted as YYYY-MM-DD.\nurl_slug will be the descriptive part of the .md file and the permalink URL for the page about the paper. The .md file will be YYYY-MM-DD-[url_slug].md and the permalink will be https://[yourdomain]/publications/YYYY-MM-DD-[url_slug]\n\nThis is how the raw file looks (it doesn’t look pretty, use a spreadsheet or other program to edit and create).\n\n!cat publications.tsv\n\npub_date    title   venue   excerpt citation    url_slug    paper_url\n2009-10-01  Paper Title Number 1    Journal 1   This paper is about the number 1. The number 2 is left for future work. Your Name, You. (2009). \"Paper Title Number 1.\" &lt;i&gt;Journal 1&lt;/i&gt;. 1(1). paper-title-number-1    http://academicpages.github.io/files/paper1.pdf\n2010-10-01  Paper Title Number 2    Journal 1   This paper is about the number 2. The number 3 is left for future work. Your Name, You. (2010). \"Paper Title Number 2.\" &lt;i&gt;Journal 1&lt;/i&gt;. 1(2). paper-title-number-2    http://academicpages.github.io/files/paper2.pdf\n2015-10-01  Paper Title Number 3    Journal 1   This paper is about the number 3. The number 4 is left for future work. Your Name, You. (2015). \"Paper Title Number 3.\" &lt;i&gt;Journal 1&lt;/i&gt;. 1(3). paper-title-number-3    http://academicpages.github.io/files/paper3.pdf"
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html#import-pandas",
+    "href": "old/markdown_generator/publications.html#import-pandas",
+    "title": "Publications markdown generator for academicpages",
+    "section": "Import pandas",
+    "text": "Import pandas\nWe are using the very handy pandas library for dataframes.\n\nimport pandas as pd"
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html#import-tsv",
+    "href": "old/markdown_generator/publications.html#import-tsv",
+    "title": "Publications markdown generator for academicpages",
+    "section": "Import TSV",
+    "text": "Import TSV\nPandas makes this easy with the read_csv function. We are using a TSV, so we specify the separator as a tab, or \\t.\nI found it important to put this data in a tab-separated values format, because there are a lot of commas in this kind of data and comma-separated values can get messed up. However, you can modify the import statement, as pandas also has read_excel(), read_json(), and others.\n\npublications = pd.read_csv(\"publications.tsv\", sep=\"\\t\", header=0)\npublications\n\n\n\n\n\n\n\npub_date\ntitle\nvenue\nexcerpt\ncitation\nurl_slug\npaper_url\n\n\n\n\n0\n2009-10-01\nPaper Title Number 1\nJournal 1\nThis paper is about the number 1. The number 2...\nYour Name, You. (2009). \"Paper Title Number 1....\npaper-title-number-1\nhttp://academicpages.github.io/files/paper1.pdf\n\n\n1\n2010-10-01\nPaper Title Number 2\nJournal 1\nThis paper is about the number 2. The number 3...\nYour Name, You. (2010). \"Paper Title Number 2....\npaper-title-number-2\nhttp://academicpages.github.io/files/paper2.pdf\n\n\n2\n2015-10-01\nPaper Title Number 3\nJournal 1\nThis paper is about the number 3. The number 4...\nYour Name, You. (2015). \"Paper Title Number 3....\npaper-title-number-3\nhttp://academicpages.github.io/files/paper3.pdf"
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html#escape-special-characters",
+    "href": "old/markdown_generator/publications.html#escape-special-characters",
+    "title": "Publications markdown generator for academicpages",
+    "section": "Escape special characters",
+    "text": "Escape special characters\nYAML is very picky about how it takes a valid string, so we are replacing single and double quotes (and ampersands) with their HTML encoded equivilents. This makes them look not so readable in raw format, but they are parsed and rendered nicely.\n\nhtml_escape_table = {\n    \"&\": \"&amp;\",\n    '\"': \"&quot;\",\n    \"'\": \"&apos;\"\n    }\n\ndef html_escape(text):\n    \"\"\"Produce entities within text.\"\"\"\n    return \"\".join(html_escape_table.get(c,c) for c in text)"
+  },
+  {
+    "objectID": "old/markdown_generator/publications.html#creating-the-markdown-files",
+    "href": "old/markdown_generator/publications.html#creating-the-markdown-files",
+    "title": "Publications markdown generator for academicpages",
+    "section": "Creating the markdown files",
+    "text": "Creating the markdown files\nThis is where the heavy lifting is done. This loops through all the rows in the TSV dataframe, then starts to concatentate a big string (md) that contains the markdown for each type. It does the YAML metadata first, then does the description for the individual page.\n\nimport os\nfor row, item in publications.iterrows():\n    \n    md_filename = str(item.pub_date) + \"-\" + item.url_slug + \".md\"\n    html_filename = str(item.pub_date) + \"-\" + item.url_slug\n    year = item.pub_date[:4]\n    \n    ## YAML variables\n    \n    md = \"---\\ntitle: \\\"\"   + item.title + '\"\\n'\n    \n    md += \"\"\"collection: publications\"\"\"\n    \n    md += \"\"\"\\npermalink: /publication/\"\"\" + html_filename\n    \n    if len(str(item.excerpt)) &gt; 5:\n        md += \"\\nexcerpt: '\" + html_escape(item.excerpt) + \"'\"\n    \n    md += \"\\ndate: \" + str(item.pub_date) \n    \n    md += \"\\nvenue: '\" + html_escape(item.venue) + \"'\"\n    \n    if len(str(item.paper_url)) &gt; 5:\n        md += \"\\npaperurl: '\" + item.paper_url + \"'\"\n    \n    md += \"\\ncitation: '\" + html_escape(item.citation) + \"'\"\n    \n    md += \"\\n---\"\n    \n    ## Markdown description for individual page\n        \n    if len(str(item.excerpt)) &gt; 5:\n        md += \"\\n\" + html_escape(item.excerpt) + \"\\n\"\n    \n    if len(str(item.paper_url)) &gt; 5:\n        md += \"\\n[Download paper here](\" + item.paper_url + \")\\n\" \n        \n    md += \"\\nRecommended citation: \" + item.citation\n    \n    md_filename = os.path.basename(md_filename)\n       \n    with open(\"../_publications/\" + md_filename, 'w') as f:\n        f.write(md)\n\nThese files are in the publications directory, one directory below where we’re working from.\n\n!ls ../_publications/\n\n2009-10-01-paper-title-number-1.md  2015-10-01-paper-title-number-3.md\n2010-10-01-paper-title-number-2.md\n\n\n\n!cat ../_publications/2009-10-01-paper-title-number-1.md\n\n---\ntitle: \"Paper Title Number 1\"\ncollection: publications\npermalink: /publication/2009-10-01-paper-title-number-1\nexcerpt: 'This paper is about the number 1. The number 2 is left for future work.'\ndate: 2009-10-01\nvenue: 'Journal 1'\npaperurl: 'http://academicpages.github.io/files/paper1.pdf'\ncitation: 'Your Name, You. (2009). &quot;Paper Title Number 1.&quot; &lt;i&gt;Journal 1&lt;/i&gt;. 1(1).'\n---\nThis paper is about the number 1. The number 2 is left for future work.\n\n[Download paper here](http://academicpages.github.io/files/paper1.pdf)\n\nRecommended citation: Your Name, You. (2009). \"Paper Title Number 1.\" &lt;i&gt;Journal 1&lt;/i&gt;. 1(1)."
+  },
+  {
+    "objectID": "old/markdown_generator/readme.html",
+    "href": "old/markdown_generator/readme.html",
+    "title": "Jupyter notebook markdown generator",
+    "section": "",
+    "text": "Jupyter notebook markdown generator\nThese .ipynb files are Jupyter notebook files that convert a TSV containing structured data about talks (talks.tsv) or presentations (presentations.tsv) into individual markdown files that will be properly formatted for the academicpages template. The notebooks contain a lot of documentation about the process. The .py files are pure python that do the same things if they are executed in a terminal, they just don’t have pretty documentation."
+  },
+  {
+    "objectID": "old/markdown_generator/PubsFromBib.html",
+    "href": "old/markdown_generator/PubsFromBib.html",
+    "title": "Publications markdown generator for academicpages",
+    "section": "",
+    "text": "Takes a set of bibtex of publications and converts them for use with academicpages.github.io. This is an interactive Jupyter notebook (see more info here).\nThe core python code is also in pubsFromBibs.py. Run either from the markdown_generator folder after replacing updating the publist dictionary with: * bib file names * specific venue keys based on your bib file preferences * any specific pre-text for specific files * Collection Name (future feature)\nTODO: Make this work with other databases of citations, TODO: Merge this with the existing TSV parsing solution\n\nfrom pybtex.database.input import bibtex\nimport pybtex.database.input.bibtex \nfrom time import strptime\nimport string\nimport html\nimport os\nimport re\n\n\n#todo: incorporate different collection types rather than a catch all publications, requires other changes to template\npublist = {\n    \"proceeding\": {\n        \"file\" : \"proceedings.bib\",\n        \"venuekey\": \"booktitle\",\n        \"venue-pretext\": \"In the proceedings of \",\n        \"collection\" : {\"name\":\"publications\",\n                        \"permalink\":\"/publication/\"}\n        \n    },\n    \"journal\":{\n        \"file\": \"pubs.bib\",\n        \"venuekey\" : \"journal\",\n        \"venue-pretext\" : \"\",\n        \"collection\" : {\"name\":\"publications\",\n                        \"permalink\":\"/publication/\"}\n    } \n}\n\n\nhtml_escape_table = {\n    \"&\": \"&amp;\",\n    '\"': \"&quot;\",\n    \"'\": \"&apos;\"\n    }\n\ndef html_escape(text):\n    \"\"\"Produce entities within text.\"\"\"\n    return \"\".join(html_escape_table.get(c,c) for c in text)\n\n\nfor pubsource in publist:\n    parser = bibtex.Parser()\n    bibdata = parser.parse_file(publist[pubsource][\"file\"])\n\n    #loop through the individual references in a given bibtex file\n    for bib_id in bibdata.entries:\n        #reset default date\n        pub_year = \"1900\"\n        pub_month = \"01\"\n        pub_day = \"01\"\n        \n        b = bibdata.entries[bib_id].fields\n        \n        try:\n            pub_year = f'{b[\"year\"]}'\n\n            #todo: this hack for month and day needs some cleanup\n            if \"month\" in b.keys(): \n                if(len(b[\"month\"])&lt;3):\n                    pub_month = \"0\"+b[\"month\"]\n                    pub_month = pub_month[-2:]\n                elif(b[\"month\"] not in range(12)):\n                    tmnth = strptime(b[\"month\"][:3],'%b').tm_mon   \n                    pub_month = \"{:02d}\".format(tmnth) \n                else:\n                    pub_month = str(b[\"month\"])\n            if \"day\" in b.keys(): \n                pub_day = str(b[\"day\"])\n\n                \n            pub_date = pub_year+\"-\"+pub_month+\"-\"+pub_day\n            \n            #strip out {} as needed (some bibtex entries that maintain formatting)\n            clean_title = b[\"title\"].replace(\"{\", \"\").replace(\"}\",\"\").replace(\"\\\\\",\"\").replace(\" \",\"-\")    \n\n            url_slug = re.sub(\"\\\\[.*\\\\]|[^a-zA-Z0-9_-]\", \"\", clean_title)\n            url_slug = url_slug.replace(\"--\",\"-\")\n\n            md_filename = (str(pub_date) + \"-\" + url_slug + \".md\").replace(\"--\",\"-\")\n            html_filename = (str(pub_date) + \"-\" + url_slug).replace(\"--\",\"-\")\n\n            #Build Citation from text\n            citation = \"\"\n\n            #citation authors - todo - add highlighting for primary author?\n            for author in bibdata.entries[bib_id].persons[\"author\"]:\n                citation = citation+\" \"+author.first_names[0]+\" \"+author.last_names[0]+\", \"\n\n            #citation title\n            citation = citation + \"\\\"\" + html_escape(b[\"title\"].replace(\"{\", \"\").replace(\"}\",\"\").replace(\"\\\\\",\"\")) + \".\\\"\"\n\n            #add venue logic depending on citation type\n            venue = publist[pubsource][\"venue-pretext\"]+b[publist[pubsource][\"venuekey\"]].replace(\"{\", \"\").replace(\"}\",\"\").replace(\"\\\\\",\"\")\n\n            citation = citation + \" \" + html_escape(venue)\n            citation = citation + \", \" + pub_year + \".\"\n\n            \n            ## YAML variables\n            md = \"---\\ntitle: \\\"\"   + html_escape(b[\"title\"].replace(\"{\", \"\").replace(\"}\",\"\").replace(\"\\\\\",\"\")) + '\"\\n'\n            \n            md += \"\"\"collection: \"\"\" +  publist[pubsource][\"collection\"][\"name\"]\n\n            md += \"\"\"\\npermalink: \"\"\" + publist[pubsource][\"collection\"][\"permalink\"]  + html_filename\n            \n            note = False\n            if \"note\" in b.keys():\n                if len(str(b[\"note\"])) &gt; 5:\n                    md += \"\\nexcerpt: '\" + html_escape(b[\"note\"]) + \"'\"\n                    note = True\n\n            md += \"\\ndate: \" + str(pub_date) \n\n            md += \"\\nvenue: '\" + html_escape(venue) + \"'\"\n            \n            url = False\n            if \"url\" in b.keys():\n                if len(str(b[\"url\"])) &gt; 5:\n                    md += \"\\npaperurl: '\" + b[\"url\"] + \"'\"\n                    url = True\n\n            md += \"\\ncitation: '\" + html_escape(citation) + \"'\"\n\n            md += \"\\n---\"\n\n            \n            ## Markdown description for individual page\n            if note:\n                md += \"\\n\" + html_escape(b[\"note\"]) + \"\\n\"\n\n            if url:\n                md += \"\\n[Access paper here](\" + b[\"url\"] + \"){:target=\\\"_blank\\\"}\\n\" \n            else:\n                md += \"\\nUse [Google Scholar](https://scholar.google.com/scholar?q=\"+html.escape(clean_title.replace(\"-\",\"+\"))+\"){:target=\\\"_blank\\\"} for full citation\"\n\n            md_filename = os.path.basename(md_filename)\n\n            with open(\"../_publications/\" + md_filename, 'w') as f:\n                f.write(md)\n            print(f'SUCESSFULLY PARSED {bib_id}: \\\"', b[\"title\"][:60],\"...\"*(len(b['title'])&gt;60),\"\\\"\")\n        # field may not exist for a reference\n        except KeyError as e:\n            print(f'WARNING Missing Expected Field {e} from entry {bib_id}: \\\"', b[\"title\"][:30],\"...\"*(len(b['title'])&gt;30),\"\\\"\")\n            continue"
+  },
+  {
+    "objectID": "old/talkmap.html",
+    "href": "old/talkmap.html",
+    "title": "Leaflet cluster map of talk locations",
+    "section": "",
+    "text": "Run this from the _talks/ directory, which contains .md files of all your talks. This scrapes the location YAML field from each .md file, geolocates it with geopy/Nominatim, and uses the getorg library to output data, HTML, and Javascript for a standalone cluster map.\n\n!pip install getorg --upgrade\nimport glob\nimport getorg\nfrom geopy import Nominatim\n\nRequirement already up-to-date: getorg in /home/vm/anaconda3/lib/python3.5/site-packages\nRequirement already up-to-date: geopy in /home/vm/.local/lib/python3.5/site-packages (from getorg)\nRequirement already up-to-date: retrying in /home/vm/.local/lib/python3.5/site-packages (from getorg)\nRequirement already up-to-date: pygithub in /home/vm/anaconda3/lib/python3.5/site-packages (from getorg)\nRequirement already up-to-date: six&gt;=1.7.0 in /home/vm/.local/lib/python3.5/site-packages (from retrying-&gt;getorg)\nIPywidgets and ipyleaflet support enabled.\n\n\n\ng = glob.glob(\"*.md\")\n\n\ngeocoder = Nominatim()\nlocation_dict = {}\nlocation = \"\"\npermalink = \"\"\ntitle = \"\"\n\n\n\nfor file in g:\n    with open(file, 'r') as f:\n        lines = f.read()\n        if lines.find('location: \"') &gt; 1:\n            loc_start = lines.find('location: \"') + 11\n            lines_trim = lines[loc_start:]\n            loc_end = lines_trim.find('\"')\n            location = lines_trim[:loc_end]\n                            \n           \n        location_dict[location] = geocoder.geocode(location)\n        print(location, \"\\n\", location_dict[location])\n\nBerkeley CA, USA \n Berkeley, Alameda County, California, United States of America\nLos Angeles, CA \n LA, Los Angeles County, California, United States of America\nLondon, UK \n London, Greater London, England, UK\nSan Francisco, California \n SF, California, United States of America\n\n\n\nm = getorg.orgmap.create_map_obj()\ngetorg.orgmap.output_html_cluster_map(location_dict, folder_name=\"../talkmap\", hashed_usernames=False)\n\n'Written map to ../talkmap/'"
+  },
+  {
+    "objectID": "old/CHANGELOG.html",
+    "href": "old/CHANGELOG.html",
+    "title": "mm5110.github.io",
+    "section": "",
+    "text": "Improve UX of static comment forms. #448"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section",
+    "href": "old/CHANGELOG.html#section",
+    "title": "mm5110.github.io",
+    "section": "",
+    "text": "Improve UX of static comment forms. #448"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-1",
+    "href": "old/CHANGELOG.html#section-1",
+    "title": "mm5110.github.io",
+    "section": "3.4.1",
+    "text": "3.4.1\n\nEnhancements\n\nAdd staticman.filename configuration with UNIX timestamp for sorting data files. example ~&gt; comment-1470943149.\n\n\n\nBug Fixes\n\nDon’t add &lt;a&gt; to author name if URL is blank."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-2",
+    "href": "old/CHANGELOG.html#section-2",
+    "title": "mm5110.github.io",
+    "section": "3.4.0",
+    "text": "3.4.0\n\nEnhancements\n\nSupport static-based commenting via Staticman for sites hosted with GitHub Pages. #424"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-3",
+    "href": "old/CHANGELOG.html#section-3",
+    "title": "mm5110.github.io",
+    "section": "3.3.7",
+    "text": "3.3.7\n\nBug Fixes\n\nRe-enabled Jekyll plugins in _config.yml in case they aren’t autoloaded in Gemfile. #417\n\n\n\nEnhancements\n\nFallback to site.github.url for use in {{ base_path }} when site.url is nil.\nReplace Sass and Autoprefixer npm build scripts with Jekyll’s built-in asset support. #333\n\n\n\nMaintenance\n\nDocument site.repository and its role with github-metadata gem.\nAdd sample archive page with content for testing styles on demo site."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-4",
+    "href": "old/CHANGELOG.html#section-4",
+    "title": "mm5110.github.io",
+    "section": "3.3.6",
+    "text": "3.3.6\n\nBug Fixes\n\nFix blank site.teaser bug. #412"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-5",
+    "href": "old/CHANGELOG.html#section-5",
+    "title": "mm5110.github.io",
+    "section": "3.3.5",
+    "text": "3.3.5\n\nEnhancements\n\nAdd English default text site.locale strings. #407\nAdd Portuguese localized UI text. #411\nAdd Italian localized UI text. #409\n\n\n\nMaintenance\n\nRemove unused Google AdSense variables in _config.yml. #404\nUpdate Gemfile instructions for using github-pages vs. native jekyll gems.\nDisable gems: in _config.yml and enable plugins with Bundler instead.\nAdd repository to _config.yml to suppress GitHub Pages error Liquid Exception: No repo name found."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-6",
+    "href": "old/CHANGELOG.html#section-6",
+    "title": "mm5110.github.io",
+    "section": "3.3.4",
+    "text": "3.3.4\n\nEnhancements\n\nAdd support for configurable feed URL to use a service like FeedBurner instead of linking directly to feed.xml in &lt;head&gt; and the site footer. #378, #379, #406\nAdd Turkish localized UI text. #403\n\n\n\nMaintenance\n\nUpdate gems: activesupport (4.2.7), ffi (1.9.14), github-pages (88), jekyll-redirect-from (0.11.0), jekyll-watch (1.5.0)."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-7",
+    "href": "old/CHANGELOG.html#section-7",
+    "title": "mm5110.github.io",
+    "section": "3.3.3",
+    "text": "3.3.3\n\nEnhancements\n\nMake footer stick to the bottom of the page.\n\n\n\nBug Fixes\n\nFix gallery size bug #402\n\n\n\nMaintenance\n\nSet default lang to en."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-8",
+    "href": "old/CHANGELOG.html#section-8",
+    "title": "mm5110.github.io",
+    "section": "3.3.2",
+    "text": "3.3.2\n\nBug Fixes\n\nFix JavaScript that triggers “sticky” sidebar to avoid layout issues on screen sizes &lt; 1024px. #396"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-9",
+    "href": "old/CHANGELOG.html#section-9",
+    "title": "mm5110.github.io",
+    "section": "3.3.1",
+    "text": "3.3.1\n\nEnhancements\n\nEnable image popup on &lt; 500px wide screens. #385\nIndicate the relationship between component URLs in a paginated series by applying rel=\"prev\" and rel=\"next\" to pages that use site.paginator. #253\nImprove link posts in archive listings. #276\n\n\n\nMaintenance\n\nUpdate gems: github-pages (86), ffi 1.9.13, jekyll-mentions 1.1.3, and rouge 1.11.1\nFix note about custom sidebar content appearing below author profile. #388"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-10",
+    "href": "old/CHANGELOG.html#section-10",
+    "title": "mm5110.github.io",
+    "section": "3.2.13",
+    "text": "3.2.13\n\nEnhancements\n\nAdd English default UI text for Canada, Great Britain, and Australia. #377\nSwitch default locale from en-US to en."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-11",
+    "href": "old/CHANGELOG.html#section-11",
+    "title": "mm5110.github.io",
+    "section": "3.2.12",
+    "text": "3.2.12\n\nEnhancements\n\nRemove window width “magic number” from sticky sidebar check in main.js for improved flexibility. #375\n\n\n\nBug Fixes\n\nFix author override conditional where a missing authors.yml would show broken sidebar content. Defaults to site.author. #376"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-12",
+    "href": "old/CHANGELOG.html#section-12",
+    "title": "mm5110.github.io",
+    "section": "3.2.11",
+    "text": "3.2.11\n\nBug Fixes\n\nFix disappearing author sidebar links #372\n\n\n\nMaintenance\n\nUpdate gems: github-pages (84), jekyll-github-metadata 2.0.2, and kramdown 1.11.1\nUpdate vendor JavaScript: jQuery 1.12.4, Stickyfill.js 1.1.4\nUpdate Font Awesome 4.6.3"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-13",
+    "href": "old/CHANGELOG.html#section-13",
+    "title": "mm5110.github.io",
+    "section": "3.2.10",
+    "text": "3.2.10\n\nMaintenance\n\nAdd CONTRIBUTING.md"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-14",
+    "href": "old/CHANGELOG.html#section-14",
+    "title": "mm5110.github.io",
+    "section": "3.2.9",
+    "text": "3.2.9\n\nEnhancements\n\nAdd support for header overlay images for Open Graph images. #358\n\n\n\nBug Fixes\n\nFix Person typo Schema.org type #358\n\n\n\nMaintenance\n\nUpdate github-pages gem and dependencies.\nRemove minutes_read to avoid awkward reading time wording #356"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-15",
+    "href": "old/CHANGELOG.html#section-15",
+    "title": "mm5110.github.io",
+    "section": "3.2.8",
+    "text": "3.2.8\n\nBug Fixes\n\nRemove cursor: pointer that appears on white-space surrounding author side list items and links. #354\n\n\n\nMaintenance\n\nAdd contributing information to README.md. #357"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-16",
+    "href": "old/CHANGELOG.html#section-16",
+    "title": "mm5110.github.io",
+    "section": "3.2.7",
+    "text": "3.2.7\n\nEnhancements\n\nAdd French localized UI text. #346\n\n\n\nBug Fixes\n\nFix branch logic for Yandex and Alexa in seo.html. #348"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-17",
+    "href": "old/CHANGELOG.html#section-17",
+    "title": "mm5110.github.io",
+    "section": "3.2.6",
+    "text": "3.2.6\n\nBug Fixes\n\nFix error Liquid Exception: divided by 0 in _includes/archive-single.html, included in _layouts/single.html caused by null words_per_minute in _config.yml. #345"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-18",
+    "href": "old/CHANGELOG.html#section-18",
+    "title": "mm5110.github.io",
+    "section": "3.2.5",
+    "text": "3.2.5\n\nBug Fixes\n\nFix link color in hero overlay to be white.\nRemove underlines from archive item titles."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-19",
+    "href": "old/CHANGELOG.html#section-19",
+    "title": "mm5110.github.io",
+    "section": "3.2.4",
+    "text": "3.2.4\n\nEnhancements\n\nImprove text alignment of masthead, hero overlay, page footer to be flush left and remove awkward white-space gaps. #342\nAdd Spanish localized UI text. #338\n\n\n\nBug Fixes\n\nFix alignment of icons in author sidebar #341\n\n\n\nMaintenance\n\nAdd background color to page footer to set it apart from main content. #342\nAdd terms and privacy policy to theme’s demo site. #343\nUpdate screenshots found in theme documentation."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-20",
+    "href": "old/CHANGELOG.html#section-20",
+    "title": "mm5110.github.io",
+    "section": "3.2.3",
+    "text": "3.2.3\n\nEnhancements\n\nAdd Discourse as a commenting provider. #335"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-21",
+    "href": "old/CHANGELOG.html#section-21",
+    "title": "mm5110.github.io",
+    "section": "3.2.2",
+    "text": "3.2.2\n\nEnhancements\n\nAdd support for image captions in Magnific Popup overlays via the gallery helper. #334"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-22",
+    "href": "old/CHANGELOG.html#section-22",
+    "title": "mm5110.github.io",
+    "section": "3.2.1",
+    "text": "3.2.1\n\nBug Fixes\n\nRemove need for “double tapping” masthead menu links on iOS devices. #315\n\n\n\nMaintenance\n\nAdd ISSUE_TEMPLATE.md for improve issue submission process."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-23",
+    "href": "old/CHANGELOG.html#section-23",
+    "title": "mm5110.github.io",
+    "section": "3.2.0",
+    "text": "3.2.0\n\nBug Fixes\n\nFix missing category/tag links in post footer due to possible conflict with site.tags and site.categories. #329"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-24",
+    "href": "old/CHANGELOG.html#section-24",
+    "title": "mm5110.github.io",
+    "section": "3.1.8",
+    "text": "3.1.8\n\nBug Fixes\n\nFix Liquid Exception: undefined method 'gsub' for nil:NilClass in _layouts/single.html error when page.title is null. &lt;h1&gt; element is now conditional if title: is not set for a page or collection item. #312\n\n\n\nMaintenance\n\nRemove duplicate fa-twitter and fa-twitter-square classes from _utilities.scss. #302\nDocument installing additional Jekyll gem dependencies when using gem \"jekyll\" instead of gem \"github-pages\" to avoid any errors on run. #305"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-25",
+    "href": "old/CHANGELOG.html#section-25",
+    "title": "mm5110.github.io",
+    "section": "3.1.7",
+    "text": "3.1.7\n\nEnhancements\n\nAdd translation key for “Recent Posts” used in home page index.html. #316\n\n\n\nMaintenance\n\nSmall fix to avoid underlying the whitespace between icons and related text when hovering. #303"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-26",
+    "href": "old/CHANGELOG.html#section-26",
+    "title": "mm5110.github.io",
+    "section": "3.1.6",
+    "text": "3.1.6\n\nMaintenance\n\nUpdate gem dependencies. Run bundle to update Gemfile.lock."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-27",
+    "href": "old/CHANGELOG.html#section-27",
+    "title": "mm5110.github.io",
+    "section": "3.1.5",
+    "text": "3.1.5\n\nMaintenance\n\nFix www and https links in author profile include #293"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-28",
+    "href": "old/CHANGELOG.html#section-28",
+    "title": "mm5110.github.io",
+    "section": "3.1.4",
+    "text": "3.1.4\n\nEnhancements\n\nAdd overlay_filter param to hero headers #298"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-29",
+    "href": "old/CHANGELOG.html#section-29",
+    "title": "mm5110.github.io",
+    "section": "3.1.3",
+    "text": "3.1.3\n\nEnhancements\n\nImprove site.locale documentation #284\nRemove ProTip note about protocol-less site.url as it is an anti-pattern #288\n\n\n\nBug Fixes\n\nFix og_image URL in seo.html #277\nFix author_profile toggle when assigned in a _layout #285\nFix typo in build:all npm script #283\nFix URL typo documentation #287\nSEO author bug. If twitter.username is set and author.twitter is nil bad things happen. #289"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-30",
+    "href": "old/CHANGELOG.html#section-30",
+    "title": "mm5110.github.io",
+    "section": "3.1.2",
+    "text": "3.1.2\n\nEnhancements\n\nExplain how to use nav_list helper in documentation.\nReduce left/right padding on smaller screens to increase width of main content column.\n\n\n\nBug Fixes\n\nFix alignment issues with related posts #273 and “Follow” button in author profile #274."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-31",
+    "href": "old/CHANGELOG.html#section-31",
+    "title": "mm5110.github.io",
+    "section": "3.1.1",
+    "text": "3.1.1\n\nBug Fix\n\nFixed reading time bug when words_per_minute wasn’t set in _config.yml #271"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-32",
+    "href": "old/CHANGELOG.html#section-32",
+    "title": "mm5110.github.io",
+    "section": "3.1.0",
+    "text": "3.1.0\n\nEnhancements\n\nUpdated Font Awesome to version 4.6.1\nAdded optional GitHub and Bitbucket links to footer if set on site.author in _config.yml.\n\n\n\nBug Fixes\n\nFixed Bitbucket URL typo in author sidebar."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-33",
+    "href": "old/CHANGELOG.html#section-33",
+    "title": "mm5110.github.io",
+    "section": "3.0.3",
+    "text": "3.0.3\n\nEnhancements\n\nRebuilt the entire theme: layouts, includes, stylesheets, scripts, you name it.\nRefreshed the look and feel while staying true to the original design of the theme (author sidebar/main content).\nReplaced grid system with Susy.\nReplaced Grunt tasks with npm scripts.\nRemoved Google Fonts and replaced with system fonts to improve performance (they can be added back if desired)\nGreatly improved theme documentation.\nIncreased the amount of sample posts, sample pages, and sample collections to throughly test the theme and edge-cases.\nMoved all sample content and assets out of master to keep it as clean as possible for forking.\nAdded new layouts for splash pages, archives for jekyll-archives if enabled, and compress.html to improve performance.\nAdded taxonomy links to posts (tags and categories).\nAdded optional “reading time” meta data.\nImproved Liquid used for Twitter Cards and Open Graph data in &lt;head&gt;.\nImproved gallery include helper and added feature_row for use with splash page layout.\nAdded Keybase.io, author web URI, and Bitbucket optional links to sidebar.\nAdd feed.xml link to footer.\nAdded a UI text data file to easily change all text found in the theme.\nAdded LinkedIn to optional social share buttons.\nAdded Facebook, Google+, and custom commenting options in addition to Disqus.\nAdded optional breadcrumb links."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-34",
+    "href": "old/CHANGELOG.html#section-34",
+    "title": "mm5110.github.io",
+    "section": "2.2.1",
+    "text": "2.2.1"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-35",
+    "href": "old/CHANGELOG.html#section-35",
+    "title": "mm5110.github.io",
+    "section": "2.2.0",
+    "text": "2.2.0\n\nEnhancements\n\nAdd support for Jekyll 3.0\nMinor updates to syntax highlighting CSS and theme documentation"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-36",
+    "href": "old/CHANGELOG.html#section-36",
+    "title": "mm5110.github.io",
+    "section": "2.1.3",
+    "text": "2.1.3\n\nEnhancements\n\nCleaner print styles that remove the top navigation, social sharing buttons, and other elements not needed when printed."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-37",
+    "href": "old/CHANGELOG.html#section-37",
+    "title": "mm5110.github.io",
+    "section": "2.1.2",
+    "text": "2.1.2\n\nEnhancements\n\nAdd optional CodePen icon/url to author side bar #156\nDocumented Stackoverflow username explanation in _config.yml #157\nSimplified Liquid in post-index.html to better handle year listings #166\n\n\n\nBug Fixes\n\nCleanup Facebook related Open Graph meta tags #149\nCorrected minor typos #158 #175"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-38",
+    "href": "old/CHANGELOG.html#section-38",
+    "title": "mm5110.github.io",
+    "section": "2.1.1",
+    "text": "2.1.1\n\nEnhancements\n\nAdd optional XING profile link to author sidebar\nInclude open graph meta tags for feature image (if assigned) #149\nCreate an include for feed footer\n\n\n\nBug Fixes\n\nRemove http protocol from Google search form on sample 404 page\nOnly show related posts if there are one or more available\nFix alignment of email address link in author sidebar"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-39",
+    "href": "old/CHANGELOG.html#section-39",
+    "title": "mm5110.github.io",
+    "section": "2.1.0",
+    "text": "2.1.0\n\nEnhancements\n\nAdd optional social sharing buttons (#42)\n\n\n\n\nsocial sharing buttons\n\n\n\nAdd Soundcloud, YouTube (#95), Flickr (#119), and Weibo (#116) icons for use in author sidebar.\nFix typos in posts and documentation and remove references to Less\nInclude note about Octopress gem being optional\nPost author override support extended to the Atom feed (#71)\nOnly include email address in feed if specified in _config.yml or author _data\nWrap all page content in #main to harmonize article and post index styles (#86)\nInclude new sample feature images for posts and pages\nTable of contents improvements: fix collapse toggle, indent nested elements, show on small screens, and create an _include for reusing in posts and pages.\nInclude note about running Jekyll with bundle exec when using Bundler\nFix home page path in top navigation\nRemove Google Authorship (#120)\nRemove duplicate author content that displayed in div.article-author-bottom\nRemoved unused _sass/print.scss styles\nImprove comments in .scss files"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-40",
+    "href": "old/CHANGELOG.html#section-40",
+    "title": "mm5110.github.io",
+    "section": "2.0.0",
+    "text": "2.0.0"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-41",
+    "href": "old/CHANGELOG.html#section-41",
+    "title": "mm5110.github.io",
+    "section": "1.3.3",
+    "text": "1.3.3\n\nEnhancements\n\nAdded new icons and profile links for Stackoverflow, Dribbble, Pinterest, Foursquare, and Steam to the author bio sidebar.\nCleaned up the Kramdown auto table of contents styling to be more readable\nRemoved page width specific .less stylesheets and created mixins for easier updating\nRemoved Modernizr since it wasn’t being used\nAdded pages to sitemap.xml\nAdded category: to rake new_post task\nMinor typographic changes\n\n\n\nBug Fixes\n\nCorrected various broken links in README and Theme Setup."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-42",
+    "href": "old/CHANGELOG.html#section-42",
+    "title": "mm5110.github.io",
+    "section": "1.3.1",
+    "text": "1.3.1\n\nEnhancements\n\nCleaned up table of contents styling\nReworked top navigation to be a better experience on small screens. Nav items now display vertically when the menu button is tapped, revealing links with larger touch targets.\n\n\n\n\nmenu animation"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-43",
+    "href": "old/CHANGELOG.html#section-43",
+    "title": "mm5110.github.io",
+    "section": "1.2.0",
+    "text": "1.2.0\n\nBug Fixes\n\nTable weren’t filling the entire width of the content container. They now scale at 100%. Thanks @dhruvbhatia\n\n\n\nEnhancements\n\nDecreased spacing between Markdown footnotes\nRemoved dark background on footer\nRemoved UPPERCASE styling on post titles in the index listing"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-44",
+    "href": "old/CHANGELOG.html#section-44",
+    "title": "mm5110.github.io",
+    "section": "1.1.4",
+    "text": "1.1.4\n\nBug Fixes\n\nFix top navigation bug issue (#10) for real this time. Remember to clear your floats kids."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-45",
+    "href": "old/CHANGELOG.html#section-45",
+    "title": "mm5110.github.io",
+    "section": "1.1.3",
+    "text": "1.1.3\n\nBug Fixes\n\nFix top navigation links that weren’t click able on small viewports (Issue #10).\nRemove line wrap from top navigation links that may span multiple lines."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-46",
+    "href": "old/CHANGELOG.html#section-46",
+    "title": "mm5110.github.io",
+    "section": "1.1.2",
+    "text": "1.1.2\n\nEnhancements\n\nAdded Grunt build script for compiling Less/JavaScript and optimizing image assets.\nAdded support for large image summary Twitter card.\nStylesheet adjustments"
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-47",
+    "href": "old/CHANGELOG.html#section-47",
+    "title": "mm5110.github.io",
+    "section": "1.1.1",
+    "text": "1.1.1\n\nBug Fixes\n\nRemoved Typeplate styles. Was causing issues with newer versions of Less and is no longer maintained.\n\n\n\nEnhancements\n\nAdded image attribution for post and page feature images.\nAdded 404 page.\nCleaned up various Less variables to better align with naming conventions used in other MM Jekyll themes.\nRemoved Chrome Frame references.\nAdded global CSS3 transitions to text and block elements.\nImproved typography in a few places."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-48",
+    "href": "old/CHANGELOG.html#section-48",
+    "title": "mm5110.github.io",
+    "section": "1.0.2",
+    "text": "1.0.2\n\nEnhancements\n\nGoogle Analytics, Google Authorship, webmaster verifies, and Twitter card meta are now optional."
+  },
+  {
+    "objectID": "old/CHANGELOG.html#section-49",
+    "href": "old/CHANGELOG.html#section-49",
+    "title": "mm5110.github.io",
+    "section": "1.0.1",
+    "text": "1.0.1"
+  },
+  {
+    "objectID": "old/CONTRIBUTING.html",
+    "href": "old/CONTRIBUTING.html",
+    "title": "mm5110.github.io",
+    "section": "",
+    "text": "Contributions are welcome! Please add issues and make pull requests. There are no stupid questions. All ideas are welcome. This is a volunteer project. Be excellent to each other.\nFork from master and go from there. This repository is intended to remain a generic, ready-to-fork template that demonstrates the features of academicpages.\nIf you make a pull request and change code, please make sure there is a closed issue tagged with ‘code change’ that has some comment linking to either the single commit (if the change was just one commit) or a diff comparing before/after the change (see issue 21 for example). This is so that those who have forked this repo and modified it for their purposes can more easily patch bugs and new features."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Michael Murray",
+    "section": "",
+    "text": "Bio\nI am a Hedrick Assistant Adjunct Professor at UCLA where I am fortunate enough to work with Deanna Needell and Guido Montufar. Prior to this I studied under Jared Tanner at Oxford where I obtained a DPhil in Maths.\n\n\nResearch overview\nMy research is mostly concerned with using maths to better understand and improve deep learning algorithms. Examples of specific topics include the role of overparameterization, principled design of network architectures and transitions between benign and non-benign forms of overfitting. See my research page for specifics on current and past projects. An up-to-date list of my publications can be found on Google scholar."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "projects.html",
+    "href": "projects.html",
+    "title": "Research",
+    "section": "",
+    "text": "Broadly speaking, most of my work concerns using maths to better understand the behaviour and improve the performance of algorithms for machine learning and data science. I am particularly interested in deep learning for two reasons: first because it offers game-changing performance across so many important applications like computer vision and drug prediction, and second because the fact that it works so well challenges some of the conventional wisdoms concerning machine learning. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making it safer, more reliable and less costly to train and use in terms of time, energy and memory."
+  },
+  {
+    "objectID": "teaching.html",
+    "href": "teaching.html",
+    "title": "Teaching",
+    "section": "",
+    "text": "At UCLA I am a Program in Computing (PIC) instructor and teach a number of programming related courses which I have detailed below. In my spare time I am compiling materials for a course I’d one day like to teach which currently I think of as “Neural networks: theory and practice”, the aims of which are i) to give students a practical working knowledge of how to design and train neural networks and ii) introduce them to current theories concerning approximation rates, training guarantees, generalization bounds and architecture design from the perspective of Geometric deep learning."
+  },
+  {
+    "objectID": "projects.html#principles-for-neural-network-architecture-and-design",
+    "href": "projects.html#principles-for-neural-network-architecture-and-design",
+    "title": "Research",
+    "section": "Principles for neural network architecture and design",
+    "text": "Principles for neural network architecture and design\nXXXX\nMy research is mostly concerned with using maths to better understand and improve deep learning algorithms. Examples of specific topics include the role of overparameterization, principled design of network architectures and transitions between benign and non-benign forms of overfitting. See the projects page for current and past projects are available here and an up-to-date list of publications on Google scholar."
+  },
+  {
+    "objectID": "projects.html#research-perspective",
+    "href": "projects.html#research-perspective",
+    "title": "Research",
+    "section": "",
+    "text": "Broadly speaking, most of my work concerns using maths to better understand the behaviour and improve the performance of algorithms for machine learning and data science. I am particularly interested in deep learning for two reasons: first because it offers game-changing performance across so many important applications like computer vision and drug prediction, and second because the fact that it works so well challenges some of the conventional wisdoms concerning machine learning. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making it safer, more reliable and less costly to train and use in terms of time, energy and memory."
+  },
+  {
+    "objectID": "projects.html#current-projects",
+    "href": "projects.html#current-projects",
+    "title": "Research",
+    "section": "Current projects",
+    "text": "Current projects\n\nImplict and explicit regularization of denoising neural networks\n\n\nGeometric NTK\n\n\nBenign overfitting: linearly seperable data models and beyond\n\n\nTraining guarantees in the mildly overparameterized regime"
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Concentration of Gibbs measures onto minimizers of objective functions\n\n\n\n\n\n\n\nprobability\n\n\n\n\n\n\n\n\n\n\n\nAug 1, 2023\n\n\nMichael Murray\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/gibbs/index.html",
+    "href": "posts/gibbs/index.html",
+    "title": "Concentration of Gibbs measures onto minimizers of objective functions",
+    "section": "",
+    "text": "Under what conditions do Gibbs measures concentrate on the minimizers of an associated objective function in the inverse temperature limit?\nPre-requisites: in what follows I’ll assume the reader has at least a little familiarity with measure theory and has been exposed to some problems in machine learning."
+  },
+  {
+    "objectID": "posts/gibbs/index.html#introduction",
+    "href": "posts/gibbs/index.html#introduction",
+    "title": "Concentration of Gibbs measures onto minimizers of objective functions",
+    "section": "Introduction",
+    "text": "Introduction\nIn many situations encountered in machine learning one is confronted with minimizing some parameterized objective or loss function which depends on data. For example, consider finding the smallest eigenvalue of a data covariance matrix \\({\\mathbf{M}}\\) by minimizing the objective \\(E({\\mathbf{w}}) = \\frac{1}{2}{\\mathbf{w}}^T {\\mathbf{M}}{\\mathbf{w}}\\) over the unit sphere. One approach to analyzing such problems and which is particularly popular among Physicists is to reduce the problem to that of Gibbs sampling. In particular, in the example above, instead of directly studying the objective \\(E\\) we instead consider a sequence of associated Gibbs measures with densities defined as \\[\np_{\\beta}({\\mathbf{w}}) = \\frac{\\exp(- \\beta E({\\mathbf{w}}))}{\\int_{{\\mathbf{w}}\\in \\mathbb{S}^{d-1}} \\exp \\left( - \\beta E({\\mathbf{w}})\\right) dQ},\n\\] where here \\(Q\\) denotes the uniform measure over the unit sphere in dimension \\(d\\). The kind of statement I’ve often come across, at least in the machine learning related tutorials concerning this technique, is something like “as the free parameter (also called the inverse temperature) \\(\\beta\\) goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function”. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in (Hwang 1980), however I confess the presentation, particularly in regard to which conditions are required where, a little confusing. On the off-chance it might be helpful to others in a similar position I thought I would present some re-phrased version of some of the results in (Hwang 1980) and write down the proof in little more detail."
+  },
+  {
+    "objectID": "posts/gibbs/index.html#results",
+    "href": "posts/gibbs/index.html#results",
+    "title": "Concentration of the Gibbs measure on minimizers of energy functions",
+    "section": "Results",
+    "text": "Results\nTo place ourselves in a general setting we adopt the following definitions and conditions.\n\nLet \\((\\Omega, \\Sigma, Q)\\) be a measure space where \\(Q: \\sigma [0,1]\\) is a probability measure. \nLet \\((\\Omega, d)\\) be a metric space and assume \\(f:(\\Omega,d) \\rightarrow (\\mathbb{R}_{\\geq 0},|\\cdot|)\\) is continuous and \\(\\inf_{x \\in \\Omega} f(x) = 0\\). \nLet \\(N = \\{x \\in \\Omega: f(x) = 0\\}\\) to be the set of minimizers of \\(f\\) and assume \\(N \\neq \\emptyset\\).\nLet \\(P_\\beta\\) for \\(\\beta \\in \\mathbb{R}_{&gt;0}\\) denote a sequence of probability measures with Radon-Nikodym derivative \\[\n\\frac{dP_{\\beta}}{dQ} = \\frac{\\exp(- \\beta f(x))dQ}{\\int_{x \\in\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}.\n\\]\n\nWith these definitions and assumptions in mind we have the following result, equivalent to Proposition and Corollary 2.1 in (Hwang 1980).\n\nTheorem 1 Suppose there exists a probability measure \\(P: \\Sigma \\rightarrow [0,1]\\) such that \\(P_\\beta \\rightarrow P\\) weakly, then \\(P(N) = 1\\).\n\n\nProof. In what follows for some set \\(A \\subseteq \\mathbb{R}_{\\geq 0}\\) we use the notation \\(f^{-1}(A) = \\{x \\in \\Omega: f(x) \\in A \\}\\) for the preimage. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers \\((a_m)_{m\\in \\mathbb{N}}\\) such that \\(a_m \\downarrow 0\\) and \\(P(f^{-1}(\\{ a_m \\}) = 0\\). Indeed, suppose this is not possible, then there must exist a smallest real \\(\\epsilon&gt;0\\) such that \\(P(f^{-1}(\\{ \\epsilon\\})) = 0\\) and \\(P(f^{-1}(\\{ y \\})&gt; 0\\) for all \\(y \\in (0, \\epsilon)\\). Now consider disjoint sets \\((S_k)_{k \\in \\mathbb{N}}\\) of \\(\\Omega\\) defined as \\[\nS_k = \\{x \\in \\Omega: f(x) \\in (0, \\epsilon), (k+1)^{-1} &lt; P(\\{ x\\}) \\leq k^{-1} \\},\n\\]\nthen for any \\(y \\in (0, \\epsilon)\\) there exists a \\(k \\in \\mathbb{N}\\) such that \\(f^{-1}(y) \\in S_k\\) and thus \\(f^{-1}((0, \\epsilon)) = \\bigcup_{k=1}^{\\infty} S_k\\). As the \\(S_k\\) are disjoint and \\(P\\) is a measure this implies \\(P(f^{-1}((0, \\epsilon))) = \\sum_{k=1}^{\\infty} P(S_k)\\). Suppose now there exists a \\(k \\in \\mathbb{N}\\) such that the cardinality of \\(S_k\\) is non-finite, choose a countable subset \\((x_i)_{i=1}^{\\infty}\\) from \\(S_k\\) and observe that \\(P(f^{-1}(x)) &gt; (k+1)^{-1}\\) for any \\(x \\in S_k\\). Then \\[\nP(f^{-1}((0, \\epsilon))) \\geq P(S_k) \\geq (k+1)^{-1} \\sum_{i=1}^{\\infty} 1 =  \\infty\n\\] which is of course a contradiction. Therefore it must hold that \\(S_k\\) is finite for all \\(k \\in \\mathbb{N}\\), which in turn implies \\((f^{-1}((0, \\epsilon)))\\) is at most countable. However, \\(P(f^{-1}(\\{y \\}))&gt;0\\) implies \\(f^{-1}(y) \\neq \\emptyset\\) for all \\(y \\in (0, \\epsilon)\\) and furthermore the sets \\((f^{-1}(\\{ y\\}))_{y \\in (0, \\epsilon)}\\) are evidently disjoint. Therefore, as \\((0, \\epsilon)\\) is uncountable and \\(f^{-1}((0, \\epsilon)) = \\bigcup_{y \\in (0, \\epsilon)} f^{-1}(\\{ y\\})\\) then \\(f^{-1}((0, \\epsilon))\\) must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence \\(a_m \\downarrow 0\\) such that \\(P(f(x) = a_m) = 0\\) for all \\(m \\in \\mathbb{N}\\).\nRecall a set \\(A\\in \\Sigma\\) is called \\(P\\)-continuous if \\(P(\\partial A) = 0\\) where here \\(\\partial A\\) denotes the boundary of \\(A\\). If \\(P_{\\beta}\\) converges weakly to \\(P\\) then by the Portmanteau Theorem for any \\(P\\)-continuous sets \\(A\\in \\Sigma\\) we have \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(A) = P(A).\n\\] Define \\[\nN'_m = f^{-1}([a_m, \\infty)) = \\{x \\in \\Omega: f(x) \\in [a_m, \\infty) \\}.\n\\] By asssumption \\(f\\) is continuous, therefore \\[\n\\partial N_m'  = \\partial f^{-1}([a_m, \\infty)) \\subseteq f^{-1}(\\partial [a_m, \\infty)) = f^{-1}(\\{a_m \\}).\n\\] As by construction \\(P(f^{-1}(\\{a_m \\})) = 0\\) it follows that \\(P(\\partial N_m') = 0\\) and thus \\(N_m'\\) is a \\(P\\)-continuous set for all \\(m \\in \\mathbb{N}\\). As a result \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = P(N_m')\n\\] Observe \\[\n\\begin{align*}\n  P_\\beta(N_m') &= \\frac{\\int_{N_m'}\\exp(- \\beta f(x))dQ}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\frac{\\exp( -\\beta a_m\\} Q(N_m')}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\left(\\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) \\right)^{-1}.\n\\end{align*}\n\\] As \\[\n\\begin{align*}\n  \\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) &\\geq \\int_{f^{-1}([0,a_m/2])} \\exp \\left( - \\beta (f(x) - a_m)\\right)\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right) Q(f^{-1}([0,a_m/2]))\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right)\n\\end{align*}\n\\] then for any \\(m \\in \\mathbb{N}\\) \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = \\lim_{\\beta \\rightarrow \\infty}\\exp \\left(-\\frac{\\beta a_m}{2} \\right)  = 0.\n\\] As a result, for all \\(m \\in \\mathbb{N}\\) it follows that \\(P(N_m') = 0\\) and therefore \\(\\lim_{m \\rightarrow \\infty} P(N_m') = 0\\). By construction \\((N_m')_{m \\in \\mathbb{N}}\\) is an increasing sequence of sets, \\(N' = \\bigcup_{m = 1}^{\\infty} N_m'\\) and therefore \\(P(N') = \\lim_{m \\rightarrow \\infty} P(N_m')\\). Hence we conclude \\[\nP(N') = \\lim_{m \\rightarrow \\infty} P(N_m') = 0.\n\\]"
+  },
+  {
+    "objectID": "posts/gibbs/index.html#presenting-the-results-of-lap-revisited",
+    "href": "posts/gibbs/index.html#presenting-the-results-of-lap-revisited",
+    "title": "Concentration of the Gibbs measure on minimizers of energy functions",
+    "section": "Presenting the results of (Hwang 1980)",
+    "text": "Presenting the results of (Hwang 1980)\nTo place ourselves in a general setting we adopt the following definitions and conditions.\n\nLet \\((\\Omega, \\Sigma, Q)\\) be a measure space where \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra and \\(Q: \\Sigma \\rightarrow [0,1]\\) is a probability measure. \nLet \\((\\Omega, d)\\) be a seperable complete metric space and assume \\(f:(\\Omega,d) \\rightarrow (\\mathbb{R}_{\\geq 0},|\\cdot|)\\) is continuous and \\(\\inf_{x \\in \\Omega} f(x) = 0\\). \nLet \\(N = \\{x \\in \\Omega: f(x) = 0\\}\\) to be the set of minimizers of \\(f\\) and assume \\(N \\neq \\emptyset\\). We denote the compliment of \\(N\\) as \\(N'= \\Omega \\backslash N\\).\nLet \\(P_\\beta\\) for \\(\\beta \\in \\mathbb{R}_{&gt;0}\\) denote a sequence of probability measures with Radon-Nikodym derivative \\[\n\\frac{dP_{\\beta}}{dQ} = \\frac{\\exp(- \\beta f(x))dQ}{\\int_{x \\in\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}.\n\\]\n\nWith these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in (Hwang 1980).\n\nTheorem 1 Suppose there exists a probability measure \\(P: \\Sigma \\rightarrow [0,1]\\) such that \\(P_\\beta \\rightarrow P\\) weakly, then \\(P(N) = 1\\).\n\nBefore we turn to the proof, a few remarks.\n\nWe assume \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra in order to use the Portmanteau Theorem.\nWe assume \\(f\\) is continuous (as all our measures are Borel measures this also implies \\(f\\) is measurable) as this implies \\(\\partial f^{-1}(A) \\subseteq f^{-1}(\\partial A)\\) which we use in the proof.\nWe assume there exists at least one minimizer of \\(f\\) due to Proposition 1 of (Hwang 1980) (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence \\((P_{\\beta})\\) to converge weakly.\nIf a minimizer exists we can assume without loss of generality that the minimum of \\(f\\) is \\(0\\) as if instead we consider the Gibbs measure associated with \\(f(x) - \\min_{x \\in \\Omega}f(x)\\) we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.\nAlthough we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that \\((\\Omega, d)\\) is compact then \\((P_{\\beta})\\) is tight and so by Prokhorov’s Theorem we know that \\((P_{\\beta})\\) has at the very least a weakly convergent subsequence.\n\n\nProof. It suffices to show that \\(P(N') = 0\\). We first claim it is possible to construct a strictly decreasing sequence of positive real numbers \\((a_m)_{m\\in \\mathbb{N}}\\) such that \\(a_m \\downarrow 0\\) and \\(P(f^{-1}(\\{ a_m \\}) = 0\\). Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real \\(\\epsilon&gt;0\\) such that \\(P(f^{-1}(\\{ \\epsilon\\})) = 0\\) and \\(P(f^{-1}(\\{ y \\})&gt; 0\\) for all \\(y \\in (0, \\epsilon)\\). In short this implies that there are an uncountable number of singletons in \\((0, \\epsilon)\\) which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets \\((S_k)_{k \\in \\mathbb{N}}\\) of \\(\\Omega\\) defined as \\[\nS_k = \\{x \\in \\Omega: f(x) \\in (0, \\epsilon), (k+1)^{-1} &lt; P(f(x)\\leq k^{-1} \\},\n\\]\nthen for any \\(y \\in (0, \\epsilon)\\) there exists a \\(k \\in \\mathbb{N}\\) such that \\(f^{-1}(y) \\in S_k\\) and thus \\(f^{-1}((0, \\epsilon)) = \\bigcup_{k=1}^{\\infty} S_k\\). Observe for any \\(x \\in S_k\\) that \\(P(f^{-1}(x)) &gt; (k+1)^{-1}\\), therefore the cardinality of \\(S_k\\) can be at most \\(k+1\\). As a result every \\(S_k\\) must be finite which in turn implies \\((f^{-1}((0, \\epsilon)))\\) is also countable as it is a countable union of finite sets. However, \\(P(f^{-1}(\\{y \\}))&gt;0\\) implies \\(f^{-1}(y) \\neq \\emptyset\\) for all \\(y \\in (0, \\epsilon)\\) and furthermore these preimages of singletons are evidently disjoint. Therefore, as \\((0, \\epsilon)\\) is uncountable and \\(f^{-1}((0, \\epsilon)) = \\bigcup_{y \\in (0, \\epsilon)} f^{-1}(\\{ y\\})\\) then \\(f^{-1}((0, \\epsilon))\\) must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals \\(a_m \\downarrow 0\\) such that \\(P(f(x) = a_m) = 0\\) for all \\(m \\in \\mathbb{N}\\).\nDefine \\[\nN'_m = f^{-1}([a_m, \\infty)) = \\{x \\in \\Omega: f(x) \\in [a_m, \\infty) \\}.\n\\] By asssumption \\(f\\) is continuous, therefore \\[\n\\partial N_m'  = \\partial f^{-1}([a_m, \\infty)) \\subseteq f^{-1}(\\partial [a_m, \\infty)) = f^{-1}(\\{a_m \\}).\n\\] As by construction \\(P(f^{-1}(\\{a_m \\})) = 0\\) it follows that \\(P(\\partial N_m') = 0\\) and thus \\(N_m'\\) is a \\(P\\)-continuous set for all \\(m \\in \\mathbb{N}\\). By the Portmanteau Theorem it therefore follows that \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = P(N_m').\n\\] Observe \\[\n\\begin{align*}\n  P_\\beta(N_m') &= \\frac{\\int_{N_m'}\\exp(- \\beta f(x))dQ}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\frac{\\exp( -\\beta a_m\\} Q(N_m')}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\left(\\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) \\right)^{-1}.\n\\end{align*}\n\\] Furthermore, as \\[\n\\begin{align*}\n  \\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) &\\geq \\int_{f^{-1}([0,a_m/2])} \\exp \\left( - \\beta (f(x) - a_m)\\right)\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right) Q(f^{-1}([0,a_m/2]))\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right)\n\\end{align*}\n\\] then it holds that \\(P_\\beta(N_m') \\leq \\exp \\left( - \\frac{\\beta a_m}{2} \\right)\\) and as a result for any \\(m \\in \\mathbb{N}\\) we have \\[\nP(N_m') = \\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = \\lim_{\\beta \\rightarrow \\infty}\\exp \\left(-\\frac{\\beta a_m}{2} \\right)  = 0.\n\\] By construction \\((N_m')_{m \\in \\mathbb{N}}\\) is an increasing sequence of sets, \\(N' = \\bigcup_{m = 1}^{\\infty} N_m'\\) and therefore \\(P(N') = \\lim_{m \\rightarrow \\infty} P(N_m')\\). Hence we conclude \\[\nP(N') = \\lim_{m \\rightarrow \\infty} P(N_m') = 0.\n\\]"
+  },
+  {
+    "objectID": "posts/gibbs/index.html#the-limiting-gibbs-measure-is-supported-on-the-set-of-minimizers",
+    "href": "posts/gibbs/index.html#the-limiting-gibbs-measure-is-supported-on-the-set-of-minimizers",
+    "title": "Concentration of the Gibbs measure on minimizers of energy functions",
+    "section": "The limiting Gibbs measure is supported on the set of minimizers",
+    "text": "The limiting Gibbs measure is supported on the set of minimizers\nTo place ourselves in a general setting we adopt the following definitions and conditions.\n\nLet \\((\\Omega, \\Sigma, Q)\\) be a measure space where \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra and \\(Q: \\Sigma \\rightarrow [0,1]\\) is a probability measure. \nLet \\((\\Omega, d)\\) be a seperable complete metric space and assume \\(f:(\\Omega,d) \\rightarrow (\\mathbb{R}_{\\geq 0},|\\cdot|)\\) is continuous and \\(\\inf_{x \\in \\Omega} f(x) = 0\\). \nLet \\(N = \\{x \\in \\Omega: f(x) = 0\\}\\) to be the set of minimizers of \\(f\\) and assume \\(N \\neq \\emptyset\\). We denote the compliment of \\(N\\) as \\(N'= \\Omega \\backslash N\\).\nLet \\(P_\\beta\\) for \\(\\beta \\in \\mathbb{R}_{&gt;0}\\) denote a sequence of probability measures with Radon-Nikodym derivative \\[\n\\frac{dP_{\\beta}}{dQ} = \\frac{\\exp(- \\beta f(x))dQ}{\\int_{x \\in\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}.\n\\]\n\nWith these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in (Hwang 1980).\n\nTheorem 1 Suppose there exists a probability measure \\(P: \\Sigma \\rightarrow [0,1]\\) such that \\(P_\\beta \\rightarrow P\\) weakly, then \\(P(N) = 1\\).\n\nBefore we turn to the proof, a few remarks.\n\nWe assume \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra in order to use the Portmanteau Theorem.\nWe assume \\(f\\) is continuous (as all our measures are Borel measures this also implies \\(f\\) is measurable) as this implies \\(\\partial f^{-1}(A) \\subseteq f^{-1}(\\partial A)\\) which we use in the proof.\nWe assume there exists at least one minimizer of \\(f\\) due to Proposition 1 of (Hwang 1980) (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence \\((P_{\\beta})\\) to converge weakly.\nIf a minimizer exists we can assume without loss of generality that the minimum of \\(f\\) is \\(0\\) as if instead we consider the Gibbs measure associated with \\(f(x) - \\min_{x \\in \\Omega}f(x)\\) we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.\nAlthough we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that \\((\\Omega, d)\\) is compact then \\((P_{\\beta})\\) is tight and so by Prokhorov’s Theorem we know that \\((P_{\\beta})\\) has at the very least a weakly convergent subsequence.\n\n\nProof. It suffices to show that \\(P(N') = 0\\). We first claim it is possible to construct a strictly decreasing sequence of positive real numbers \\((a_m)_{m\\in \\mathbb{N}}\\) such that \\(a_m \\downarrow 0\\) and \\(P(f^{-1}(\\{ a_m \\}) = 0\\). Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real \\(\\epsilon&gt;0\\) such that \\(P(f^{-1}(\\{ \\epsilon\\})) = 0\\) and \\(P(f^{-1}(\\{ y \\})&gt; 0\\) for all \\(y \\in (0, \\epsilon)\\). In short this implies that there are an uncountable number of singletons in \\((0, \\epsilon)\\) which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets \\((S_k)_{k \\in \\mathbb{N}}\\) of \\(\\Omega\\) defined as \\[\nS_k = \\{x \\in \\Omega: f(x) \\in (0, \\epsilon), (k+1)^{-1} &lt; P(f(x)\\leq k^{-1} \\},\n\\]\nthen for any \\(y \\in (0, \\epsilon)\\) there exists a \\(k \\in \\mathbb{N}\\) such that \\(f^{-1}(y) \\in S_k\\) and thus \\(f^{-1}((0, \\epsilon)) = \\bigcup_{k=1}^{\\infty} S_k\\). Observe for any \\(x \\in S_k\\) that \\(P(f^{-1}(x)) &gt; (k+1)^{-1}\\), therefore the cardinality of \\(S_k\\) can be at most \\(k+1\\). As a result every \\(S_k\\) must be finite which in turn implies \\((f^{-1}((0, \\epsilon)))\\) is also countable as it is a countable union of finite sets. However, \\(P(f^{-1}(\\{y \\}))&gt;0\\) implies \\(f^{-1}(y) \\neq \\emptyset\\) for all \\(y \\in (0, \\epsilon)\\) and furthermore these preimages of singletons are evidently disjoint. Therefore, as \\((0, \\epsilon)\\) is uncountable and \\(f^{-1}((0, \\epsilon)) = \\bigcup_{y \\in (0, \\epsilon)} f^{-1}(\\{ y\\})\\) then \\(f^{-1}((0, \\epsilon))\\) must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals \\(a_m \\downarrow 0\\) such that \\(P(f(x) = a_m) = 0\\) for all \\(m \\in \\mathbb{N}\\).\nDefine \\[\nN'_m = f^{-1}([a_m, \\infty)) = \\{x \\in \\Omega: f(x) \\in [a_m, \\infty) \\}.\n\\] By asssumption \\(f\\) is continuous, therefore \\[\n\\partial N_m'  = \\partial f^{-1}([a_m, \\infty)) \\subseteq f^{-1}(\\partial [a_m, \\infty)) = f^{-1}(\\{a_m \\}).\n\\] As by construction \\(P(f^{-1}(\\{a_m \\})) = 0\\) it follows that \\(P(\\partial N_m') = 0\\) and thus \\(N_m'\\) is a \\(P\\)-continuous set for all \\(m \\in \\mathbb{N}\\). By the Portmanteau Theorem it therefore follows that \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = P(N_m').\n\\] Observe \\[\n\\begin{align*}\n  P_\\beta(N_m') &= \\frac{\\int_{N_m'}\\exp(- \\beta f(x))dQ}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\frac{\\exp( -\\beta a_m\\} Q(N_m')}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\left(\\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) \\right)^{-1}.\n\\end{align*}\n\\] Furthermore, as \\[\n\\begin{align*}\n  \\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) &\\geq \\int_{f^{-1}([0,a_m/2])} \\exp \\left( - \\beta (f(x) - a_m)\\right)\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right) Q(f^{-1}([0,a_m/2]))\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right)\n\\end{align*}\n\\] then it holds that \\(P_\\beta(N_m') \\leq \\exp \\left( - \\frac{\\beta a_m}{2} \\right)\\) and as a result for any \\(m \\in \\mathbb{N}\\) we have \\[\nP(N_m') = \\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = \\lim_{\\beta \\rightarrow \\infty}\\exp \\left(-\\frac{\\beta a_m}{2} \\right)  = 0.\n\\] By construction \\((N_m')_{m \\in \\mathbb{N}}\\) is an increasing sequence of sets, \\(N' = \\bigcup_{m = 1}^{\\infty} N_m'\\) and therefore \\(P(N') = \\lim_{m \\rightarrow \\infty} P(N_m')\\). Hence we conclude \\[\nP(N') = \\lim_{m \\rightarrow \\infty} P(N_m') = 0.\n\\]"
+  },
+  {
+    "objectID": "posts/gibbs/index.html#proving-the-limiting-gibbs-measure-if-it-exists-is-supported-on-the-set-of-minimizers",
+    "href": "posts/gibbs/index.html#proving-the-limiting-gibbs-measure-if-it-exists-is-supported-on-the-set-of-minimizers",
+    "title": "Concentration of the Gibbs measure on minimizers of energy functions",
+    "section": "Proving the limiting Gibbs measure (if it exists) is supported on the set of minimizers",
+    "text": "Proving the limiting Gibbs measure (if it exists) is supported on the set of minimizers\nTo place ourselves in a general setting we adopt the following definitions and conditions.\n\nLet \\((\\Omega, \\Sigma, Q)\\) be a measure space where \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra and \\(Q: \\Sigma \\rightarrow [0,1]\\) is a probability measure. \nLet \\((\\Omega, d)\\) be a seperable complete metric space and assume \\(f:(\\Omega,d) \\rightarrow (\\mathbb{R}_{\\geq 0},|\\cdot|)\\) is continuous and \\(\\inf_{x \\in \\Omega} f(x) = 0\\). \nLet \\(N = \\{x \\in \\Omega: f(x) = 0\\}\\) to be the set of minimizers of \\(f\\) and assume \\(N \\neq \\emptyset\\). We denote the compliment of \\(N\\) as \\(N'= \\Omega \\backslash N\\).\nLet \\(P_\\beta\\) for \\(\\beta \\in \\mathbb{R}_{&gt;0}\\) denote a sequence of probability measures with Radon-Nikodym derivative \\[\n\\frac{dP_{\\beta}}{dQ} = \\frac{\\exp(- \\beta f(x))dQ}{\\int_{x \\in\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}.\n\\]\n\nWith these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in (Hwang 1980).\n\nTheorem 1 Suppose there exists a probability measure \\(P: \\Sigma \\rightarrow [0,1]\\) such that \\(P_\\beta \\rightarrow P\\) weakly, then \\(P(N) = 1\\).\n\nBefore we turn to the proof, a few remarks.\n\nWe assume \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra in order to use the Portmanteau Theorem.\nWe assume \\(f\\) is continuous (as all our measures are Borel measures this also implies \\(f\\) is measurable) as this implies \\(\\partial f^{-1}(A) \\subseteq f^{-1}(\\partial A)\\) which we use in the proof.\nWe assume there exists at least one minimizer of \\(f\\) due to Proposition 1 of (Hwang 1980) (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence \\((P_{\\beta})\\) to converge weakly.\nIf a minimizer exists we can assume without loss of generality that the minimum of \\(f\\) is \\(0\\) as if instead we consider the Gibbs measure associated with \\(f(x) - \\min_{x \\in \\Omega}f(x)\\) we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.\nAlthough we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that \\((\\Omega, d)\\) is compact then \\((P_{\\beta})\\) is tight and so by Prokhorov’s Theorem we know that \\((P_{\\beta})\\) has at the very least a weakly convergent subsequence.\n\n\nProof. It suffices to show that \\(P(N') = 0\\). We first claim it is possible to construct a strictly decreasing sequence of positive real numbers \\((a_m)_{m\\in \\mathbb{N}}\\) such that \\(a_m \\downarrow 0\\) and \\(P(f^{-1}(\\{ a_m \\}) = 0\\). Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real \\(\\epsilon&gt;0\\) such that \\(P(f^{-1}(\\{ \\epsilon\\})) = 0\\) and \\(P(f^{-1}(\\{ y \\})&gt; 0\\) for all \\(y \\in (0, \\epsilon)\\). In short this implies that there are an uncountable number of singletons in \\((0, \\epsilon)\\) which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets \\((S_k)_{k \\in \\mathbb{N}}\\) of \\(\\Omega\\) defined as \\[\nS_k = \\{x \\in \\Omega: f(x) \\in (0, \\epsilon), (k+1)^{-1} &lt; P(f(x)\\leq k^{-1} \\},\n\\]\nthen for any \\(y \\in (0, \\epsilon)\\) there exists a \\(k \\in \\mathbb{N}\\) such that \\(f^{-1}(y) \\in S_k\\) and thus \\(f^{-1}((0, \\epsilon)) = \\bigcup_{k=1}^{\\infty} S_k\\). Observe for any \\(x \\in S_k\\) that \\(P(f^{-1}(x)) &gt; (k+1)^{-1}\\), therefore the cardinality of \\(S_k\\) can be at most \\(k+1\\). As a result every \\(S_k\\) must be finite which in turn implies \\((f^{-1}((0, \\epsilon)))\\) is also countable as it is a countable union of finite sets. However, \\(P(f^{-1}(\\{y \\}))&gt;0\\) implies \\(f^{-1}(y) \\neq \\emptyset\\) for all \\(y \\in (0, \\epsilon)\\) and furthermore these preimages of singletons are evidently disjoint. Therefore, as \\((0, \\epsilon)\\) is uncountable and \\(f^{-1}((0, \\epsilon)) = \\bigcup_{y \\in (0, \\epsilon)} f^{-1}(\\{ y\\})\\) then \\(f^{-1}((0, \\epsilon))\\) must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals \\(a_m \\downarrow 0\\) such that \\(P(f(x) = a_m) = 0\\) for all \\(m \\in \\mathbb{N}\\).\nDefine \\[\nN'_m = f^{-1}([a_m, \\infty)) = \\{x \\in \\Omega: f(x) \\in [a_m, \\infty) \\}.\n\\] By asssumption \\(f\\) is continuous, therefore \\[\n\\partial N_m'  = \\partial f^{-1}([a_m, \\infty)) \\subseteq f^{-1}(\\partial [a_m, \\infty)) = f^{-1}(\\{a_m \\}).\n\\] As by construction \\(P(f^{-1}(\\{a_m \\})) = 0\\) it follows that \\(P(\\partial N_m') = 0\\) and thus \\(N_m'\\) is a \\(P\\)-continuous set for all \\(m \\in \\mathbb{N}\\). By the Portmanteau Theorem it therefore follows that \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = P(N_m').\n\\] Observe \\[\n\\begin{align*}\n  P_\\beta(N_m') &= \\frac{\\int_{N_m'}\\exp(- \\beta f(x))dQ}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\frac{\\exp( -\\beta a_m\\} Q(N_m')}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\left(\\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) \\right)^{-1}.\n\\end{align*}\n\\] Furthermore, as \\[\n\\begin{align*}\n  \\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) &\\geq \\int_{f^{-1}([0,a_m/2])} \\exp \\left( - \\beta (f(x) - a_m)\\right)\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right) Q(f^{-1}([0,a_m/2]))\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right)\n\\end{align*}\n\\] then it holds that \\(P_\\beta(N_m') \\leq \\exp \\left( - \\frac{\\beta a_m}{2} \\right)\\) and as a result for any \\(m \\in \\mathbb{N}\\) we have \\[\nP(N_m') = \\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = \\lim_{\\beta \\rightarrow \\infty}\\exp \\left(-\\frac{\\beta a_m}{2} \\right)  = 0.\n\\] By construction \\((N_m')_{m \\in \\mathbb{N}}\\) is an increasing sequence of sets, \\(N' = \\bigcup_{m = 1}^{\\infty} N_m'\\) and therefore \\(P(N') = \\lim_{m \\rightarrow \\infty} P(N_m')\\). Hence we conclude \\[\nP(N') = \\lim_{m \\rightarrow \\infty} P(N_m') = 0.\n\\]"
+  },
+  {
+    "objectID": "posts/gibbs/index.html#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers",
+    "href": "posts/gibbs/index.html#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers",
+    "title": "Concentration of Gibbs measures onto minimizers of objective functions",
+    "section": "Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers",
+    "text": "Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers\nTo place ourselves in a general setting we adopt the following definitions and conditions.\n\nLet \\((\\Omega, \\Sigma, Q)\\) be a measure space where \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra and \\(Q: \\Sigma \\rightarrow [0,1]\\) is a probability measure. \nLet \\((\\Omega, d)\\) be a seperable complete metric space and assume \\(f:(\\Omega,d) \\rightarrow (\\mathbb{R}_{\\geq 0},|\\cdot|)\\) is continuous and \\(\\inf_{x \\in \\Omega} f(x) = 0\\). \nLet \\(N = \\{x \\in \\Omega: f(x) = 0\\}\\) to be the set of minimizers of \\(f\\) and assume \\(N \\neq \\emptyset\\). We denote the compliment of \\(N\\) as \\(N'= \\Omega \\backslash N\\).\nLet \\(P_\\beta\\) for \\(\\beta \\in \\mathbb{R}_{&gt;0}\\) denote a sequence of probability measures with Radon-Nikodym derivative \\[\n\\frac{dP_{\\beta}}{dQ} = \\frac{\\exp(- \\beta f(x))dQ}{\\int_{x \\in\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}.\n\\]\n\nWith these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in (Hwang 1980).\n\nTheorem 1 Suppose there exists a probability measure \\(P: \\Sigma \\rightarrow [0,1]\\) such that \\(P_\\beta \\rightarrow P\\) weakly, then \\(P(N) = 1\\).\n\nBefore we turn to the proof, a few remarks.\n\nWe assume \\(\\Sigma\\) is a Borel-\\(\\sigma\\) algebra in order to use the Portmanteau Theorem.\nWe assume \\(f\\) is continuous (as all our measures are Borel measures this also implies \\(f\\) is measurable) as this implies \\(\\partial f^{-1}(A) \\subseteq f^{-1}(\\partial A)\\) which we use in the proof.\nWe assume there exists at least one minimizer of \\(f\\) due to Proposition 1 of (Hwang 1980) (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence \\((P_{\\beta})\\) to converge weakly.\nIf a minimizer exists we can assume without loss of generality that the minimum of \\(f\\) is \\(0\\) as if instead we consider the Gibbs measure associated with \\(f(x) - \\min_{x \\in \\Omega}f(x)\\) we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.\nAlthough we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that \\((\\Omega, d)\\) is compact then \\((P_{\\beta})\\) is tight and so by Prokhorov’s Theorem we know that \\((P_{\\beta})\\) has at the very least a weakly convergent subsequence.\n\n\nProof. It suffices to show that \\(P(N') = 0\\). We first claim it is possible to construct a strictly decreasing sequence of positive real numbers \\((a_m)_{m\\in \\mathbb{N}}\\) such that \\(a_m \\downarrow 0\\) and \\(P(f^{-1}(\\{ a_m \\}) = 0\\). Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real \\(\\epsilon&gt;0\\) such that \\(P(f^{-1}(\\{ \\epsilon\\})) = 0\\) and \\(P(f^{-1}(\\{ y \\})&gt; 0\\) for all \\(y \\in (0, \\epsilon)\\). In short this implies that there are an uncountable number of singletons in \\((0, \\epsilon)\\) which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets \\((S_k)_{k \\in \\mathbb{N}}\\) of \\(\\Omega\\) defined as \\[\nS_k = \\{x \\in \\Omega: f(x) \\in (0, \\epsilon), (k+1)^{-1} &lt; P(f(x)\\leq k^{-1} \\},\n\\]\nthen for any \\(y \\in (0, \\epsilon)\\) there exists a \\(k \\in \\mathbb{N}\\) such that \\(f^{-1}(y) \\in S_k\\) and thus \\(f^{-1}((0, \\epsilon)) = \\bigcup_{k=1}^{\\infty} S_k\\). Observe for any \\(x \\in S_k\\) that \\(P(f^{-1}(x)) &gt; (k+1)^{-1}\\), therefore the cardinality of \\(S_k\\) can be at most \\(k+1\\). As a result every \\(S_k\\) must be finite which in turn implies \\((f^{-1}((0, \\epsilon)))\\) is also countable as it is a countable union of finite sets. However, \\(P(f^{-1}(\\{y \\}))&gt;0\\) implies \\(f^{-1}(y) \\neq \\emptyset\\) for all \\(y \\in (0, \\epsilon)\\) and furthermore these preimages of singletons are evidently disjoint. Therefore, as \\((0, \\epsilon)\\) is uncountable and \\(f^{-1}((0, \\epsilon)) = \\bigcup_{y \\in (0, \\epsilon)} f^{-1}(\\{ y\\})\\) then \\(f^{-1}((0, \\epsilon))\\) must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals \\(a_m \\downarrow 0\\) such that \\(P(f(x) = a_m) = 0\\) for all \\(m \\in \\mathbb{N}\\).\nDefine \\[\nN'_m = f^{-1}([a_m, \\infty)) = \\{x \\in \\Omega: f(x) \\in [a_m, \\infty) \\}.\n\\] By asssumption \\(f\\) is continuous, therefore \\[\n\\partial N_m'  = \\partial f^{-1}([a_m, \\infty)) \\subseteq f^{-1}(\\partial [a_m, \\infty)) = f^{-1}(\\{a_m \\}).\n\\] As by construction \\(P(f^{-1}(\\{a_m \\})) = 0\\) it follows that \\(P(\\partial N_m') = 0\\) and thus \\(N_m'\\) is a \\(P\\)-continuous set for all \\(m \\in \\mathbb{N}\\). By the Portmanteau Theorem it therefore follows that \\[\n\\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = P(N_m').\n\\] Observe \\[\n\\begin{align*}\n  P_\\beta(N_m') &= \\frac{\\int_{N_m'}\\exp(- \\beta f(x))dQ}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\frac{\\exp( -\\beta a_m\\} Q(N_m')}{\\int_{\\Omega} \\exp \\left( - \\beta f(x)\\right) dQ}\\\\\n  & \\leq \\left(\\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) \\right)^{-1}.\n\\end{align*}\n\\] Furthermore, as \\[\n\\begin{align*}\n  \\int_{\\Omega} \\exp \\left( - \\beta (f(x) - a_m)\\right) &\\geq \\int_{f^{-1}([0,a_m/2])} \\exp \\left( - \\beta (f(x) - a_m)\\right)\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right) Q(f^{-1}([0,a_m/2]))\\\\\n  & \\geq \\exp \\left(\\frac{\\beta a_m}{2} \\right)\n\\end{align*}\n\\] then it holds that \\(P_\\beta(N_m') \\leq \\exp \\left( - \\frac{\\beta a_m}{2} \\right)\\) and as a result for any \\(m \\in \\mathbb{N}\\) we have \\[\nP(N_m') = \\lim_{\\beta \\rightarrow \\infty} P_\\beta(N_m') = \\lim_{\\beta \\rightarrow \\infty}\\exp \\left(-\\frac{\\beta a_m}{2} \\right)  = 0.\n\\] By construction \\((N_m')_{m \\in \\mathbb{N}}\\) is an increasing sequence of sets, \\(N' = \\bigcup_{m = 1}^{\\infty} N_m'\\) and therefore \\(P(N') = \\lim_{m \\rightarrow \\infty} P(N_m')\\). Hence we conclude \\[\nP(N') = \\lim_{m \\rightarrow \\infty} P(N_m') = 0.\n\\]"
+  },
+  {
+    "objectID": "projects.html#past-projects",
+    "href": "projects.html#past-projects",
+    "title": "Research",
+    "section": "Past projects",
+    "text": "Past projects"
+  },
+  {
+    "objectID": "projects.html#previous-projects",
+    "href": "projects.html#previous-projects",
+    "title": "Research",
+    "section": "Previous projects",
+    "text": "Previous projects\n\nHow does the choice of activation function impact training?\n\n\nEncoder blind compressed sensing"
+  },
+  {
+    "objectID": "teaching.html#current-projects",
+    "href": "teaching.html#current-projects",
+    "title": "Teaching",
+    "section": "Current projects",
+    "text": "Current projects"
+  },
+  {
+    "objectID": "teaching.html#current-courses",
+    "href": "teaching.html#current-courses",
+    "title": "Teaching",
+    "section": "Current courses",
+    "text": "Current courses\n\nPIC16A: Introduction to Python with Data Science Applications\n\n\nPIC10A: Introduction programming with C++\n\n\nPIC10B: Intermediate C++"
+  },
+  {
+    "objectID": "teaching.html#past-courses",
+    "href": "teaching.html#past-courses",
+    "title": "Teaching",
+    "section": "Past courses",
+    "text": "Past courses\nAt Oxford I was a Tutor for Information Theory (B8.4) and Theories of Deep Learning (C6.5)."
+  },
+  {
+    "objectID": "teaching.html#for-students",
+    "href": "teaching.html#for-students",
+    "title": "Teaching",
+    "section": "For students",
+    "text": "For students"
+  }
+]

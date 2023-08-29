@@ -1,0 +1,27 @@
+---
+title: "Michael Murray"
+image: images/mm_profile1.jpg
+about: 
+  template: trestles
+  image-shape: round
+  image-width: 23em
+  links:
+    - text: Google Scholar
+      href: https://scholar.google.com/citations?hl=en&user=wplO7UoAAAAJ
+    - text: LinkedIn
+      href: https://www.linkedin.com/in/michael-murray-a95550a4/
+    - text: GitHub
+      href: https://github.com/mm5110
+    - text: Email
+      href: mailto:mmurray@math.ucla.edu
+---
+# Bio
+I am a Hedrick Assistant Adjunct Professor at UCLA where I am fortunate enough to work with Deanna Needell and Guido Montufar. Prior to this I studied under Jared Tanner at Oxford where I obtained a DPhil in Maths.
+
+# Research overview
+My research is mostly concerned with using maths to better understand and improve deep learning algorithms. Examples of specific topics include the role of overparameterization, principled design of network architectures and transitions between benign and non-benign forms of overfitting. See my research page for specifics on current and past projects. An up-to-date list of my publications can be found on Google scholar.
+
+---
+
+
+

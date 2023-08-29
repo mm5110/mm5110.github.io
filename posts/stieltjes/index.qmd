@@ -1,0 +1,68 @@
+---
+title: "The Stieltjes transform"
+author: "Michael Murray"
+date: "2023-07-28"
+categories: [probability]
+bibliography: ../../references.bib
+# image: "image.jpg"
+draft: true
+---
+*Learning about the  properties of the Stieltjes transform.*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+**Pre-requisites:** a first course in measure theory, complex numbers, real analysis and probability.
+
+The Stieltjes is a fundamental object in probability and has played a particularly prominent role in Random Matrix Theory. In this note we look at some of its key properties, listed below.
+
+- There is a one-to-one mapping between a probability measure and its Stieltjes transform.
+- XXXX
+
+
+In what follows we consider the measurable space $(\reals, B(\reals))$ where $B(\reals)$ denotes the Borel $\sigma$-algebra and $P_\mu(\reals)$  denotes the set of probability measure $\mu:B(\reals) \rightarrow \reals$. In addition we use $F(\comps)$ to denote the set of complex functions $m:\comps \rightarrow \comps$. The Stieltjes transform $S:P_\mu(\reals) \rightarrow F(\comps)$ maps real probability measures $\mu$ to complex functions.
+
+::: {#def-def}
+The Stieltjes transform of $\mu \in \prob(\reals)$ is a complex function $m_{\mu}: \reals  \backslash \supp(\mu) \rightarrow \comps$ defined as
+$$
+m_{\mu}(z) = \int_{\reals} \frac{1}{t - z} d\mu(t).
+$$
+:::
+
+The following lemma summarizes some useful properties of the Stieltjes transform.
+
+::: {#lem-lem}
+The complex function $m_{\mu} = S(\mu)$ satisfies the following,
+
+1. it exists for any $z \in \comps \backslash \reals$,
+2. is analytic on $\comps \backslash \reals$,
+3. letting $\gamma_n(\mu) = \int_{\reals}t^n d\mu(t)$ denote the $n$th moment of $\mu$ then $m_{\mu}(z) = - \sum_{n=0}^{\infty} \frac{\gamma_n(\mu)}{z^{n+1}}$
+:::
+
+In particular, point 1 illustrates that the Stieltjes transform is well defined on its domain. Point 2 implies that in addition to being continuous and infinitely differentiable the Stieltjes transform at each point in its domain can be expressed in terms of a power series (Taylor expansion), power series are advantagoes as they are amenable both to manipulation and numerical computation. Finally, and in fact based on 2, point 3 relates the Stieltjes transform to the moments of the measure in question.
+
+::: {.proof}
+
+:::
+
+
+
+<!-- ::: {#def-def} -->
+<!-- Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, -->
+<!-- vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida  -->
+<!-- mauris. -->
+<!-- ::: -->
+
+<!-- ::: {#exm-exm} -->
+<!-- Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi -->
+<!-- auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae, ultricies et, tellus. -->
+<!-- ::: -->
+
+<!-- Some text before the theorem. -->
+
+<!-- ::: {#thm-thm} -->
+<!-- Nulla malesuada porttitor diam. Donec felis erat, congue non, volutpat -->
+<!-- at, tincidunt tristique, libero. Vivamus viverra fermentum felis. -->
+<!-- ::: -->
+

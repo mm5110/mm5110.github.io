@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Michael Murray">
+<meta name="dcterms.date" content="2023-08-01">
+
+<title>Home - Concentration of Gibbs measures onto minimizers of objective functions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Home</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html" rel="" target="">
+ <span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../teaching.html" rel="" target="">
+ <span class="menu-text">Teaching</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Concentration of Gibbs measures onto minimizers of objective functions</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">probability</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Michael Murray </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 1, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" id="toc-proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" class="nav-link" data-scroll-target="#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers">Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p><em>Under what conditions do Gibbs measures concentrate on the minimizers of an associated objective function in the inverse temperature limit?</em></p>
+<div class="hidden">
+%%%%% NEW MATH DEFINITIONS %%%%% $$
+{lemma}{Lemma}
+<p>{}[1]{{#1}}</p>
+<p>% Figure reference, lower-case. % Figure reference, capital. For start of sentence % Section reference, lower-case. % Section reference, capital. % Reference to two sections. % Reference to three sections. % Reference to an equation, lower-case. % Reference to an equation, upper case % A raw reference to an equation—avoid using if possible % Reference to a chapter, lower-case. % Reference to an equation, upper case. % Reference to a range of chapters % Reference to an algorithm, lower-case. % Reference to an algorithm, upper case. % Reference to a part, lower case % Reference to a part, upper case </p>
+<p>% Random variables % rm is already a command, just don’t name any random variables m </p>
+<p>% Random vectors </p>
+<p>% Elements of random vectors </p>
+<p>% Random matrices </p>
+<p>% Elements of random matrices </p>
+<p>% Vectors </p>
+<p>% Elements of vectors </p>
+<p>% Matrix </p>
+% Tensor
+<p>% </p>
+<p>% Graph </p>
+<p>% Sets % Don’t use a set called E, because this would be the same as our symbol % for expectation. </p>
+<p>% Entries of a matrix </p>
+% entries of a tensor % Same font as tensor, without wrapper
+<p>% The true underlying data generating distribution % The empirical distribution defined by the training set % The model distribution % Stochastic autoencoder distributions </p>
+<p>% Laplace distribution</p>
+<p>% Wolfram Mathworld says <span class="math inline">\(L^2\)</span> is for function spaces and <span class="math inline">\(\ell^2\)</span> is for vectors % But then they seem to use <span class="math inline">\(L^2\)</span> for vectors throughout the site, and so does % wikipedia. </p>
+<p>% See usage in notation.tex. Chosen to match Daphne’s book.</p>
+% MM commands % Defined commands
+<p>% </p>
+<p>% Caligraphic letters $$</p>
+</div>
+<p><strong>Pre-requisites</strong>: in what follows I’ll assume the reader has at least a little familiarity with measure theory and has been exposed to some problems in machine learning.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In many situations encountered in machine learning one is confronted with minimizing some parameterized objective or loss function which depends on data. For example, consider finding the smallest eigenvalue of a data covariance matrix <span class="math inline">\({\mathbf{M}}\)</span> by minimizing the objective <span class="math inline">\(E({\mathbf{w}}) = \frac{1}{2}{\mathbf{w}}^T {\mathbf{M}}{\mathbf{w}}\)</span> over the unit sphere. One approach to analyzing such problems and which is particularly popular among Physicists is to reduce the problem to that of Gibbs sampling. In particular, in the example above, instead of directly studying the objective <span class="math inline">\(E\)</span> we instead consider a sequence of associated Gibbs measures with densities defined as <span class="math display">\[
+p_{\beta}({\mathbf{w}}) = \frac{\exp(- \beta E({\mathbf{w}}))}{\int_{{\mathbf{w}}\in \mathbb{S}^{d-1}} \exp \left( - \beta E({\mathbf{w}})\right) dQ},
+\]</span> where here <span class="math inline">\(Q\)</span> denotes the uniform measure over the unit sphere in dimension <span class="math inline">\(d\)</span>. The kind of statement I’ve often come across, at least in the machine learning related tutorials concerning this technique, is something like <em>“as the free parameter (also called the inverse temperature) <span class="math inline">\(\beta\)</span> goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function”</em>. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span>, however I confess the presentation, particularly in regard to which conditions are required where, a little confusing. On the off-chance it might be helpful to others in a similar position I thought I would present some re-phrased version of some of the results in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span> and write down the proof in little more detail.</p>
+</section>
+<section id="proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" class="level2">
+<h2 class="anchored" data-anchor-id="proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers">Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers</h2>
+<p>To place ourselves in a general setting we adopt the following definitions and conditions.</p>
+<ul>
+<li>Let <span class="math inline">\((\Omega, \Sigma, Q)\)</span> be a measure space where <span class="math inline">\(\Sigma\)</span> is a Borel-<span class="math inline">\(\sigma\)</span> algebra and <span class="math inline">\(Q: \Sigma \rightarrow [0,1]\)</span> is a probability measure. <!-- - Let $(\Omega, d)$ be a complete, seperable metric space. --></li>
+<li>Let <span class="math inline">\((\Omega, d)\)</span> be a seperable complete metric space and assume <span class="math inline">\(f:(\Omega,d) \rightarrow (\mathbb{R}_{\geq 0},|\cdot|)\)</span> is continuous and <span class="math inline">\(\inf_{x \in \Omega} f(x) = 0\)</span>. <!-- - Assume for any $a>0$ that $Q(\{x \in \Omega: f(x)< a \}) > 0$ *[WIP: not sure we need this]*. --></li>
+<li>Let <span class="math inline">\(N = \{x \in \Omega: f(x) = 0\}\)</span> to be the set of minimizers of <span class="math inline">\(f\)</span> and assume <span class="math inline">\(N \neq \emptyset\)</span>. We denote the compliment of <span class="math inline">\(N\)</span> as <span class="math inline">\(N'= \Omega \backslash N\)</span>.</li>
+<li>Let <span class="math inline">\(P_\beta\)</span> for <span class="math inline">\(\beta \in \mathbb{R}_{&gt;0}\)</span> denote a sequence of probability measures with Radon-Nikodym derivative <span class="math display">\[
+\frac{dP_{\beta}}{dQ} = \frac{\exp(- \beta f(x))dQ}{\int_{x \in\Omega} \exp \left( - \beta f(x)\right) dQ}.
+\]</span></li>
+</ul>
+<p>With these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span>.</p>
+<div id="thm-thm" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 1 </strong></span>Suppose there exists a probability measure <span class="math inline">\(P: \Sigma \rightarrow [0,1]\)</span> such that <span class="math inline">\(P_\beta \rightarrow P\)</span> weakly, then <span class="math inline">\(P(N) = 1\)</span>.</p>
+</div>
+<p>Before we turn to the proof, a few remarks.</p>
+<ul>
+<li>We assume <span class="math inline">\(\Sigma\)</span> is a Borel-<span class="math inline">\(\sigma\)</span> algebra in order to use the Portmanteau Theorem.</li>
+<li>We assume <span class="math inline">\(f\)</span> is continuous (as all our measures are Borel measures this also implies <span class="math inline">\(f\)</span> is measurable) as this implies <span class="math inline">\(\partial f^{-1}(A) \subseteq f^{-1}(\partial A)\)</span> which we use in the proof.</li>
+<li>We assume there exists at least one minimizer of <span class="math inline">\(f\)</span> due to Proposition 1 of <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span> (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence <span class="math inline">\((P_{\beta})\)</span> to converge weakly.</li>
+<li>If a minimizer exists we can assume without loss of generality that the minimum of <span class="math inline">\(f\)</span> is <span class="math inline">\(0\)</span> as if instead we consider the Gibbs measure associated with <span class="math inline">\(f(x) - \min_{x \in \Omega}f(x)\)</span> we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.</li>
+<li>Although we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that <span class="math inline">\((\Omega, d)\)</span> is compact then <span class="math inline">\((P_{\beta})\)</span> is tight and so by Prokhorov’s Theorem we know that <span class="math inline">\((P_{\beta})\)</span> has at the very least a weakly convergent subsequence.</li>
+</ul>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>It suffices to show that <span class="math inline">\(P(N') = 0\)</span>. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers <span class="math inline">\((a_m)_{m\in \mathbb{N}}\)</span> such that <span class="math inline">\(a_m \downarrow 0\)</span> and <span class="math inline">\(P(f^{-1}(\{ a_m \}) = 0\)</span>. Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real <span class="math inline">\(\epsilon&gt;0\)</span> such that <span class="math inline">\(P(f^{-1}(\{ \epsilon\})) = 0\)</span> and <span class="math inline">\(P(f^{-1}(\{ y \})&gt; 0\)</span> for all <span class="math inline">\(y \in (0, \epsilon)\)</span>. In short this implies that there are an uncountable number of singletons in <span class="math inline">\((0, \epsilon)\)</span> which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets <span class="math inline">\((S_k)_{k \in \mathbb{N}}\)</span> of <span class="math inline">\(\Omega\)</span> defined as <span class="math display">\[
+S_k = \{x \in \Omega: f(x) \in (0, \epsilon), (k+1)^{-1} &lt; P(f(x)\leq k^{-1} \},
+\]</span></p>
+<p>then for any <span class="math inline">\(y \in (0, \epsilon)\)</span> there exists a <span class="math inline">\(k \in \mathbb{N}\)</span> such that <span class="math inline">\(f^{-1}(y) \in S_k\)</span> and thus <span class="math inline">\(f^{-1}((0, \epsilon)) = \bigcup_{k=1}^{\infty} S_k\)</span>. Observe for any <span class="math inline">\(x \in S_k\)</span> that <span class="math inline">\(P(f^{-1}(x)) &gt; (k+1)^{-1}\)</span>, therefore the cardinality of <span class="math inline">\(S_k\)</span> can be at most <span class="math inline">\(k+1\)</span>. As a result every <span class="math inline">\(S_k\)</span> must be finite which in turn implies <span class="math inline">\((f^{-1}((0, \epsilon)))\)</span> is also countable as it is a countable union of finite sets. However, <span class="math inline">\(P(f^{-1}(\{y \}))&gt;0\)</span> implies <span class="math inline">\(f^{-1}(y) \neq \emptyset\)</span> for all <span class="math inline">\(y \in (0, \epsilon)\)</span> and furthermore these preimages of singletons are evidently disjoint. Therefore, as <span class="math inline">\((0, \epsilon)\)</span> is uncountable and <span class="math inline">\(f^{-1}((0, \epsilon)) = \bigcup_{y \in (0, \epsilon)} f^{-1}(\{ y\})\)</span> then <span class="math inline">\(f^{-1}((0, \epsilon))\)</span> must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals <span class="math inline">\(a_m \downarrow 0\)</span> such that <span class="math inline">\(P(f(x) = a_m) = 0\)</span> for all <span class="math inline">\(m \in \mathbb{N}\)</span>.</p>
+<p>Define <span class="math display">\[
+N'_m = f^{-1}([a_m, \infty)) = \{x \in \Omega: f(x) \in [a_m, \infty) \}.
+\]</span> By asssumption <span class="math inline">\(f\)</span> is continuous, therefore <span class="math display">\[
+\partial N_m'  = \partial f^{-1}([a_m, \infty)) \subseteq f^{-1}(\partial [a_m, \infty)) = f^{-1}(\{a_m \}).
+\]</span> As by construction <span class="math inline">\(P(f^{-1}(\{a_m \})) = 0\)</span> it follows that <span class="math inline">\(P(\partial N_m') = 0\)</span> and thus <span class="math inline">\(N_m'\)</span> is a <span class="math inline">\(P\)</span>-continuous set for all <span class="math inline">\(m \in \mathbb{N}\)</span>. By the Portmanteau Theorem it therefore follows that <span class="math display">\[
+\lim_{\beta \rightarrow \infty} P_\beta(N_m') = P(N_m').
+\]</span> Observe <span class="math display">\[
+\begin{align*}
+  P_\beta(N_m') &amp;= \frac{\int_{N_m'}\exp(- \beta f(x))dQ}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
+  &amp; \leq \frac{\exp( -\beta a_m\} Q(N_m')}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
+  &amp; \leq \left(\int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) \right)^{-1}.
+\end{align*}
+\]</span> Furthermore, as <span class="math display">\[
+\begin{align*}
+  \int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) &amp;\geq \int_{f^{-1}([0,a_m/2])} \exp \left( - \beta (f(x) - a_m)\right)\\
+  &amp; \geq \exp \left(\frac{\beta a_m}{2} \right) Q(f^{-1}([0,a_m/2]))\\
+  &amp; \geq \exp \left(\frac{\beta a_m}{2} \right)
+\end{align*}
+\]</span> then it holds that <span class="math inline">\(P_\beta(N_m') \leq \exp \left( - \frac{\beta a_m}{2} \right)\)</span> and as a result for any <span class="math inline">\(m \in \mathbb{N}\)</span> we have <span class="math display">\[
+P(N_m') = \lim_{\beta \rightarrow \infty} P_\beta(N_m') = \lim_{\beta \rightarrow \infty}\exp \left(-\frac{\beta a_m}{2} \right)  = 0.
+\]</span> By construction <span class="math inline">\((N_m')_{m \in \mathbb{N}}\)</span> is an increasing sequence of sets, <span class="math inline">\(N' = \bigcup_{m = 1}^{\infty} N_m'\)</span> and therefore <span class="math inline">\(P(N') = \lim_{m \rightarrow \infty} P(N_m')\)</span>. Hence we conclude <span class="math display">\[
+P(N') = \lim_{m \rightarrow \infty} P(N_m') = 0.
+\]</span></p>
+</div>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-lap-revisited" class="csl-entry" role="listitem">
+Hwang, Chii-Ruey. 1980. <span>“<span class="nocase">Laplace’s Method Revisited: Weak Convergence of Probability Measures</span>.”</span> <em>The Annals of Probability</em> 8 (6): 1177–82. <a href="https://doi.org/10.1214/aop/1176994579">https://doi.org/10.1214/aop/1176994579</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

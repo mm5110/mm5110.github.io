@@ -1,0 +1,101 @@
+---
+title: "Concentration of Gibbs measures onto minimizers of objective functions"
+author: "Michael Murray"
+date: "2023-08-01"
+categories: [probability]
+bibliography: ../../references.bib
+---
+*Under what conditions do Gibbs measures concentrate on the minimizers of an associated objective function in the inverse temperature limit?*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+**Pre-requisites**: in what follows I'll assume the reader has at least a little familiarity with measure theory and has been exposed to some problems in machine learning.
+
+## Introduction
+In many situations encountered in machine learning one is confronted with minimizing some parameterized objective or loss function which depends on data. For example, consider finding the smallest eigenvalue of a data covariance matrix $\rmM$ by minimizing the objective $E(\rvw) = \frac{1}{2}\rvw^T \rmM \rvw$ over the unit sphere. One approach to analyzing such problems and which is particularly popular among Physicists is to reduce the problem to that of Gibbs sampling. In particular, in the example above, instead of directly studying the objective $E$ we instead consider a sequence of associated Gibbs measures with densities defined as
+$$
+p_{\beta}(\rvw) = \frac{\exp(- \beta E(\rvw))}{\int_{\rvw \in \sphere^{d-1}} \exp \left( - \beta E(\rvw)\right) dQ},
+$$
+where here $Q$ denotes the uniform measure over the unit sphere in dimension $d$. The kind of statement I've often come across, at least in the machine learning related tutorials concerning this technique, is something like *"as the free parameter (also called the inverse temperature) $\beta$ goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function"*. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in [@lap-revisited], however I confess the presentation, particularly in regard to which conditions are required where, a little confusing. On the off-chance it might be helpful to others in a similar position I thought I would present some re-phrased version of some of the results in [@lap-revisited] and write down the proof in little more detail.
+
+
+## Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers
+To place ourselves in a general setting we adopt the following definitions and conditions.
+
+- Let $(\Omega, \Sigma, Q)$ be a measure space where $\Sigma$ is a Borel-$\sigma$ algebra and $Q: \Sigma \rightarrow  [0,1]$ is a probability measure.
+<!-- - Let $(\Omega, d)$ be a complete, seperable metric space. -->
+- Let $(\Omega, d)$ be a seperable complete metric space and assume $f:(\Omega,d) \rightarrow (\reals_{\geq 0},|\cdot|)$ is continuous and $\inf_{x \in \Omega} f(x) = 0$.
+<!-- - Assume for any $a>0$ that $Q(\{x \in \Omega: f(x)< a \}) > 0$ *[WIP: not sure we need this]*. -->
+- Let $N = \{x \in \Omega: f(x) = 0\}$ to be the set of minimizers of $f$ and assume $N \neq \emptyset$. We denote the compliment of $N$ as $N'= \Omega \backslash N$.
+- Let $P_\beta$ for $\beta \in \reals_{>0}$ denote a sequence of probability measures with Radon-Nikodym derivative
+$$
+\frac{dP_{\beta}}{dQ} = \frac{\exp(- \beta f(x))dQ}{\int_{x \in\Omega} \exp \left( - \beta f(x)\right) dQ}.
+$$
+
+With these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in [@lap-revisited].
+
+::: {#thm-thm}
+Suppose there exists a probability measure $P: \Sigma \rightarrow [0,1]$ such that $P_\beta
+\rightarrow P$ weakly, then $P(N) = 1$.
+:::
+
+Before we turn to the proof, a few remarks.
+
+- We assume $\Sigma$ is a Borel-$\sigma$ algebra in order to use the Portmanteau Theorem.
+- We assume $f$ is continuous (as all our measures are Borel measures this also implies $f$ is measurable) as this implies $\partial f^{-1}(A) \subseteq f^{-1}(\partial A)$ which we use in the proof.
+- We assume there exists at least one minimizer of $f$ due to Proposition 1 of [@lap-revisited] (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence $(P_{\beta})$ to converge weakly.
+- If a minimizer exists we can assume without loss of generality that the minimum of $f$ is $0$ as if instead we consider the Gibbs measure associated with $f(x) - \min_{x \in \Omega}f(x)$ we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.
+- Although we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that $(\Omega, d)$ is compact then $(P_{\beta})$ is tight and so by Prokhorov's Theorem we know that $(P_{\beta})$ has at the very least a weakly convergent subsequence.
+
+
+::: {.proof}
+It suffices to show that $P(N') = 0$. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers $(a_m)_{m\in \naturals}$ such that $a_m \downarrow 0$ and $P(f^{-1}(\{ a_m \}) = 0$. Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real $\epsilon>0$ such that $P(f^{-1}(\{ \epsilon\})) = 0$ and $P(f^{-1}(\{ y \})> 0$ for all $y \in (0, \epsilon)$. In short this implies that there are an uncountable number of singletons in $(0, \epsilon)$ which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets $(S_k)_{k \in \naturals}$ of $\Omega$ defined as
+$$
+S_k = \{x \in \Omega: f(x) \in (0, \epsilon), (k+1)^{-1} < P(f(x)\leq k^{-1} \},
+$$
+
+then for any $y \in (0, \epsilon)$ there exists a $k \in \naturals$ such that $f^{-1}(y) \in S_k$ and thus $f^{-1}((0, \epsilon)) = \bigcup_{k=1}^{\infty} S_k$. Observe for any $x \in S_k$ that $P(f^{-1}(x)) > (k+1)^{-1}$, therefore the cardinality of $S_k$ can be at most $k+1$. As a result every $S_k$ must be finite which in turn implies $(f^{-1}((0, \epsilon)))$ is also countable as it is a countable union of finite sets. However, $P(f^{-1}(\{y \}))>0$ implies $f^{-1}(y) \neq \emptyset$ for all $y \in (0, \epsilon)$ and furthermore these preimages of singletons are evidently disjoint. Therefore, as $(0, \epsilon)$ is uncountable and $f^{-1}((0, \epsilon)) = \bigcup_{y \in (0, \epsilon)} f^{-1}(\{ y\})$ then $f^{-1}((0, \epsilon))$ must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals $a_m \downarrow 0$ such that $P(f(x) = a_m) = 0$ for all $m \in \naturals$.
+
+Define 
+$$
+N'_m = f^{-1}([a_m, \infty)) = \{x \in \Omega: f(x) \in [a_m, \infty) \}.
+$$ 
+By asssumption $f$ is continuous, therefore
+$$
+\partial N_m'  = \partial f^{-1}([a_m, \infty)) \subseteq f^{-1}(\partial [a_m, \infty)) = f^{-1}(\{a_m \}).
+$$
+As by construction $P(f^{-1}(\{a_m \})) = 0$ it follows that $P(\partial N_m') = 0$ and thus $N_m'$ is a $P$-continuous set for all $m \in \naturals$.  By the Portmanteau Theorem it therefore follows that
+$$
+\lim_{\beta \rightarrow \infty} P_\beta(N_m') = P(N_m').
+$$
+Observe
+$$
+\begin{align*}
+  P_\beta(N_m') &= \frac{\int_{N_m'}\exp(- \beta f(x))dQ}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
+  & \leq \frac{\exp( -\beta a_m\} Q(N_m')}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
+  & \leq \left(\int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) \right)^{-1}.
+\end{align*}
+$$
+Furthermore, as
+$$
+\begin{align*}
+  \int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) &\geq \int_{f^{-1}([0,a_m/2])} \exp \left( - \beta (f(x) - a_m)\right)\\
+  & \geq \exp \left(\frac{\beta a_m}{2} \right) Q(f^{-1}([0,a_m/2]))\\
+  & \geq \exp \left(\frac{\beta a_m}{2} \right) 
+\end{align*}
+$$
+then it holds that $P_\beta(N_m') \leq \exp \left( - \frac{\beta a_m}{2} \right)$ and as a result for any $m \in \naturals$ we have
+$$
+ P(N_m') = \lim_{\beta \rightarrow \infty} P_\beta(N_m') = \lim_{\beta \rightarrow \infty}\exp \left(-\frac{\beta a_m}{2} \right)  = 0.
+$$
+By construction $(N_m')_{m \in \naturals}$ is an increasing sequence of sets, $N' = \bigcup_{m = 1}^{\infty} N_m'$ and therefore $P(N') = \lim_{m \rightarrow \infty} P(N_m')$. Hence we conclude
+$$
+P(N') = \lim_{m \rightarrow \infty} P(N_m') = 0. 
+$$
+:::
+
+
+
+
+

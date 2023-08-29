@@ -1,0 +1,32 @@
+---
+title: "Research"
+---
+
+## Research perspective
+
+Broadly speaking, most of my work concerns using maths to better understand the behaviour and improve the performance of algorithms for machine learning and data science. I am particularly interested in deep learning for two reasons: first because it offers game-changing performance across so many important applications like computer vision and drug prediction, and second because the fact that it works so well challenges some of the conventional wisdoms concerning machine learning. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making it safer, more reliable and less costly to train and use in terms of time, energy and memory.
+
+## Current projects
+
+#### Implict and explicit regularization of denoising neural networks
+
+
+#### Geometric NTK
+
+
+#### Benign overfitting: linearly seperable data models and beyond
+
+
+#### Training guarantees in the mildly overparameterized regime
+
+
+## Previous projects
+
+#### How does the choice of activation function impact training?
+
+#### Encoder blind compressed sensing
+
+
+
+
+------------------------------------------------------------------------
