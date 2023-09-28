@@ -12,7 +12,7 @@ bibliography: ../../references.bib
 :::
 
 ## Introduction and problem setting
-The purpose of this post is to sketch out in the simplest setting possible how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks. More complex and general forms of the argument presented here are widely present in the literature, starting with for instance [@du2018gradient] and [@jacot2020neural].
+The purpose of this post is to derive from first principles how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks. As our goal is to highlight the key ideas we will work in the simplest setting possible, namely a single layer differentiable neural network. More complex and general forms of the argument presented here are widely present in the literature, starting with for instance [@du2018gradient] and [@jacot2020neural].
 
 For now let $f: \reals^p \times \reals^d \rightarrow \reals$ be a parameterized function with parameters $\theta \in \reals^p$ mapping vectors in $\reals^d$ to a real scalar value. Consider an arbitrary training sample consisting of $n$ pairs of points and their corresponding targets $(\rvx_i, y_i)_{i=1}^n \in (\reals^d \times \reals)^n$, recall the least squares loss defined as
 \begin{align*}
@@ -34,7 +34,7 @@ For now we assume that $f$ is at differentiable with respect to its parameters. 
   \in \reals^{p \times n}.
 \end{align*}
 
-## A recipe for deriving guarantees based on analyzing the smallest eigenvalue of the Neural Tangent Kernel (NTK)
+## A recipe for deriving guarantees based on analyzing the smallest eigenvalue of the NTK
 
 The Jacobian and its gram, $\rmH(t) = \rmJ(t)^T \rmJ(t) \in \reals^{n \times n}$, which is also referred to as the Neural Tangent Kernel (NTK) gram matrix, will play a critical role in what follows here and also when it comes to studying linearized neural networks. Note calling $\rmH(t)$ the NTK or NTK gram matrix is somewhat misleading as it can be studied more generally for any sufficiently smooth model, not just neural networks! However, as it is now accepted terminology we will stick with it.  The following proposition illustrates the significance of this matrix for training.
 
@@ -61,7 +61,7 @@ The Jacobian and its gram, $\rmH(t) = \rmJ(t)^T \rmJ(t) \in \reals^{n \times n}$
         = \sum_{k = 1}^p \frac{d \theta_k}{dt} \frac{\partial f(\theta(t), \rvx_i)}{\partial \theta_k}
         = \nabla_{\theta} f(\theta(t), \rvx_i)^T  \left(\frac{d \theta(t)}{dt}\right).
     \end{align*}
-    Again collecting terms and substituting the expression for gradient flow given in \eqref{opt2-eq:grad-flow} we have
+    Again collecting terms and substituting the expression for gradient flow we have
     \begin{align*}
         \frac{d \rvu(t)}{dt} = \rmJ(t)^T \frac{d \theta(t)}{dt}
         = - \rmJ(t)^T \nabla_{\theta}L(t) = - \rmJ(t)^T\rmJ(t)\rvr(t) = - \rmH(t) \rvr(t).
@@ -130,10 +130,10 @@ Based on @lem-unifbound and @lem-shadowmatrix we therefore can use the following
 For neural networks we will see that a good candidate for $\rmH_{\infty}$ is the expected value of $\rmH(0)$ which coincides with the infinite width limit of the network. By making the width of the network sufficiently large we will prove the above conditions are satisfied. Finally note for the bound on the loss to be useful we require $\lambda_{n}(\rmH_{\infty})>0$! 
 
 ## Case-study: a differentiable, shallow neural network
-To illustrate how the approach for proving convergence guarantees can be applied to neural networks we study potentially the simplest setting possible: consider a two layer network
-\[
+To illustrate how the approach for proving convergence guarantees can be applied to neural networks we study potentially the simplest setting possible. Consider a two layer network
+$$
 f(\theta, \rvx) = \frac{1}{\sqrt{m}}\sum_{j=1}^m a_j \phi(\rvw_j^T\rvx).
-\]
+$$
 Here $\rvx \in \reals^d$ denotes an input vector, $\rvw_j \in \reals^d$ the weights of the $j$th neuron, $\rmW \in \reals^{m \times d}$ the matrix of neuron weights stored row-wise, $\rva \in \reals^m$ the vector of output weights. The reasons for the explicit scaling of $1/\sqrt{m}$ will be become apparent soon. With regards to the activation function, for now we only assume $\phi:\reals \rightarrow \reals$ is differentiable, as a result of this both $f$ and in turn $L$ are differentiable with respect to the network parameters. We further assume the network parameters are initialized mutually independent of one another with inner weights $w_{jk}(0) \sim N(0,1)$ and outer weights $a_j(0) \sim U(\{-1,+1\})$ for all $j \in [m]$, $k\in [d]$. We assume for simplicity the outer weights $\rva$ are frozen after initialization while the inner weights $\rmW(t)$ evolve according to gradient flow \eqref{opt2-eq:grad-flow}. We therefore define the trainable network parameter vector $\theta = [\rvw_1^T, \rvw_2^T... \rvw_m^T] \in \reals^{p}$ where $p = dm$. Finally, for typographical clarity we assume that the data is normalized to lie on the unit ball, i.e., $||\rvx_i ||_2 = 1$ for all $i\in [n]$.
 
 First we characterize the entries of $\rmH(t)$, as
@@ -165,7 +165,7 @@ $$
 :::
 
 :::{.proof}
-Let $i,l \in [n]$ be arbitrary and for typographical clarity let $Z_r = \phi'(\rvw^T \rvx_i)  \phi'(\rvw^T \rvx_l)$. Then by the bounded derivative assumption on $\phi$ it follows that $H_{il}(0)$ is the arithmetic average of a sum of $m$ mutually independent and identically distributed random variables, which almost surely are supported on $[-C^2, C^2]$. Applying Hoeffding's inequality
+Let $i,l \in [n]$ be arbitrary and for typographical clarity let $Z_r = \phi'(\rvw_r^T \rvx_i)  \phi'(\rvw_r^T \rvx_l)$. Then by the bounded derivative assumption on $\phi$ it follows that $H_{il}(0)$ is the arithmetic average of a sum of $m$ mutually independent and identically distributed random variables, which almost surely are supported on $[-C^2, C^2]$. Applying Hoeffding's inequality
     \begin{align*}
         \prob\left( \left|\frac{1}{m} \sum_{r=1}^m (Z_r - \expec[Z_r]) \right| \geq \epsilon \right) \leq 2\exp\left( -\frac{2m\epsilon^2}{4C^4} \right),
     \end{align*}
@@ -196,7 +196,7 @@ Setting $\epsilon = \varepsilon/n$, if $m \geq \frac{2C^4n^2}{\varepsilon^2} \ln
 To ensure closeness of the finite width NTK to its idealized infinite width limit at initialization we require a significant level of overparameterization! It is worth remarking that the tools we have used here are quite crude and that this dependency can indeed be relaxed, see for instance [@banerjee2023neural]. Before we proceed to bound the dynamics we first bound $L(0)$, in particular it will become apparent later that we need $L(0)$ to scale sublinearly with $m$!
 
 :::{#lem-L0}
-Suppose there exists a $C \in \reals_{>0}$ such that $\expec [\phi^2(Z)] \leq K$ and $|y_i| \leq K$ for all $i \in [n]$ and $Z \sim N(0,1)$. For $\delta \in (0,1)$, if $n \geq \delta^{-1}$ then with probability at least $1-\delta$ we have $L(0) \leq 2Cn^2$.
+Suppose there exists a $C \in \reals_{>0}$ such that $\expec [\phi^2(Z)] \leq C$ and $|y_i| \leq C$ for all $i \in [n]$ and $Z \sim N(0,1)$. For $\delta \in (0,1)$, if $n \geq \delta^{-1}$ then with probability at least $1-\delta$ we have $L(0) \leq 2Cn^2$.
 :::
 
 :::{.proof}
@@ -323,18 +323,18 @@ As $\phi$ is continuously differentiable then by construction so is $f$. For arb
 - To bound $|| \rmH(t) - \rmH(0) ||$ it suffices to bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$.
 - To bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$ it suffices to bound $L(t)$.
 
-However, we can circumvent this issue using a real induction argument! We now present the main result.
+However, we can circumvent this issue using a real induction argument! We now present the main result. Note we present the result in terms of $\lambda_n(\rmH_{\infty})$ and assume $\lambda_n(\rmH_{\infty})>0$. This is a reasonable assumption as for generic data (where the data matrix is drawn from a set with full Lebesgue measure) the smallest eigenvalue will be strictly positive. Quantitative lower bounds can be derived by placing for instance a seperation condition on the data, as an example see Corollary I.2 in [@oymak2019moderate].
 
 :::{#thm-main}
-Assume $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
+Assume $\lambda_n(\rmH_{\infty})>0$, $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4n^2}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
 \begin{align*}
          L(t) \leq \exp(- \lambda_n(\rmH_{\infty}) t) L(0). 
 \end{align*}
 :::
 
 :::{.proof}
-By construction $\lambda_{n}(\rmH_{\infty})\geq 0$, as the case $\lambda_{n}(\rmH_{\infty})=0$ is trivial assume $\lambda_{n}(\rmH_{\infty})>0$. To prove the result claimed recall from @lem-unifbound that it suffices to show that $\lambda_n(\rmH(t)) \geq \lambda_n(\rmH_{\infty})/2$ for all $t >0$. From @lem-shadowmatrix for this condition to be true it suffices that $||\rmH(t) - \rmH(0)||,  ||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$ for all $t \geq 0$. Note as 
-$$m \geq \frac{32C^4}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right)
+By construction $\lambda_{n}(\rmH_{\infty})\geq 0$, as the case $\lambda_{n}(\rmH_{\infty})=0$ is trivial assume $\lambda_{n}(\rmH_{\infty})>0$. To prove the result claimed recall from @lem-unifbound that it suffices to show that $\lambda_n(\rmH(t)) \geq \lambda_n(\rmH_{\infty})/2$ for all $t >0$. From @lem-shadowmatrix for this condition to be true it suffices that $||\rmH(t) - \rmH(0)||,  ||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$ for all $t \geq 0$. Note by @lem-initDiff then as
+$$m \geq \frac{32C^4n^2}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right)
 $$
 then with probability at most $\delta/2$ it holds that
    $$
@@ -373,6 +373,6 @@ For Statement iii), if $[0,t) \subset S$ then for any $\delta'>0$ it follows tha
 :::
 
 ## Conclusion
-@thm-main is interesting as despite the loss function being non-linear and non-convex in the model parameters, it says for sufficiently overparameterized networks and assuming $\lambda_n(\rmH_{\infty}) > 0$, then given a sufficiently long training time one can achieve arbitrarily small loss using gradient flow! There are some notable limitations however, in particular the level of overparameterization is exceedingly severe and not representative of networks in practice. Moreover, in order to derive our results we had to limit the movement of each neuron throughout training! This condition requiring the NTK to remain close to its initialization, or equivalently each neuron to remain close to its initialization, is limiting as it rules out a rich feature learning regime in which the kernel (or weights adapt to the data).
+@thm-main is interesting as despite the loss function being non-linear and non-convex in the model parameters, it says for sufficiently overparameterized networks and assuming $\lambda_n(\rmH_{\infty}) > 0$, then given a sufficiently long training time one can achieve arbitrarily small loss using gradient flow! There are some notable limitations however, in particular the level of overparameterization is exceedingly severe and not representative of networks in practice. Moreover, in order to derive our results we had to limit the movement of each neuron throughout training! This condition requiring the NTK to remain close to its initialization, or equivalently each neuron to remain close to its initialization, is limiting as it rules out a rich feature learning regime in which the kernel (or weights adapt to the data). In this post we looked at deriving from first principles guarantees in the very simple setting of a differentiable single layer network. These ideas can be generalized to encompass more general networks and problems in terms of depth, architecture and loss functions. A nice summary and introduction to these topics can be found here <https://www.benjamin-bowman.com/assets/Intro_to_NTK.pdf>.
 
 
