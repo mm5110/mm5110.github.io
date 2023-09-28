@@ -201,7 +201,6 @@ div.csl-indent {
 <p>% </p>
 <p>% Caligraphic letters $$</p>
 </div>
-<p><strong>Pre-requisites</strong>: in what follows I’ll assume the reader has at least a little familiarity with measure theory and has been exposed to some problems in machine learning.</p>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In many situations encountered in machine learning one is confronted with minimizing some parameterized objective or loss function which depends on data. For example, consider finding the smallest eigenvalue of a data covariance matrix <span class="math inline">\({\mathbf{M}}\)</span> by minimizing the objective <span class="math inline">\(E({\mathbf{w}}) = \frac{1}{2}{\mathbf{w}}^T {\mathbf{M}}{\mathbf{w}}\)</span> over the unit sphere. One approach to analyzing such problems and which is particularly popular among Physicists is to reduce the problem to that of Gibbs sampling. In particular, in the example above, instead of directly studying the objective <span class="math inline">\(E\)</span> we instead consider a sequence of associated Gibbs measures with densities defined as <span class="math display">\[

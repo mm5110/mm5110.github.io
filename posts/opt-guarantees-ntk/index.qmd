@@ -1,0 +1,378 @@
+---
+title: "Optimization guarantees via the NTK"
+author: "Michael Murray"
+date: "2023-09-27"
+categories: [Neural Networks]
+bibliography: ../../references.bib
+---
+*In this post we will look at how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks.*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+## Introduction and problem setting
+The purpose of this post is to sketch out in the simplest setting possible how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks. More complex and general forms of the argument presented here are widely present in the literature, starting with for instance [@du2018gradient] and [@jacot2020neural].
+
+For now let $f: \reals^p \times \reals^d \rightarrow \reals$ be a parameterized function with parameters $\theta \in \reals^p$ mapping vectors in $\reals^d$ to a real scalar value. Consider an arbitrary training sample consisting of $n$ pairs of points and their corresponding targets $(\rvx_i, y_i)_{i=1}^n \in (\reals^d \times \reals)^n$, recall the least squares loss defined as
+\begin{align*}
+    L(\theta) &= \frac{1}{2}\sum_{i=1}^n (f(\theta, \rvx_i) - y_i)^2.
+\end{align*}
+To solve the least squares problem we study the trajectory through parameter space under gradient flow, a continuous time simplification of gradient descent: simplifying our notation by using $L(t)$ instead of $L(\theta(t))$, then for $t\geq 0$
+\begin{equation} \label{opt2-eq:grad-flow}
+    \frac{d \theta(t)}{dt} = - \nabla_{\theta} L(t).
+\end{equation}
+For now we assume that $f$ is at differentiable with respect to its parameters. With $\rvu(t) = [f(\theta(t), \rvx_1), f(\theta(t), \rvx_2)... f(\theta(t), \rvx_n)] \in \reals^n$ denoting the vector of predictions and $\rvr(t) = \rvu(t) - \rvy$ the vector of residuals at time $t \geq 0$, then we denote the Jacobian as
+\begin{align*}
+\rmJ(t) = \nabla_\theta \rvr(t)= \nabla_\theta \rvu(t) =
+  \begin{bmatrix}
+    \frac{\partial f(\theta(t), \rvx_1) }{\partial \theta_1} & \frac{\partial f(\theta(t), \rvx_2) }{\partial \theta_1} & ... & \frac{\partial f(\theta(t), \rvx_n) }{\partial \theta_1} \\
+    \frac{\partial f(\theta(t), \rvx_1) }{\partial \theta_2} & \frac{\partial f(\theta(t), \rvx_2) }{\partial \theta_2} & ... & \frac{\partial f(\theta(t), \rvx_n) }{\partial \theta_2} \\
+    \vdots & \vdots & \ddots & \vdots\\
+    \frac{\partial f(\theta(t), \rvx_1) }{\partial \theta_p} & \frac{\partial f(\theta(t), \rvx_2) }{\partial \theta_p} & ... & \frac{\partial f(\theta(t), \rvx_n) }{\partial \theta_p} 
+  \end{bmatrix}
+  \in \reals^{p \times n}.
+\end{align*}
+
+## A recipe for deriving guarantees based on analyzing the smallest eigenvalue of the Neural Tangent Kernel (NTK)
+
+The Jacobian and its gram, $\rmH(t) = \rmJ(t)^T \rmJ(t) \in \reals^{n \times n}$, which is also referred to as the Neural Tangent Kernel (NTK) gram matrix, will play a critical role in what follows here and also when it comes to studying linearized neural networks. Note calling $\rmH(t)$ the NTK or NTK gram matrix is somewhat misleading as it can be studied more generally for any sufficiently smooth model, not just neural networks! However, as it is now accepted terminology we will stick with it.  The following proposition illustrates the significance of this matrix for training.
+
+::: {#prp-gf}
+*Assume $f$ is differentiable with respect to its parameters $\theta \in \reals^p$ at all points along the trajectory of gradient flow. Then
+    \begin{align*}
+    \frac{d \rvr(t)}{dt} = - \rmH(t) \rvr(t).
+    \end{align*}
+*
+:::
+
+::: {.proof}
+   Observe that as
+    \begin{align*}
+        \frac{\partial L(\theta)}{\partial \theta_k} = \sum_{i=1}^n \frac{\partial f(\theta, \rvx_i)}{ \partial \theta_k} (f(\theta, \rvx_i) - y_i)
+    \end{align*}
+   then collecting terms we have
+    $$
+    \nabla_{\theta} L(\theta(t)) =  \rmJ(t)\rvr(t).
+    $$
+    Noting that $f$ is a function of $p$ parameters which each depend on $t$, then from the chain rule it follows that
+    \begin{align*}
+        \frac{d u_i(t)}{dt }   =  \frac{d f(\theta(t), \rvx_i)}{dt}
+        = \sum_{k = 1}^p \frac{d \theta_k}{dt} \frac{\partial f(\theta(t), \rvx_i)}{\partial \theta_k}
+        = \nabla_{\theta} f(\theta(t), \rvx_i)^T  \left(\frac{d \theta(t)}{dt}\right).
+    \end{align*}
+    Again collecting terms and substituting the expression for gradient flow given in \eqref{opt2-eq:grad-flow} we have
+    \begin{align*}
+        \frac{d \rvu(t)}{dt} = \rmJ(t)^T \frac{d \theta(t)}{dt}
+        = - \rmJ(t)^T \nabla_{\theta}L(t) = - \rmJ(t)^T\rmJ(t)\rvr(t) = - \rmH(t) \rvr(t).
+    \end{align*}
+    To finish observe $\frac{d \rvu(t)}{dt} = \frac{d \rvr(t)}{dt}$.
+:::
+
+The following lemma hints at how we might be able to use @prp-gf to derive guarantees for training, note here we use $\lambda_i(\rmA)$ to denote the $ith$ eigenvalue of a matrix $\rmA \in 
+\comps^{n \times n}$ where $\lambda_1(\rmA) \geq \lambda_2(\rmA) \geq ... \lambda_n(\rmA)$.
+
+::: {#lem-unifbound}
+*For some $T\in \reals_{\geq 0}$, suppose for all $t \in [0,T]$ there exists a constant $\kappa \geq 0$ such that $\lambda_n(\rmH(t)) \geq \frac{\kappa}{2}$. Suppose $f$ is differentiable along the trajectory of the gradient flow. Then for all $t \in [0, T]$
+\begin{align*}
+         L(t) \leq \exp(- \kappa t) L(0). 
+\end{align*}
+*
+:::
+    
+
+\noindent Indeed, @lem-unifbound suggests that arbitrarily small training error can be guaranteed as long as we can bound the smallest eigenvalue of $\rmH(t)$ above zero for sufficiently long enough.
+
+::: {.proof}
+Observe by definition that $L(t) = ||\rvr(t) ||_2^2$. Using Lemma 1 it follows that
+    \begin{align*}
+        \frac{d}{dt}||\rvr(t)||^2 &=2\rvr(t)^T\frac{d \rvr(t)}{dt} 
+        = - 2\rvr(t)^T \rmH(t) \rvr(t)
+       = -2 ||\rmJ(t) \rvr(t)||^2
+       \leq - 2\lambda_n(\rmH(t)) ||r(t)||^2 \leq -\kappa||r(t)||^2.
+    \end{align*}
+    As $||r(s)||^2$ and $-\kappa$ are real and continuous functions of $s$ for $s \in [0,t]$, then the result claimed follows from Gronwall's inequality,
+    \begin{align*}
+        ||\rvr(t)||^2 \leq \exp\left( - \int_{0}^t \kappa ds \right) ||\rvr(0)||^2 = \exp(-\kappa t) ||\rvr(0)||^2.
+    \end{align*}
+:::
+
+As a result, to prove convergence it suffices to uniformly lower bound the smallest eigenvalue of $\rmH(t)$ for all $t\geq0$. Note as $\rmH(t)$ is a gram matrix then its eigenvalues are both real and non-negative. This observation leads to the following somewhat trivial corollary.
+
+:::{#cor-trivialbound}
+Under the same conditions as @lem-unifbound we have $L(t) \leq L(0)$.
+:::
+
+Before proceeding a small side point to make is that we actually only need to bound the smallest eigenvalue of the eigenspace of $\rmH(t)$ in which the residue lies. To be clear, suppose $\rvr(t)$ lies in the span of the top $k(t)$ eigenvectors of $\rmH(t)$, then it would suffice to lower bound instead $\lambda_{k(t)}(\rmH(t))$. However, for neural networks, and indeed many other models, analyzing the spectrum of $\rmH(t)$ directly is difficult. In particular, before one even considers the dynamics, observe, due to the random initialization of the network parameters, that $\rmH(0)$ is a random matrix whose distribution is typically not easily analyzed. The approach we will instead pursue is as follows: i) substitute the analysis of the eigenvalues of $\rmH(0)$ with that of a simpler `proxy' matrix $\rmH_{\infty}$ (the choice of notation here will soon become clear!), which we assume for now is positive semi-definite, then ii) derive conditions to ensure that $\lambda_n(\rmH(t))$ remains close to $\lambda_n(\rmH_{\infty})$ for all $t \in [0,T]$ where $T\in \reals_{>0}$ is arbitrary.
+
+:::{#lem-shadowmatrix}
+Let $\rmH_{\infty} \in \reals^{n \times n}$ be positive semi-definite. Given a $T \in \reals_{>0}$, if $||\rmH(t) - \rmH(0)||,  ||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$ for all $t \in [0, T]$, then $\lambda_n(H(t)) \geq \frac{\lambda_{n}(\rmH_{\infty})}{2}$ for all $t \in [0, T]$.
+:::
+
+:::{.proof}
+  For any square matrix $\rmA \in \reals^{n \times n}$ we have $\lambda_1(\rmA) = -\lambda_n(-\rmA)$. Therefore, and as $\rmH(t)$ and $\rmH_{\infty}$ are Hermitian by construction and assumption respectively, using a Weyl inequality we have
+    $$
+    |\lambda_n(\rmH(t)) - \lambda_n(\rmH_{\infty})| = |\lambda_n(\rmH(t)) + \lambda_1(-\rmH_{\infty})| \leq |\lambda_1(\rmH(t) - \rmH_{\infty})| = ||\rmH(t) - \rmH_{\infty}||.
+    $$
+   Therefore, from the assumptions of the lemma and using the triangle inequality, it follows that
+    $$
+    |\lambda_n(\rmH(t)) - \lambda_n(\rmH_{\infty})| \leq ||\rmH(t) - \rmH_{\infty}|| \leq ||\rmH(t) - \rmH(0)|| +  ||\rmH(0) - \rmH_{\infty}|| \leq \frac{\lambda_n(\rmH_{\infty})}{2}.
+    $$
+    Trivially the result of the lemma holds if $\lambda_n(\rmH(t)) \geq \lambda_{n}(\rmH_{\infty})$, therefore assume $\lambda_n(\rmH(t)) < \lambda_{n}(\rmH_{\infty})$: in this case rearranging the inequality derived above it follows that
+    $\lambda_n(\rmH(t)) \geq  \frac{\lambda_n(\rmH_{\infty})}{2}$. 
+:::
+
+Based on @lem-unifbound and @lem-shadowmatrix we therefore can use the following approach for deriving training guarantees when confronted with non-linear least squares.
+
+- Identify a suitable `proxy' matrix $\rmH_{\infty}$ which is positive semi-definite and is close to $\rmH(0)$, in particular $||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$
+- Identify a parameter regime which ensures the NTK remains close to its initialization, $||\rmH(t) - \rmH(0)|| \leq \lambda_n(\rmH_{\infty})/4$.
+
+For neural networks we will see that a good candidate for $\rmH_{\infty}$ is the expected value of $\rmH(0)$ which coincides with the infinite width limit of the network. By making the width of the network sufficiently large we will prove the above conditions are satisfied. Finally note for the bound on the loss to be useful we require $\lambda_{n}(\rmH_{\infty})>0$! 
+
+## Case-study: a differentiable, shallow neural network
+To illustrate how the approach for proving convergence guarantees discussed in Section \ref{opt2-subsec:outline} can be applied to neural networks, here we study potentially the simplest setting possible. Consider a two layer network
+\[
+f(\theta, \rvx) = \frac{1}{\sqrt{m}}\sum_{j=1}^m a_j \phi(\rvw_j^T\rvx).
+\]
+Here $\rvx \in \reals^d$ denotes an input vector, $\rvw_j \in \reals^d$ the weights of the $j$th neuron, $\rmW \in \reals^{m \times d}$ the matrix of neuron weights stored row-wise, $\rva \in \reals^m$ the vector of output weights. The reasons for the explicit scaling of $1/\sqrt{m}$ will be become apparent soon. With regards to the activation function, for now we only assume $\phi:\reals \rightarrow \reals$ is differentiable, as a result of this both $f$ and in turn $L$ are differentiable with respect to the network parameters. We further assume the network parameters are initialized mutually independent of one another with inner weights $w_{jk}(0) \sim N(0,1)$ and outer weights $a_j(0) \sim U(\{-1,+1\})$ for all $j \in [m]$, $k\in [d]$. We assume for simplicity the outer weights $\rva$ are frozen after initialization while the inner weights $\rmW(t)$ evolve according to gradient flow \eqref{opt2-eq:grad-flow}. We therefore define the trainable network parameter vector $\theta = [\rvw_1^T, \rvw_2^T... \rvw_m^T] \in \reals^{p}$ where $p = dm$. Finally, for typographical clarity we assume that the data is normalized to lie on the unit ball, i.e., $||\rvx_i ||_2 = 1$ for all $i\in [n]$.
+
+First we characterize the entries of $\rmH(t)$, as
+$$
+\frac{\partial f(\theta(t), \rvx)}{\partial w_{rc}} = \frac{1}{\sqrt{m}} a_r \phi'(\rvw_r^T\rvx)x_c
+$$
+then 
+\begin{align*}
+        H_{il}(t) &= \nabla_{\theta}f(\theta(t), \rvx_i)^T\nabla_{\theta}f(\theta(t), \rvx_l)\\
+        & = \frac{1}{m} \left(\sum_{k \in [d]} x_{ki} x_{kl} \right) \left(\sum_{r \in [m]}  a_r^2 \phi'(\rvw_r(t)^T \rvx_i)  \phi'(\rvw_r(t)^T \rvx_l)\right) \\  
+        &= \frac{1}{m} \sum_{r \in [m]} \phi'(\rvw_r(t)^T \rvx_i)  \phi'(\rvw_r(t)^T \rvx_l).
+\end{align*}
+
+Assume now that $\phi'(z)\leq C_1$ for all $z \in \reals$ and let $\rvw \sim N(\textbf{0}, \textbf{I}_d)$. As $(\rvw_r)_{r \in [m]}$ are mutually independent and identically distributed then
+    $$
+    \expec[H_{il}(0)] = \expec[\phi'(\rvw^T \rvx_i)  \phi'(\rvw^T \rvx_l)] \leq C^2 < \infty.
+    $$
+Furthermore, by the law of large numbers
+$$
+    \lim_{m \rightarrow \infty} H_{il}(0) = \expec[ H_{il}(0)]
+$$
+Now let $\rmH_{\infty}= \expec[\rmH(0)]$. Recall $\rmH(t) = \rmJ(t)^T \rmJ(t)$ is a gram matrix and therefore positive semi-definite and thus $\rmH_{\infty}$ is also positive semi-definite. We now show via a concentration argument that if $m$ is large then $H_{il}(0) \approx  \expec[H_{il}(0)]$. This means given sufficient width we can bound the 2-norm distance between $\rmH(0)$ and $\rmH_{\infty}$ using the Frobenius norm of their difference. 
+
+:::{#lem-initDiff}
+Assume $\phi'(z)\leq C$ for all $z \in \reals$. For arbitrary $\delta \in (0,1]$ and $\varepsilon>0$, if $m \geq n^2 \frac{2C^4}{\varepsilon^2} \ln \left( \frac{2n^2}{\delta} \right)$ then with probability at least $1-\delta$
+$$
+    || \rmH(0) - \rmH_{\infty}|| < \varepsilon.
+$$
+:::
+
+:::{.proof}
+Let $i,l \in [n]$ be arbitrary and for typographical clarity let $Z_r = \phi'(\rvw^T \rvx_i)  \phi'(\rvw^T \rvx_l)$. Then by the bounded derivative assumption on $\phi$ it follows that $H_{il}(0)$ is the arithmetic average of a sum of $m$ mutually independent and identically distributed random variables, which almost surely are supported on $[-C^2, C^2]$. Applying Hoeffding's inequality
+    \begin{align*}
+        \prob\left( \left|\frac{1}{m} \sum_{r=1}^m (Z_r - \expec[Z_r]) \right| \geq \epsilon \right) \leq 2\exp\left( -\frac{2m\epsilon^2}{4C^4} \right),
+    \end{align*}
+    and therefore
+    \begin{align*}
+        \prob\left( | H_{il}(0) - \expec[H_{il}(0)] | \geq \epsilon \right) \leq 2\exp\left( -\frac{m\epsilon^2}{2C^4} \right).
+    \end{align*}
+Applying the union bound
+    \begin{align*}
+        \prob\left( \bigcap_{i,l=1}^n \{| H_{il}(0) - \expec[H_{il}(0)] | < \epsilon \} \right) & = 1 - \prob\left( \bigcup_{i,l=1}^n \{| H_{il}(0) - \expec[H_{il}(0)] | \geq \epsilon \} \right)\\
+        &\geq 1- \sum_{i,l=1}^n \prob \left(| H_{il}(0) - \expec[H_{il}(0)] | \geq \epsilon  \right)\\
+        & \geq 1- 2n^2 \exp\left( -\frac{m\epsilon^2}{2C^4} \right)
+    \end{align*}  
+   Let $\delta \in (0,1]$ denote the failure probability, then
+   \begin{align*}
+       \delta &\geq 2n^2\exp\left( -\frac{m\epsilon^2}{2C^4} \right) \Leftrightarrow
+       \ln \left( \frac{2n^2}{\delta} \right) \leq \frac{m\epsilon^2}{2C^4} \Leftrightarrow
+       m \geq \frac{2C^4}{\epsilon^2} \ln \left( \frac{2n^2}{\delta} \right).
+   \end{align*}
+Setting $\epsilon = \varepsilon/n$, if $m \geq \frac{2C^4n^2}{\varepsilon^2} \ln \left( \frac{2n^2}{\delta} \right)$ then with probability at least $1-\delta$
+   \begin{align*}
+       || \rmH(0) - \rmH_{\infty}||^2 < || \rmH(0) - \rmH_{\infty}||_F^2
+       =\sum_{i,l \in [n]} | H_{il}(0) - \expec[H_{il}(0)] |^2
+        < n^2 \epsilon^2 = \varepsilon^2.
+\end{align*}
+:::
+
+To ensure closeness of the finite width NTK to its idealized infinite width limit at initialization we require a significant level of overparameterization! It is worth remarking that the tools we have used here are quite crude and that this dependency can indeed be relaxed, see for instance [@banerjee2023neural]. Before we proceed to bound the dynamics we first bound $L(0)$, in particular it will become apparent later that we need $L(0)$ to scale sublinearly with $m$!
+
+:::{#lem-L0}
+Suppose there exists a $C \in \reals_{>0}$ such that $\expec [\phi^2(Z)] \leq K$ and $|y_i| \leq K$ for all $i \in [n]$ and $Z \sim N(0,1)$. For $\delta \in (0,1)$, if $n \geq \delta^{-1}$ then with probability at least $1-\delta$ we have $L(0) \leq 2Cn^2$.
+:::
+
+:::{.proof}
+A naive approach to bounding $L(0)$ might be to uniformly bound $\phi(\rvw_j^T\rvx)$ for all $j\in [m]$ and any unit norm input $\rvx$. This approach will clearly result in a bound which scales with $m$ however. Due to the random initialization clearly $L(0)$ is random, so our approach will instead be to show that the expectation of $L(0)$ does not scale with $m$ and then use a concentration bound. Note, having random output weights actually makes our life easier compared with say fixing the output weights according to some pre-determined pattern, e.g., half are negative and half positive! First observe
+\begin{align*}
+    L(0) = \sum_{i=1}^n(f(\theta(0), \rvx_i)- y_i)^2
+    = \sum_{i=1}^n(f^2(\theta(0), \rvx_i)- 2y_if(\theta(0), \rvx_i) ) + ||\rvy||^2 .
+\end{align*}
+For typographical ease, letting $\rvw_j = \rvw_j(0)$ for all $j \in [m]$ then analyzing the quadratic term we have
+\begin{align*}
+    f^2(\theta(0), \rvx_i) = \frac{1}{m} \sum_{j,k=1}^m a_j a_k \phi(\rvw_j^T \rvx_i)\phi(\rvw_k^T \rvx_i),
+\end{align*}
+this contains $m(m+1)/2$ distinct random variables which by inspection are not independent. This rules out using say Hoeffding's bound, so instead we analyze the expectation and simply apply Markov's inequality. First, as $\rvw_j \in N(0, \textbf{I})$ and $||\rvx_i||=1$ then $\rvw_j^T\rvx_i = \sum_{l=1}^d \rw_{jl} x_{li} \sim N(0, 1)$. Therefore, and noting the assumption on $\phi$ that $\expec[\phi^2(Z)] \leq C < \infty$, as $\expec[a_j] = 0$ for all $j \in [m]$ then by independence
+$$
+\expec[f(\theta(0), \rvx_i) )] = \frac{1}{\sqrt{m}} \sum_{j=1}^m \expec[a_j]\expec[\phi(\rvw_j^T \rvx_i)] = 0.
+$$
+Furthermore
+\begin{align*}
+\expec[f^2(\theta(0), \rvx_i) )] &= \frac{1}{m}\sum_{j=1} \expec[a_j^2]\expec[\phi^2(\rvw_j^T \rvx_i)] + \frac{1}{m}\sum_{j\neq k} \expec[a_j]\expec[a_k]\expec[\phi(\rvw_j^T \rvx_i)]\expec[\phi(\rvw_k^T \rvx_i)]\\
+&=\frac{1}{m}\sum_{j=1} \expec[a_j^2]\expec[\phi^2(\rvw_j^T \rvx_i)]\\
+&\leq C,
+\end{align*}
+therefore 
+\begin{align*}
+    \expec[L(0)] &= \sum_{i=1}^n(\expec[f^2(\theta(0), \rvx_i)]- 2y_i\expec[f(\theta(0), \rvx_i)] ) + ||\rvy||^2 \leq 2nC
+\end{align*}
+by the assumptions of the lemma. As $L(0)$ is a non-negative random variable then
+$$
+\prob(L(0) \geq 2Cn^2) \leq \frac{1}{n}.
+$$
+Therefore, for any failure probability $\delta \in (0,1)$ if $n\geq \delta^{-1}$ then with probability at least $1-\delta$ we have $L(0) < 2Cn^2$.
+:::
+
+Before proceeding it is worth remarking that this bound is certainly not tight due to the fact we have used Markov's inequality. One alternative would be to try to using a for example Chebyshev's inequality, or alternatively change the initialization. In particular, an antisymmetrically initialized network, in which a positive and negative equally weighted copy of each neuron is present, ensures that at initialization the network is the zero function. In this setting $L(0) = \frac{1}{2}||\rvy||^2$ which scales only with $n$ not $m$.
+
+So far we have achieved our first goal, a sufficient condition for the second, i.e., the control of the dynamics to ensure that $\rmH(t)$ remains close to $\rmH(0)$, can be derived by guaranteeing that the parameters of network never move far from initialization. 
+
+:::{#lem-smoothDynamics}
+Assume $\phi$ is differentiable and that there exists a $C\in \reals_{\geq 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$ and $\phi'$ is $C$-Lipschitz. For some $t \in \reals_{\geq 0}$ suppose $|| \rvw_r(t) - \rvw(0)|| \leq \frac{\lambda_n(\rmH_{\infty})}{8C^2 n } =: R$. Then 
+$$
+|| \rmH(t) - \rmH(0)|| \leq \frac{\lambda_n(\rmH_{\infty})}{4}
+$$
+:::
+
+:::{.proof}
+First, for arbitrary $i,l \in [n]$ observe from \eqref{opt-eq:H-t-entry} that
+    \begin{align*}
+    | H_{il}(t) - H_{il}(0)| &= \frac{1}{m} \left| \sum_{r=1}^m \phi'(\rvw_r(t)^T \rvx_i)\phi'(\rvw_r(t)^T \rvx_l) - \phi'(\rvw_r(0)^T \rvx_i)\phi'(\rvw_r(0)^T \rvx_l) \right|\\
+    &\leq \frac{1}{m}  \sum_{r=1}^m \left|\phi'(\rvw_r(t)^T \rvx_i)\phi'(\rvw_r(t)^T \rvx_l) - \phi'(\rvw_r(0)^T \rvx_i)\phi'(\rvw_r(0)^T \rvx_l) \right|\\
+    \end{align*}
+    For typographical ease let $g(\rva, \rvb) = \left|\phi'(\rva^T \rvx_i)\phi'(\rva^T \rvx_l) - \phi'(\rvb^T \rvx_i)\phi'(\rvb^T \rvx_l) \right|$, then using the triangle inequality and the fact that $|\phi'(z)| < C$
+    \begin{align*}
+        g(\rva, \rvb) &\leq \left|\phi'(\rva^T \rvx_i)\phi'(\rva^T \rvx_l) - \phi'(\rva^T \rvx_l)\phi'(\rvb^T \rvx_i) \right|\\
+        &+\left|\phi'(\rva^T \rvx_l)\phi'(\rvb^T \rvx_i) - \phi'(\rvb^T \rvx_i)\phi'(\rvb^T \rvx_l) \right|\\
+        & \leq C \left(|\phi'(\rva^T \rvx_i) - \phi'(\rvb^T \rvx_i) | + |\phi'(\rva^T \rvx_l) - \phi'(\rvb^T \rvx_l) |  \right). 
+    \end{align*}
+    As $\phi'$ is $C$-Lipschitz continuous then $|\phi'(\rva^T \rvx) - \phi'(\rvb^T \rvx) | \leq C |\rva^T \rvx - \rvb^T \rvx|$, therefore
+    \begin{align*}
+        g(\rva, \rvb) &\leq C^2 \left( |\rva^T \rvx_i - \rvb^T \rvx_i| + |\rva^T \rvx_l - \rvb^T \rvx_l |\right)\\
+        & \leq C^2(|| \rvx_i || + || \rvx_l || ) || \rva - \rvb || \\
+        & = 2C^2 || \rva - \rvb ||.
+    \end{align*}
+    Therefore
+    \begin{align*}
+        | H_{il}(t) - H_{il}(0)|  \leq \frac{1}{m} \sum_{r=1}^m g(\rvw_r(t), \rvw_r(0)) \leq 2C^2 \frac{\lambda_n(\rmH_{\infty})}{8C^2 n } 
+        = \frac{\lambda_n(\rmH_{\infty})}{4n}.
+    \end{align*}
+    As a result
+    \begin{align*}
+        || \rmH(t) - \rmH(0) ||^2 \leq || \rmH(t) - \rmH(0) ||_F^2
+        = \sum_{i,l=1}^n | H_{il}(t) - H_{il}(0)|^2
+        \leq \frac{\lambda_n^2(\rmH_{\infty})}{16}.
+    \end{align*}
+:::
+
+
+Following Lemma @lem-smoothDynamics we can bound the 2-norm distance between the parameters at time $t$ and initialization as follows.
+
+:::{#lem-parametersbound} 
+Assume $\phi$ is continuously differentiable and also that there exists a $C\in \reals_{\geq 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$. For a given $T \in \reals_{\geq 0}$ and any $r \in [m]$, $t \in [0,T]$ it holds that
+    \begin{align*}
+    ||  \rvw_r(t) - \rvw_r(0)  || \leq C\sqrt{\frac{n}{m}}\int_{0}^t L(\tau) d\tau.
+    \end{align*}
+:::
+
+:::{.proof}
+As $\phi$ is continuously differentiable then by construction so is $f$. For arbitrary $T \in \reals_>0$, then by inspection each entry of $\nabla_{\theta}L(t)$,
+    \begin{align*}
+        \frac{\partial L(t)}{\partial \theta_k} = \sum_{i=1}^n \frac{\partial f(\theta(t), \rvx_i)}{ \partial \theta_k} (f(\theta, \rvx_i) - y_i),
+    \end{align*} 
+    is continuous on $[0,T]$. In addition, due to the boundedness of the derivative and the continuity of $f$ each entry of $\nabla_{\theta}L(t)$ is also bounded on $[0,T]$. Therefore, and as we are using gradient flow each entry of $\frac{d\theta(t)}{dt}$ is a real valued, continuous and Riemann integrable function on $[0,T]$. As $\theta(t)$ is the antiderivative of $\frac{d\theta(t)}{dt}$, then by the Fundamental Theorem of Calculus for any $t \in [0,T]$
+    $$
+    \theta(t) = \theta(0) + \int_{0}^t \frac{d\theta(\tau)}{d\tau} d\tau
+    $$
+    and therefore
+    $$
+    \rvw_r(t) = \rvw_r(0) + \int_{0}^t \frac{d\rvw_r(\tau)}{d\tau} d\tau.
+    $$
+    Rearranging and taking the norm gives
+    $$
+    ||  \rvw_r(t) - \rvw_r(0)  || = || \int_{0}^t \frac{d\rvw(\tau)}{d\tau} d\tau|| \leq \int_{0}^t \left| \left| \frac{d\rvw(\tau)}{d\tau} \right| \right| d\tau.
+    $$
+    We proceed to upper bound the integrand as follows, as $|a_j| \leq 1$, the input data has unit norm and $|\phi'(z)| \leq C$ for all $z \in \reals$, then
+    \begin{align*}
+        \left| \left| \frac{d\rvw_r(t)}{d t} \right| \right|^2&= \nabla_{\rvw_r} L(t)^T \nabla_{\rvw_r} L(t) \\
+        &= \sum_{k =1}^d \left(\frac{\partial L(t)}{\partial w_{rk}}\right)^2\\
+        &= \sum_{k =1}^d \left(\sum_{i=1}^n\frac{\partial f(\theta(t), \rvx_i)}{ \partial w_{rk}} (f(\theta, \rvx_i) - y_i)\right)^2\\
+        &= \sum_{k =1}^d \left(\sum_{i=1}^n\frac{1}{\sqrt{m}} a_j \phi'(\rvw_j^T\rvx_i)x_k r_i(t) \right)^2\\
+        & \leq \frac{C^2}{m} \left(\sum_{k =1}^d x_k^2\right) \left(\sum_i r_i(t) \right)^2 \\
+        & =\frac{C^2}{m} \rvr(t)^T \textbf{1}_{n \times n} \rvr(t)\\
+        & =\frac{C^2}{m} ||n^{-1/2}  \textbf{1}_{n \times n}\rvr(t)||^2\\
+        & \leq \frac{C^2}{mn} ||\textbf{1}_{n \times n}||^2 || \rvr(t)||^2\\
+        & = \frac{C^2n}{m}|| \rvr(t)||^2.
+    \end{align*}
+    Therefore, for any $r \in [m]$
+    $$
+    ||  \rvw_r(t) - \rvw_r(0)  || \leq C\sqrt{\frac{n}{m}}\int_{0}^t  L(\tau) d\tau
+    $$
+    as claimed.
+:::
+@lem-parametersbound raises a tricky issue, in particular, it seems like we have arrived at the following circular argument.
+
+- To bound $L(t)$ it suffices bound $|| \rmH(t) - \rmH(0) ||$.
+- To bound $|| \rmH(t) - \rmH(0) ||$ it suffices to bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$.
+- To bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$ it suffices to bound $L(t)$.
+
+However, we can circumvent this issue using a real induction argument! We now present the main result of this section.
+
+:::{#thm-main}
+Assume $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
+\begin{align*}
+         L(t) \leq \exp(- \lambda_n(\rmH_{\infty}) t) L(0). 
+\end{align*}
+:::
+
+:::{.proof}
+By construction $\lambda_{n}(\rmH_{\infty})\geq 0$, as the case $\lambda_{n}(\rmH_{\infty})=0$ is trivial assume $\lambda_{n}(\rmH_{\infty})>0$. To prove the result claimed recall from @lem-unifbound that it suffices to show that $\lambda_n(\rmH(t)) \geq \lambda_n(\rmH_{\infty})/2$ for all $t >0$. From @lem-shadowmatrix for this condition to be true it suffices that $||\rmH(t) - \rmH(0)||,  ||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$ for all $t \geq 0$. Note as 
+$$m \geq \frac{32C^4}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right)
+$$
+then with probability at most $\delta/2$ it holds that
+   $$
+    || \rmH(0) - \rmH_{\infty}|| >  \lambda_n(\rmH_{\infty})/4.
+    $$
+    In addition, as $n\geq 2\delta^{-1}$ then with probability at most $\delta/2$ we have $L(0) \geq 2Cn^2$. Therefore and under the assumptions of the lemma, using a union bound argument it follows that $|| \rmH(0) - \rmH_{\infty}|| \leq  \lambda_n(\rmH_{\infty})/4$ and $L(0) < 2Cn^2$.
+    
+We now proceed by real induction. As per the definition of an inductive set provided in @clark2012instructors, define for an arbitrary $T >0$
+    $$
+    S = \{t \in [0,T]: \lambda_n(\rmH(t)) > \lambda_n(\rmH_{\infty})/2 \}. 
+    $$
+Our goal is to show $S = [0,T]$. To this end it suffices to prove that the following statements are true,
+i) $0 \in S$,
+ii) for any $t \in (0, T)$ such that $t \in S$, then there exists a $t'>t$ such that $[t,t']\subset S$,
+ii) if $t \in[0,T)$ and $[0,t) \subset S$ then $t \in S$.
+For Statement i), recall for $t=0$ that
+    $$
+    |\lambda_n(\rmH(0)) - \lambda_n(\rmH_{\infty})| \leq || \rmH(0) - \rmH_{\infty}|| \leq  \lambda_n(\rmH_{\infty})/4.
+    $$
+If $\lambda_n(\rmH(0))< \lambda_n(\rmH_{\infty})$ then $\lambda_n(\rmH(0)) \geq 3\lambda_n(\rmH_{\infty})/4$, otherwise $\lambda_n(\rmH(0))\geq \lambda_n(\rmH_{\infty})$ implying $0 \in S$. 
+
+For Statement ii), observe if $t \in S$ then there exists an $\epsilon >0$ such that $\lambda_n(\rmH(t))- \epsilon > \lambda_n(\rmH_{\infty})/2$. To proceed we claim that $\lambda_n(\rmH(t))$ is continuous. Indeed, as $\phi'$ is continuous then each entry $H_{il}(t)$ is continuous. Therefore $\rmH(t)$ is continuous with respect to the Frobenius norm and indeed any other norm as all norms are equivalent in finite dimensional spaces. Therefore, by Theorem VI.1.4 @bhatia97, the eigenvalues including $\lambda_n:\reals_{\geq 0} \rightarrow \reals_{\geq 0}$ are continuous functions. By continuity it follows that there exists a $\delta'>0$ such that for all $\tau \in [t \pm \delta']$ then $\lambda_n(\rmH(\tau)) \in [\lambda_n(\rmH_{\infty})/2 \pm \epsilon]$. This in turn implies $\lambda_n(\rmH(\tau)) > \lambda_n(\rmH_{\infty})/2$ for all $\tau \in [t, t+\delta']$. 
+    
+For Statement iii), if $[0,t) \subset S$ then for any $\delta'>0$ it follows that $[0, t - \delta'] \subset S$. Using @lem-smoothDynamics
+    \begin{align*}
+        ||\rvw_r(t) - \rvw_r(0) || &\leq C\sqrt{\frac{n}{m}}\int_{0}^t  L(\tau) d\tau\\
+        &= C\sqrt{\frac{n}{m}}\left(\int_{0}^{t-\delta'}  L(\tau) d\tau + \int_{t-\delta'}^{t}  L(\tau) d\tau\right)\\
+        & \leq C\sqrt{\frac{n}{m}} L(0) \left( \int_{0}^{t-\delta'} \exp \left(- \lambda_n(\rmH_{\infty}) \right) d\tau + \delta' \right)\\
+        & \leq \sqrt{\frac{n}{m}} \frac{2C^2n^2}{\lambda_n(\rmH_{\infty})} \left( 1 + \delta'\lambda_n(\rmH_{\infty}) \right).
+    \end{align*}
+  Letting $\delta \leq \frac{1}{2\lambda_n(\rmH_{\infty})}$, then as $m\geq \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}$ it follows that
+    $$
+    ||\rvw_r(t) - \rvw_r(0) || \leq \frac{3R}{4}.
+    $$
+    Therefore $||\rmH(t) - \rmH_{\infty} || \leq \lambda_n(\rmH_{\infty})/4$ and as a result we conclude that $\lambda_n(\rmH(t))\geq \lambda_n(\rmH_{\infty})/2$ and thus $t \in S$. This concludes the proof by real induction. Note that as $T$ can be arbitrarily large we can further conclude that $\lambda_n(\rmH(t))\geq \lambda_n(\rmH_{\infty})/2$ for all $t >0$, thereby establishing a uniform lower bound on the smallest eigenvalue of $\rmH(t)$.
+:::
+
+## Conclusion
+@thm-main is interesting as despite the loss function being non-linear and non-convex in the model parameters, it says for sufficiently overparameterized networks and assuming $\lambda_n(\rmH_{\infty}) > 0$, then given a sufficiently long training time one can achieve arbitrarily small loss using gradient flow! There are some notable limitations however, in particular the level of overparameterization is exceedingly severe and not representative of networks in practice. Moreover, in order to derive our results we had to limit the movement of each neuron throughout training! This condition requiring the NTK to remain close to its initialization, or equivalently each neuron to remain close to its initialization, is limiting as it rules out a rich feature learning regime in which the kernel (or weights adapt to the data).
+
+

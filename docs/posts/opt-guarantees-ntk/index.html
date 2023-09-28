@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Michael Murray">
+<meta name="dcterms.date" content="2023-09-27">
+
+<title>Home - Optimization guarantees via the NTK</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Home</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html" rel="" target="">
+ <span class="menu-text">Research</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../teaching.html" rel="" target="">
+ <span class="menu-text">Teaching</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html" rel="" target="">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools ms-auto">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Optimization guarantees via the NTK</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">Neural Networks</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Michael Murray </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 27, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction-and-problem-setting" id="toc-introduction-and-problem-setting" class="nav-link active" data-scroll-target="#introduction-and-problem-setting">Introduction and problem setting</a></li>
+  <li><a href="#a-recipe-for-deriving-guarantees-based-on-analyzing-the-smallest-eigenvalue-of-the-neural-tangent-kernel-ntk" id="toc-a-recipe-for-deriving-guarantees-based-on-analyzing-the-smallest-eigenvalue-of-the-neural-tangent-kernel-ntk" class="nav-link" data-scroll-target="#a-recipe-for-deriving-guarantees-based-on-analyzing-the-smallest-eigenvalue-of-the-neural-tangent-kernel-ntk">A recipe for deriving guarantees based on analyzing the smallest eigenvalue of the Neural Tangent Kernel (NTK)</a></li>
+  <li><a href="#case-study-a-differentiable-shallow-neural-network" id="toc-case-study-a-differentiable-shallow-neural-network" class="nav-link" data-scroll-target="#case-study-a-differentiable-shallow-neural-network">Case-study: a differentiable, shallow neural network</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p><em>In this post we will look at how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks.</em></p>
+<div class="hidden">
+%%%%% NEW MATH DEFINITIONS %%%%% $$ %
+{lemma}{Lemma}
+<p>{}[1]{{#1}}</p>
+<p>% Figure reference, lower-case. % Figure reference, capital. For start of sentence % Section reference, lower-case. % Section reference, capital. % Reference to two sections. % Reference to three sections. % Reference to an equation, lower-case. % Reference to an equation, upper case % A raw reference to an equation—avoid using if possible % Reference to a chapter, lower-case. % Reference to an equation, upper case. % Reference to a range of chapters % Reference to an algorithm, lower-case. % Reference to an algorithm, upper case. % Reference to a part, lower case % Reference to a part, upper case </p>
+<p>% Random variables % rm is already a command, just don’t name any random variables m </p>
+<p>% Random vectors </p>
+<p>% Elements of random vectors </p>
+<p>% Random matrices </p>
+<p>% Elements of random matrices </p>
+<p>% Vectors </p>
+<p>% Elements of vectors </p>
+<p>% Matrix </p>
+% Tensor
+<p>% </p>
+<p>% Graph </p>
+<p>% Sets % Don’t use a set called E, because this would be the same as our symbol % for expectation. </p>
+<p>% Entries of a matrix </p>
+% entries of a tensor % Same font as tensor, without wrapper
+<p>% The true underlying data generating distribution % The empirical distribution defined by the training set % The model distribution % Stochastic autoencoder distributions </p>
+<p>% Laplace distribution</p>
+<p>% Wolfram Mathworld says <span class="math inline">\(L^2\)</span> is for function spaces and <span class="math inline">\(\ell^2\)</span> is for vectors % But then they seem to use <span class="math inline">\(L^2\)</span> for vectors throughout the site, and so does % wikipedia. </p>
+<p>% See usage in notation.tex. Chosen to match Daphne’s book.</p>
+% MM commands % Defined commands
+<p>% </p>
+<p>% Caligraphic letters $$</p>
+</div>
+<section id="introduction-and-problem-setting" class="level2">
+<h2 class="anchored" data-anchor-id="introduction-and-problem-setting">Introduction and problem setting</h2>
+<p>The purpose of this post is to sketch out in the simplest setting possible how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks. More complex and general forms of the argument presented here are widely present in the literature, starting with for instance <span class="citation" data-cites="du2018gradient">(<a href="#ref-du2018gradient" role="doc-biblioref">Du et al. 2019</a>)</span> and <span class="citation" data-cites="jacot2020neural">(<a href="#ref-jacot2020neural" role="doc-biblioref">Jacot, Gabriel, and Hongler 2020</a>)</span>.</p>
+<p>For now let <span class="math inline">\(f: \mathbb{R}^p \times \mathbb{R}^d \rightarrow \mathbb{R}\)</span> be a parameterized function with parameters <span class="math inline">\(\theta \in \mathbb{R}^p\)</span> mapping vectors in <span class="math inline">\(\mathbb{R}^d\)</span> to a real scalar value. Consider an arbitrary training sample consisting of <span class="math inline">\(n\)</span> pairs of points and their corresponding targets <span class="math inline">\(({\mathbf{x}}_i, y_i)_{i=1}^n \in (\mathbb{R}^d \times \mathbb{R})^n\)</span>, recall the least squares loss defined as <span class="math display">\[\begin{align*}
+    L(\theta) &amp;= \frac{1}{2}\sum_{i=1}^n (f(\theta, {\mathbf{x}}_i) - y_i)^2.
+\end{align*}\]</span> To solve the least squares problem we study the trajectory through parameter space under gradient flow, a continuous time simplification of gradient descent: simplifying our notation by using <span class="math inline">\(L(t)\)</span> instead of <span class="math inline">\(L(\theta(t))\)</span>, then for <span class="math inline">\(t\geq 0\)</span> <span class="math display">\[\begin{equation} \label{opt2-eq:grad-flow}
+    \frac{d \theta(t)}{dt} = - \nabla_{\theta} L(t).
+\end{equation}\]</span> For now we assume that <span class="math inline">\(f\)</span> is at differentiable with respect to its parameters. With <span class="math inline">\({\mathbf{u}}(t) = [f(\theta(t), {\mathbf{x}}_1), f(\theta(t), {\mathbf{x}}_2)... f(\theta(t), {\mathbf{x}}_n)] \in \mathbb{R}^n\)</span> denoting the vector of predictions and <span class="math inline">\({\mathbf{r}}(t) = {\mathbf{u}}(t) - {\mathbf{y}}\)</span> the vector of residuals at time <span class="math inline">\(t \geq 0\)</span>, then we denote the Jacobian as <span class="math display">\[\begin{align*}
+{\mathbf{J}}(t) = \nabla_\theta {\mathbf{r}}(t)= \nabla_\theta {\mathbf{u}}(t) =
+  \begin{bmatrix}
+    \frac{\partial f(\theta(t), {\mathbf{x}}_1) }{\partial \theta_1} &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_2) }{\partial \theta_1} &amp; ... &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_n) }{\partial \theta_1} \\
+    \frac{\partial f(\theta(t), {\mathbf{x}}_1) }{\partial \theta_2} &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_2) }{\partial \theta_2} &amp; ... &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_n) }{\partial \theta_2} \\
+    \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+    \frac{\partial f(\theta(t), {\mathbf{x}}_1) }{\partial \theta_p} &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_2) }{\partial \theta_p} &amp; ... &amp; \frac{\partial f(\theta(t), {\mathbf{x}}_n) }{\partial \theta_p}
+  \end{bmatrix}
+  \in \mathbb{R}^{p \times n}.
+\end{align*}\]</span></p>
+</section>
+<section id="a-recipe-for-deriving-guarantees-based-on-analyzing-the-smallest-eigenvalue-of-the-neural-tangent-kernel-ntk" class="level2">
+<h2 class="anchored" data-anchor-id="a-recipe-for-deriving-guarantees-based-on-analyzing-the-smallest-eigenvalue-of-the-neural-tangent-kernel-ntk">A recipe for deriving guarantees based on analyzing the smallest eigenvalue of the Neural Tangent Kernel (NTK)</h2>
+<p>The Jacobian and its gram, <span class="math inline">\({\mathbf{H}}(t) = {\mathbf{J}}(t)^T {\mathbf{J}}(t) \in \mathbb{R}^{n \times n}\)</span>, which is also referred to as the Neural Tangent Kernel (NTK) gram matrix, will play a critical role in what follows here and also when it comes to studying linearized neural networks. Note calling <span class="math inline">\({\mathbf{H}}(t)\)</span> the NTK or NTK gram matrix is somewhat misleading as it can be studied more generally for any sufficiently smooth model, not just neural networks! However, as it is now accepted terminology we will stick with it. The following proposition illustrates the significance of this matrix for training.</p>
+<div id="prp-gf" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 1 </strong></span><em>Assume <span class="math inline">\(f\)</span> is differentiable with respect to its parameters <span class="math inline">\(\theta \in \mathbb{R}^p\)</span> at all points along the trajectory of gradient flow. Then <span class="math display">\[\begin{align*}
+    \frac{d {\mathbf{r}}(t)}{dt} = - {\mathbf{H}}(t) {\mathbf{r}}(t).
+    \end{align*}\]</span> </em></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Observe that as <span class="math display">\[\begin{align*}
+        \frac{\partial L(\theta)}{\partial \theta_k} = \sum_{i=1}^n \frac{\partial f(\theta, {\mathbf{x}}_i)}{ \partial \theta_k} (f(\theta, {\mathbf{x}}_i) - y_i)
+    \end{align*}\]</span> then collecting terms we have <span class="math display">\[
+    \nabla_{\theta} L(\theta(t)) =  {\mathbf{J}}(t){\mathbf{r}}(t).
+    \]</span> Noting that <span class="math inline">\(f\)</span> is a function of <span class="math inline">\(p\)</span> parameters which each depend on <span class="math inline">\(t\)</span>, then from the chain rule it follows that <span class="math display">\[\begin{align*}
+        \frac{d u_i(t)}{dt }   =  \frac{d f(\theta(t), {\mathbf{x}}_i)}{dt}
+        = \sum_{k = 1}^p \frac{d \theta_k}{dt} \frac{\partial f(\theta(t), {\mathbf{x}}_i)}{\partial \theta_k}
+        = \nabla_{\theta} f(\theta(t), {\mathbf{x}}_i)^T  \left(\frac{d \theta(t)}{dt}\right).
+    \end{align*}\]</span> Again collecting terms and substituting the expression for gradient flow given in we have <span class="math display">\[\begin{align*}
+        \frac{d {\mathbf{u}}(t)}{dt} = {\mathbf{J}}(t)^T \frac{d \theta(t)}{dt}
+        = - {\mathbf{J}}(t)^T \nabla_{\theta}L(t) = - {\mathbf{J}}(t)^T{\mathbf{J}}(t){\mathbf{r}}(t) = - {\mathbf{H}}(t) {\mathbf{r}}(t).
+    \end{align*}\]</span> To finish observe <span class="math inline">\(\frac{d {\mathbf{u}}(t)}{dt} = \frac{d {\mathbf{r}}(t)}{dt}\)</span>.</p>
+</div>
+<p>The following lemma hints at how we might be able to use <a href="#prp-gf">Proposition&nbsp;1</a> to derive guarantees for training, note here we use <span class="math inline">\(\lambda_i({\mathbf{A}})\)</span> to denote the <span class="math inline">\(ith\)</span> eigenvalue of a matrix <span class="math inline">\({\mathbf{A}}\in \mathbb{C}^{n \times n}\)</span> where <span class="math inline">\(\lambda_1({\mathbf{A}}) \geq \lambda_2({\mathbf{A}}) \geq ... \lambda_n({\mathbf{A}})\)</span>.</p>
+<div id="lem-unifbound" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 1 </strong></span><em>For some <span class="math inline">\(T\in \mathbb{R}_{\geq 0}\)</span>, suppose for all <span class="math inline">\(t \in [0,T]\)</span> there exists a constant <span class="math inline">\(\kappa \geq 0\)</span> such that <span class="math inline">\(\lambda_n({\mathbf{H}}(t)) \geq \frac{\kappa}{2}\)</span>. Suppose <span class="math inline">\(f\)</span> is differentiable along the trajectory of the gradient flow. Then for all <span class="math inline">\(t \in [0, T]\)</span> <span class="math display">\[\begin{align*}
+         L(t) \leq \exp(- \kappa t) L(0).
+\end{align*}\]</span> </em></p>
+</div>
+<p>Indeed, <a href="#lem-unifbound">Lemma&nbsp;1</a> suggests that arbitrarily small training error can be guaranteed as long as we can bound the smallest eigenvalue of <span class="math inline">\({\mathbf{H}}(t)\)</span> above zero for sufficiently long enough.</p>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Observe by definition that <span class="math inline">\(L(t) = ||{\mathbf{r}}(t) ||_2^2\)</span>. Using Lemma 1 it follows that <span class="math display">\[\begin{align*}
+        \frac{d}{dt}||{\mathbf{r}}(t)||^2 &amp;=2{\mathbf{r}}(t)^T\frac{d {\mathbf{r}}(t)}{dt}
+        = - 2{\mathbf{r}}(t)^T {\mathbf{H}}(t) {\mathbf{r}}(t)
+       = -2 ||{\mathbf{J}}(t) {\mathbf{r}}(t)||^2
+       \leq - 2\lambda_n({\mathbf{H}}(t)) ||r(t)||^2 \leq -\kappa||r(t)||^2.
+    \end{align*}\]</span> As <span class="math inline">\(||r(s)||^2\)</span> and <span class="math inline">\(-\kappa\)</span> are real and continuous functions of <span class="math inline">\(s\)</span> for <span class="math inline">\(s \in [0,t]\)</span>, then the result claimed follows from Gronwall’s inequality, <span class="math display">\[\begin{align*}
+        ||{\mathbf{r}}(t)||^2 \leq \exp\left( - \int_{0}^t \kappa ds \right) ||{\mathbf{r}}(0)||^2 = \exp(-\kappa t) ||{\mathbf{r}}(0)||^2.
+    \end{align*}\]</span></p>
+</div>
+<p>As a result, to prove convergence it suffices to uniformly lower bound the smallest eigenvalue of <span class="math inline">\({\mathbf{H}}(t)\)</span> for all <span class="math inline">\(t\geq0\)</span>. Note as <span class="math inline">\({\mathbf{H}}(t)\)</span> is a gram matrix then its eigenvalues are both real and non-negative. This observation leads to the following somewhat trivial corollary.</p>
+<div id="cor-trivialbound" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 1 </strong></span>Under the same conditions as <a href="#lem-unifbound">Lemma&nbsp;1</a> we have <span class="math inline">\(L(t) \leq L(0)\)</span>.</p>
+</div>
+<p>Before proceeding a small side point to make is that we actually only need to bound the smallest eigenvalue of the eigenspace of <span class="math inline">\({\mathbf{H}}(t)\)</span> in which the residue lies. To be clear, suppose <span class="math inline">\({\mathbf{r}}(t)\)</span> lies in the span of the top <span class="math inline">\(k(t)\)</span> eigenvectors of <span class="math inline">\({\mathbf{H}}(t)\)</span>, then it would suffice to lower bound instead <span class="math inline">\(\lambda_{k(t)}({\mathbf{H}}(t))\)</span>. However, for neural networks, and indeed many other models, analyzing the spectrum of <span class="math inline">\({\mathbf{H}}(t)\)</span> directly is difficult. In particular, before one even considers the dynamics, observe, due to the random initialization of the network parameters, that <span class="math inline">\({\mathbf{H}}(0)\)</span> is a random matrix whose distribution is typically not easily analyzed. The approach we will instead pursue is as follows: i) substitute the analysis of the eigenvalues of <span class="math inline">\({\mathbf{H}}(0)\)</span> with that of a simpler `proxy’ matrix <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> (the choice of notation here will soon become clear!), which we assume for now is positive semi-definite, then ii) derive conditions to ensure that <span class="math inline">\(\lambda_n({\mathbf{H}}(t))\)</span> remains close to <span class="math inline">\(\lambda_n({\mathbf{H}}_{\infty})\)</span> for all <span class="math inline">\(t \in [0,T]\)</span> where <span class="math inline">\(T\in \mathbb{R}_{&gt;0}\)</span> is arbitrary.</p>
+<div id="lem-shadowmatrix" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 2 </strong></span>Let <span class="math inline">\({\mathbf{H}}_{\infty} \in \mathbb{R}^{n \times n}\)</span> be positive semi-definite. Given a <span class="math inline">\(T \in \mathbb{R}_{&gt;0}\)</span>, if <span class="math inline">\(||{\mathbf{H}}(t) - {\mathbf{H}}(0)||, ||{\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span> for all <span class="math inline">\(t \in [0, T]\)</span>, then <span class="math inline">\(\lambda_n(H(t)) \geq \frac{\lambda_{n}({\mathbf{H}}_{\infty})}{2}\)</span> for all <span class="math inline">\(t \in [0, T]\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>For any square matrix <span class="math inline">\({\mathbf{A}}\in \mathbb{R}^{n \times n}\)</span> we have <span class="math inline">\(\lambda_1({\mathbf{A}}) = -\lambda_n(-{\mathbf{A}})\)</span>. Therefore, and as <span class="math inline">\({\mathbf{H}}(t)\)</span> and <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> are Hermitian by construction and assumption respectively, using a Weyl inequality we have <span class="math display">\[
+    |\lambda_n({\mathbf{H}}(t)) - \lambda_n({\mathbf{H}}_{\infty})| = |\lambda_n({\mathbf{H}}(t)) + \lambda_1(-{\mathbf{H}}_{\infty})| \leq |\lambda_1({\mathbf{H}}(t) - {\mathbf{H}}_{\infty})| = ||{\mathbf{H}}(t) - {\mathbf{H}}_{\infty}||.
+    \]</span> Therefore, from the assumptions of the lemma and using the triangle inequality, it follows that <span class="math display">\[
+    |\lambda_n({\mathbf{H}}(t)) - \lambda_n({\mathbf{H}}_{\infty})| \leq ||{\mathbf{H}}(t) - {\mathbf{H}}_{\infty}|| \leq ||{\mathbf{H}}(t) - {\mathbf{H}}(0)|| +  ||{\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq \frac{\lambda_n({\mathbf{H}}_{\infty})}{2}.
+    \]</span> Trivially the result of the lemma holds if <span class="math inline">\(\lambda_n({\mathbf{H}}(t)) \geq \lambda_{n}({\mathbf{H}}_{\infty})\)</span>, therefore assume <span class="math inline">\(\lambda_n({\mathbf{H}}(t)) &lt; \lambda_{n}({\mathbf{H}}_{\infty})\)</span>: in this case rearranging the inequality derived above it follows that <span class="math inline">\(\lambda_n({\mathbf{H}}(t)) \geq \frac{\lambda_n({\mathbf{H}}_{\infty})}{2}\)</span>.</p>
+</div>
+<p>Based on <a href="#lem-unifbound">Lemma&nbsp;1</a> and <a href="#lem-shadowmatrix">Lemma&nbsp;2</a> we therefore can use the following approach for deriving training guarantees when confronted with non-linear least squares.</p>
+<ul>
+<li>Identify a suitable `proxy’ matrix <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> which is positive semi-definite and is close to <span class="math inline">\({\mathbf{H}}(0)\)</span>, in particular <span class="math inline">\(||{\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span></li>
+<li>Identify a parameter regime which ensures the NTK remains close to its initialization, <span class="math inline">\(||{\mathbf{H}}(t) - {\mathbf{H}}(0)|| \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span>.</li>
+</ul>
+<p>For neural networks we will see that a good candidate for <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> is the expected value of <span class="math inline">\({\mathbf{H}}(0)\)</span> which coincides with the infinite width limit of the network. By making the width of the network sufficiently large we will prove the above conditions are satisfied. Finally note for the bound on the loss to be useful we require <span class="math inline">\(\lambda_{n}({\mathbf{H}}_{\infty})&gt;0\)</span>!</p>
+</section>
+<section id="case-study-a-differentiable-shallow-neural-network" class="level2">
+<h2 class="anchored" data-anchor-id="case-study-a-differentiable-shallow-neural-network">Case-study: a differentiable, shallow neural network</h2>
+<p>To illustrate how the approach for proving convergence guarantees discussed in Section <span class="math inline">\(\ref{opt2-subsec:outline}\)</span> can be applied to neural networks, here we study potentially the simplest setting possible. Consider a two layer network [ f(, ) = _{j=1}^m a_j (_j^T). ] Here <span class="math inline">\({\mathbf{x}}\in \mathbb{R}^d\)</span> denotes an input vector, <span class="math inline">\({\mathbf{w}}_j \in \mathbb{R}^d\)</span> the weights of the <span class="math inline">\(j\)</span>th neuron, <span class="math inline">\({\mathbf{W}}\in \mathbb{R}^{m \times d}\)</span> the matrix of neuron weights stored row-wise, <span class="math inline">\({\mathbf{a}}\in \mathbb{R}^m\)</span> the vector of output weights. The reasons for the explicit scaling of <span class="math inline">\(1/\sqrt{m}\)</span> will be become apparent soon. With regards to the activation function, for now we only assume <span class="math inline">\(\phi:\mathbb{R}\rightarrow \mathbb{R}\)</span> is differentiable, as a result of this both <span class="math inline">\(f\)</span> and in turn <span class="math inline">\(L\)</span> are differentiable with respect to the network parameters. We further assume the network parameters are initialized mutually independent of one another with inner weights <span class="math inline">\(w_{jk}(0) \sim N(0,1)\)</span> and outer weights <span class="math inline">\(a_j(0) \sim U(\{-1,+1\})\)</span> for all <span class="math inline">\(j \in [m]\)</span>, <span class="math inline">\(k\in [d]\)</span>. We assume for simplicity the outer weights <span class="math inline">\({\mathbf{a}}\)</span> are frozen after initialization while the inner weights <span class="math inline">\({\mathbf{W}}(t)\)</span> evolve according to gradient flow . We therefore define the trainable network parameter vector <span class="math inline">\(\theta = [{\mathbf{w}}_1^T, {\mathbf{w}}_2^T... {\mathbf{w}}_m^T] \in \mathbb{R}^{p}\)</span> where <span class="math inline">\(p = dm\)</span>. Finally, for typographical clarity we assume that the data is normalized to lie on the unit ball, i.e., <span class="math inline">\(||{\mathbf{x}}_i ||_2 = 1\)</span> for all <span class="math inline">\(i\in [n]\)</span>.</p>
+<p>First we characterize the entries of <span class="math inline">\({\mathbf{H}}(t)\)</span>, as <span class="math display">\[
+\frac{\partial f(\theta(t), {\mathbf{x}})}{\partial w_{rc}} = \frac{1}{\sqrt{m}} a_r \phi'({\mathbf{w}}_r^T{\mathbf{x}})x_c
+\]</span> then <span class="math display">\[\begin{align*}
+        H_{il}(t) &amp;= \nabla_{\theta}f(\theta(t), {\mathbf{x}}_i)^T\nabla_{\theta}f(\theta(t), {\mathbf{x}}_l)\\
+        &amp; = \frac{1}{m} \left(\sum_{k \in [d]} x_{ki} x_{kl} \right) \left(\sum_{r \in [m]}  a_r^2 \phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_i)  \phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_l)\right) \\  
+        &amp;= \frac{1}{m} \sum_{r \in [m]} \phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_i)  \phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_l).
+\end{align*}\]</span></p>
+<p>Assume now that <span class="math inline">\(\phi'(z)\leq C_1\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span> and let <span class="math inline">\({\mathbf{w}}\sim N(\textbf{0}, \textbf{I}_d)\)</span>. As <span class="math inline">\(({\mathbf{w}}_r)_{r \in [m]}\)</span> are mutually independent and identically distributed then <span class="math display">\[
+    \mathbb{E}[H_{il}(0)] = \mathbb{E}[\phi'({\mathbf{w}}^T {\mathbf{x}}_i)  \phi'({\mathbf{w}}^T {\mathbf{x}}_l)] \leq C^2 &lt; \infty.
+    \]</span> Furthermore, by the law of large numbers <span class="math display">\[
+    \lim_{m \rightarrow \infty} H_{il}(0) = \mathbb{E}[ H_{il}(0)]
+\]</span> Now let <span class="math inline">\({\mathbf{H}}_{\infty}= \mathbb{E}[{\mathbf{H}}(0)]\)</span>. Recall <span class="math inline">\({\mathbf{H}}(t) = {\mathbf{J}}(t)^T {\mathbf{J}}(t)\)</span> is a gram matrix and therefore positive semi-definite and thus <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> is also positive semi-definite. We now show via a concentration argument that if <span class="math inline">\(m\)</span> is large then <span class="math inline">\(H_{il}(0) \approx \mathbb{E}[H_{il}(0)]\)</span>. This means given sufficient width we can bound the 2-norm distance between <span class="math inline">\({\mathbf{H}}(0)\)</span> and <span class="math inline">\({\mathbf{H}}_{\infty}\)</span> using the Frobenius norm of their difference.</p>
+<div id="lem-initDiff" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 3 </strong></span>Assume <span class="math inline">\(\phi'(z)\leq C\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span>. For arbitrary <span class="math inline">\(\delta \in (0,1]\)</span> and <span class="math inline">\(\varepsilon&gt;0\)</span>, if <span class="math inline">\(m \geq n^2 \frac{2C^4}{\varepsilon^2} \ln \left( \frac{2n^2}{\delta} \right)\)</span> then with probability at least <span class="math inline">\(1-\delta\)</span> <span class="math display">\[
+    || {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| &lt; \varepsilon.
+\]</span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Let <span class="math inline">\(i,l \in [n]\)</span> be arbitrary and for typographical clarity let <span class="math inline">\(Z_r = \phi'({\mathbf{w}}^T {\mathbf{x}}_i) \phi'({\mathbf{w}}^T {\mathbf{x}}_l)\)</span>. Then by the bounded derivative assumption on <span class="math inline">\(\phi\)</span> it follows that <span class="math inline">\(H_{il}(0)\)</span> is the arithmetic average of a sum of <span class="math inline">\(m\)</span> mutually independent and identically distributed random variables, which almost surely are supported on <span class="math inline">\([-C^2, C^2]\)</span>. Applying Hoeffding’s inequality <span class="math display">\[\begin{align*}
+        \mathbb{P}\left( \left|\frac{1}{m} \sum_{r=1}^m (Z_r - \mathbb{E}[Z_r]) \right| \geq \epsilon \right) \leq 2\exp\left( -\frac{2m\epsilon^2}{4C^4} \right),
+    \end{align*}\]</span> and therefore <span class="math display">\[\begin{align*}
+        \mathbb{P}\left( | H_{il}(0) - \mathbb{E}[H_{il}(0)] | \geq \epsilon \right) \leq 2\exp\left( -\frac{m\epsilon^2}{2C^4} \right).
+    \end{align*}\]</span> Applying the union bound <span class="math display">\[\begin{align*}
+        \mathbb{P}\left( \bigcap_{i,l=1}^n \{| H_{il}(0) - \mathbb{E}[H_{il}(0)] | &lt; \epsilon \} \right) &amp; = 1 - \mathbb{P}\left( \bigcup_{i,l=1}^n \{| H_{il}(0) - \mathbb{E}[H_{il}(0)] | \geq \epsilon \} \right)\\
+        &amp;\geq 1- \sum_{i,l=1}^n \mathbb{P}\left(| H_{il}(0) - \mathbb{E}[H_{il}(0)] | \geq \epsilon  \right)\\
+        &amp; \geq 1- 2n^2 \exp\left( -\frac{m\epsilon^2}{2C^4} \right)
+    \end{align*}\]</span><br>
+Let <span class="math inline">\(\delta \in (0,1]\)</span> denote the failure probability, then <span class="math display">\[\begin{align*}
+       \delta &amp;\geq 2n^2\exp\left( -\frac{m\epsilon^2}{2C^4} \right) \Leftrightarrow
+       \ln \left( \frac{2n^2}{\delta} \right) \leq \frac{m\epsilon^2}{2C^4} \Leftrightarrow
+       m \geq \frac{2C^4}{\epsilon^2} \ln \left( \frac{2n^2}{\delta} \right).
+   \end{align*}\]</span> Setting <span class="math inline">\(\epsilon = \varepsilon/n\)</span>, if <span class="math inline">\(m \geq \frac{2C^4n^2}{\varepsilon^2} \ln \left( \frac{2n^2}{\delta} \right)\)</span> then with probability at least <span class="math inline">\(1-\delta\)</span> <span class="math display">\[\begin{align*}
+       || {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}||^2 &lt; || {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}||_F^2
+       =\sum_{i,l \in [n]} | H_{il}(0) - \mathbb{E}[H_{il}(0)] |^2
+        &lt; n^2 \epsilon^2 = \varepsilon^2.
+\end{align*}\]</span></p>
+</div>
+<p>To ensure closeness of the finite width NTK to its idealized infinite width limit at initialization we require a significant level of overparameterization! It is worth remarking that the tools we have used here are quite crude and that this dependency can indeed be relaxed, see for instance <span class="citation" data-cites="banerjee2023neural">(<a href="#ref-banerjee2023neural" role="doc-biblioref">Banerjee et al. 2023</a>)</span>. Before we proceed to bound the dynamics we first bound <span class="math inline">\(L(0)\)</span>, in particular it will become apparent later that we need <span class="math inline">\(L(0)\)</span> to scale sublinearly with <span class="math inline">\(m\)</span>!</p>
+<div id="lem-L0" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 4 </strong></span>Suppose there exists a <span class="math inline">\(C \in \mathbb{R}_{&gt;0}\)</span> such that <span class="math inline">\(\mathbb{E}[\phi^2(Z)] \leq K\)</span> and <span class="math inline">\(|y_i| \leq K\)</span> for all <span class="math inline">\(i \in [n]\)</span> and <span class="math inline">\(Z \sim N(0,1)\)</span>. For <span class="math inline">\(\delta \in (0,1)\)</span>, if <span class="math inline">\(n \geq \delta^{-1}\)</span> then with probability at least <span class="math inline">\(1-\delta\)</span> we have <span class="math inline">\(L(0) \leq 2Cn^2\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>A naive approach to bounding <span class="math inline">\(L(0)\)</span> might be to uniformly bound <span class="math inline">\(\phi({\mathbf{w}}_j^T{\mathbf{x}})\)</span> for all <span class="math inline">\(j\in [m]\)</span> and any unit norm input <span class="math inline">\({\mathbf{x}}\)</span>. This approach will clearly result in a bound which scales with <span class="math inline">\(m\)</span> however. Due to the random initialization clearly <span class="math inline">\(L(0)\)</span> is random, so our approach will instead be to show that the expectation of <span class="math inline">\(L(0)\)</span> does not scale with <span class="math inline">\(m\)</span> and then use a concentration bound. Note, having random output weights actually makes our life easier compared with say fixing the output weights according to some pre-determined pattern, e.g., half are negative and half positive! First observe <span class="math display">\[\begin{align*}
+    L(0) = \sum_{i=1}^n(f(\theta(0), {\mathbf{x}}_i)- y_i)^2
+    = \sum_{i=1}^n(f^2(\theta(0), {\mathbf{x}}_i)- 2y_if(\theta(0), {\mathbf{x}}_i) ) + ||{\mathbf{y}}||^2 .
+\end{align*}\]</span> For typographical ease, letting <span class="math inline">\({\mathbf{w}}_j = {\mathbf{w}}_j(0)\)</span> for all <span class="math inline">\(j \in [m]\)</span> then analyzing the quadratic term we have <span class="math display">\[\begin{align*}
+    f^2(\theta(0), {\mathbf{x}}_i) = \frac{1}{m} \sum_{j,k=1}^m a_j a_k \phi({\mathbf{w}}_j^T {\mathbf{x}}_i)\phi({\mathbf{w}}_k^T {\mathbf{x}}_i),
+\end{align*}\]</span> this contains <span class="math inline">\(m(m+1)/2\)</span> distinct random variables which by inspection are not independent. This rules out using say Hoeffding’s bound, so instead we analyze the expectation and simply apply Markov’s inequality. First, as <span class="math inline">\({\mathbf{w}}_j \in N(0, \textbf{I})\)</span> and <span class="math inline">\(||{\mathbf{x}}_i||=1\)</span> then <span class="math inline">\({\mathbf{w}}_j^T{\mathbf{x}}_i = \sum_{l=1}^d {\textnormal{w}}_{jl} x_{li} \sim N(0, 1)\)</span>. Therefore, and noting the assumption on <span class="math inline">\(\phi\)</span> that <span class="math inline">\(\mathbb{E}[\phi^2(Z)] \leq C &lt; \infty\)</span>, as <span class="math inline">\(\mathbb{E}[a_j] = 0\)</span> for all <span class="math inline">\(j \in [m]\)</span> then by independence <span class="math display">\[
+\mathbb{E}[f(\theta(0), {\mathbf{x}}_i) )] = \frac{1}{\sqrt{m}} \sum_{j=1}^m \mathbb{E}[a_j]\mathbb{E}[\phi({\mathbf{w}}_j^T {\mathbf{x}}_i)] = 0.
+\]</span> Furthermore <span class="math display">\[\begin{align*}
+\mathbb{E}[f^2(\theta(0), {\mathbf{x}}_i) )] &amp;= \frac{1}{m}\sum_{j=1} \mathbb{E}[a_j^2]\mathbb{E}[\phi^2({\mathbf{w}}_j^T {\mathbf{x}}_i)] + \frac{1}{m}\sum_{j\neq k} \mathbb{E}[a_j]\mathbb{E}[a_k]\mathbb{E}[\phi({\mathbf{w}}_j^T {\mathbf{x}}_i)]\mathbb{E}[\phi({\mathbf{w}}_k^T {\mathbf{x}}_i)]\\
+&amp;=\frac{1}{m}\sum_{j=1} \mathbb{E}[a_j^2]\mathbb{E}[\phi^2({\mathbf{w}}_j^T {\mathbf{x}}_i)]\\
+&amp;\leq C,
+\end{align*}\]</span> therefore <span class="math display">\[\begin{align*}
+    \mathbb{E}[L(0)] &amp;= \sum_{i=1}^n(\mathbb{E}[f^2(\theta(0), {\mathbf{x}}_i)]- 2y_i\mathbb{E}[f(\theta(0), {\mathbf{x}}_i)] ) + ||{\mathbf{y}}||^2 \leq 2nC
+\end{align*}\]</span> by the assumptions of the lemma. As <span class="math inline">\(L(0)\)</span> is a non-negative random variable then <span class="math display">\[
+\mathbb{P}(L(0) \geq 2Cn^2) \leq \frac{1}{n}.
+\]</span> Therefore, for any failure probability <span class="math inline">\(\delta \in (0,1)\)</span> if <span class="math inline">\(n\geq \delta^{-1}\)</span> then with probability at least <span class="math inline">\(1-\delta\)</span> we have <span class="math inline">\(L(0) &lt; 2Cn^2\)</span>.</p>
+</div>
+<p>Before proceeding it is worth remarking that this bound is certainly not tight due to the fact we have used Markov’s inequality. One alternative would be to try to using a for example Chebyshev’s inequality, or alternatively change the initialization. In particular, an antisymmetrically initialized network, in which a positive and negative equally weighted copy of each neuron is present, ensures that at initialization the network is the zero function. In this setting <span class="math inline">\(L(0) = \frac{1}{2}||{\mathbf{y}}||^2\)</span> which scales only with <span class="math inline">\(n\)</span> not <span class="math inline">\(m\)</span>.</p>
+<p>So far we have achieved our first goal, a sufficient condition for the second, i.e., the control of the dynamics to ensure that <span class="math inline">\({\mathbf{H}}(t)\)</span> remains close to <span class="math inline">\({\mathbf{H}}(0)\)</span>, can be derived by guaranteeing that the parameters of network never move far from initialization.</p>
+<div id="lem-smoothDynamics" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5 </strong></span>Assume <span class="math inline">\(\phi\)</span> is differentiable and that there exists a <span class="math inline">\(C\in \mathbb{R}_{\geq 0}\)</span> such that <span class="math inline">\(|\phi'(z)|\leq C\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span> and <span class="math inline">\(\phi'\)</span> is <span class="math inline">\(C\)</span>-Lipschitz. For some <span class="math inline">\(t \in \mathbb{R}_{\geq 0}\)</span> suppose <span class="math inline">\(|| {\mathbf{w}}_r(t) - {\mathbf{w}}(0)|| \leq \frac{\lambda_n({\mathbf{H}}_{\infty})}{8C^2 n } =: R\)</span>. Then <span class="math display">\[
+|| {\mathbf{H}}(t) - {\mathbf{H}}(0)|| \leq \frac{\lambda_n({\mathbf{H}}_{\infty})}{4}
+\]</span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>First, for arbitrary <span class="math inline">\(i,l \in [n]\)</span> observe from that <span class="math display">\[\begin{align*}
+    | H_{il}(t) - H_{il}(0)| &amp;= \frac{1}{m} \left| \sum_{r=1}^m \phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_i)\phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_l) - \phi'({\mathbf{w}}_r(0)^T {\mathbf{x}}_i)\phi'({\mathbf{w}}_r(0)^T {\mathbf{x}}_l) \right|\\
+    &amp;\leq \frac{1}{m}  \sum_{r=1}^m \left|\phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_i)\phi'({\mathbf{w}}_r(t)^T {\mathbf{x}}_l) - \phi'({\mathbf{w}}_r(0)^T {\mathbf{x}}_i)\phi'({\mathbf{w}}_r(0)^T {\mathbf{x}}_l) \right|\\
+    \end{align*}\]</span> For typographical ease let <span class="math inline">\(g({\mathbf{a}}, {\mathbf{b}}) = \left|\phi'({\mathbf{a}}^T {\mathbf{x}}_i)\phi'({\mathbf{a}}^T {\mathbf{x}}_l) - \phi'({\mathbf{b}}^T {\mathbf{x}}_i)\phi'({\mathbf{b}}^T {\mathbf{x}}_l) \right|\)</span>, then using the triangle inequality and the fact that <span class="math inline">\(|\phi'(z)| &lt; C\)</span> <span class="math display">\[\begin{align*}
+        g({\mathbf{a}}, {\mathbf{b}}) &amp;\leq \left|\phi'({\mathbf{a}}^T {\mathbf{x}}_i)\phi'({\mathbf{a}}^T {\mathbf{x}}_l) - \phi'({\mathbf{a}}^T {\mathbf{x}}_l)\phi'({\mathbf{b}}^T {\mathbf{x}}_i) \right|\\
+        &amp;+\left|\phi'({\mathbf{a}}^T {\mathbf{x}}_l)\phi'({\mathbf{b}}^T {\mathbf{x}}_i) - \phi'({\mathbf{b}}^T {\mathbf{x}}_i)\phi'({\mathbf{b}}^T {\mathbf{x}}_l) \right|\\
+        &amp; \leq C \left(|\phi'({\mathbf{a}}^T {\mathbf{x}}_i) - \phi'({\mathbf{b}}^T {\mathbf{x}}_i) | + |\phi'({\mathbf{a}}^T {\mathbf{x}}_l) - \phi'({\mathbf{b}}^T {\mathbf{x}}_l) |  \right).
+    \end{align*}\]</span> As <span class="math inline">\(\phi'\)</span> is <span class="math inline">\(C\)</span>-Lipschitz continuous then <span class="math inline">\(|\phi'({\mathbf{a}}^T {\mathbf{x}}) - \phi'({\mathbf{b}}^T {\mathbf{x}}) | \leq C |{\mathbf{a}}^T {\mathbf{x}}- {\mathbf{b}}^T {\mathbf{x}}|\)</span>, therefore <span class="math display">\[\begin{align*}
+        g({\mathbf{a}}, {\mathbf{b}}) &amp;\leq C^2 \left( |{\mathbf{a}}^T {\mathbf{x}}_i - {\mathbf{b}}^T {\mathbf{x}}_i| + |{\mathbf{a}}^T {\mathbf{x}}_l - {\mathbf{b}}^T {\mathbf{x}}_l |\right)\\
+        &amp; \leq C^2(|| {\mathbf{x}}_i || + || {\mathbf{x}}_l || ) || {\mathbf{a}}- {\mathbf{b}}|| \\
+        &amp; = 2C^2 || {\mathbf{a}}- {\mathbf{b}}||.
+    \end{align*}\]</span> Therefore <span class="math display">\[\begin{align*}
+        | H_{il}(t) - H_{il}(0)|  \leq \frac{1}{m} \sum_{r=1}^m g({\mathbf{w}}_r(t), {\mathbf{w}}_r(0)) \leq 2C^2 \frac{\lambda_n({\mathbf{H}}_{\infty})}{8C^2 n }
+        = \frac{\lambda_n({\mathbf{H}}_{\infty})}{4n}.
+    \end{align*}\]</span> As a result <span class="math display">\[\begin{align*}
+        || {\mathbf{H}}(t) - {\mathbf{H}}(0) ||^2 \leq || {\mathbf{H}}(t) - {\mathbf{H}}(0) ||_F^2
+        = \sum_{i,l=1}^n | H_{il}(t) - H_{il}(0)|^2
+        \leq \frac{\lambda_n^2({\mathbf{H}}_{\infty})}{16}.
+    \end{align*}\]</span></p>
+</div>
+<p>Following Lemma <a href="#lem-smoothDynamics">Lemma&nbsp;5</a> we can bound the 2-norm distance between the parameters at time <span class="math inline">\(t\)</span> and initialization as follows.</p>
+<div id="lem-parametersbound" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 6 </strong></span>Assume <span class="math inline">\(\phi\)</span> is continuously differentiable and also that there exists a <span class="math inline">\(C\in \mathbb{R}_{\geq 0}\)</span> such that <span class="math inline">\(|\phi'(z)|\leq C\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span>. For a given <span class="math inline">\(T \in \mathbb{R}_{\geq 0}\)</span> and any <span class="math inline">\(r \in [m]\)</span>, <span class="math inline">\(t \in [0,T]\)</span> it holds that <span class="math display">\[\begin{align*}
+    ||  {\mathbf{w}}_r(t) - {\mathbf{w}}_r(0)  || \leq C\sqrt{\frac{n}{m}}\int_{0}^t L(\tau) d\tau.
+    \end{align*}\]</span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>As <span class="math inline">\(\phi\)</span> is continuously differentiable then by construction so is <span class="math inline">\(f\)</span>. For arbitrary <span class="math inline">\(T \in \mathbb{R}_&gt;0\)</span>, then by inspection each entry of <span class="math inline">\(\nabla_{\theta}L(t)\)</span>, <span class="math display">\[\begin{align*}
+        \frac{\partial L(t)}{\partial \theta_k} = \sum_{i=1}^n \frac{\partial f(\theta(t), {\mathbf{x}}_i)}{ \partial \theta_k} (f(\theta, {\mathbf{x}}_i) - y_i),
+    \end{align*}\]</span> is continuous on <span class="math inline">\([0,T]\)</span>. In addition, due to the boundedness of the derivative and the continuity of <span class="math inline">\(f\)</span> each entry of <span class="math inline">\(\nabla_{\theta}L(t)\)</span> is also bounded on <span class="math inline">\([0,T]\)</span>. Therefore, and as we are using gradient flow each entry of <span class="math inline">\(\frac{d\theta(t)}{dt}\)</span> is a real valued, continuous and Riemann integrable function on <span class="math inline">\([0,T]\)</span>. As <span class="math inline">\(\theta(t)\)</span> is the antiderivative of <span class="math inline">\(\frac{d\theta(t)}{dt}\)</span>, then by the Fundamental Theorem of Calculus for any <span class="math inline">\(t \in [0,T]\)</span> <span class="math display">\[
+    \theta(t) = \theta(0) + \int_{0}^t \frac{d\theta(\tau)}{d\tau} d\tau
+    \]</span> and therefore <span class="math display">\[
+    {\mathbf{w}}_r(t) = {\mathbf{w}}_r(0) + \int_{0}^t \frac{d{\mathbf{w}}_r(\tau)}{d\tau} d\tau.
+    \]</span> Rearranging and taking the norm gives <span class="math display">\[
+    ||  {\mathbf{w}}_r(t) - {\mathbf{w}}_r(0)  || = || \int_{0}^t \frac{d{\mathbf{w}}(\tau)}{d\tau} d\tau|| \leq \int_{0}^t \left| \left| \frac{d{\mathbf{w}}(\tau)}{d\tau} \right| \right| d\tau.
+    \]</span> We proceed to upper bound the integrand as follows, as <span class="math inline">\(|a_j| \leq 1\)</span>, the input data has unit norm and <span class="math inline">\(|\phi'(z)| \leq C\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span>, then <span class="math display">\[\begin{align*}
+        \left| \left| \frac{d{\mathbf{w}}_r(t)}{d t} \right| \right|^2&amp;= \nabla_{{\mathbf{w}}_r} L(t)^T \nabla_{{\mathbf{w}}_r} L(t) \\
+        &amp;= \sum_{k =1}^d \left(\frac{\partial L(t)}{\partial w_{rk}}\right)^2\\
+        &amp;= \sum_{k =1}^d \left(\sum_{i=1}^n\frac{\partial f(\theta(t), {\mathbf{x}}_i)}{ \partial w_{rk}} (f(\theta, {\mathbf{x}}_i) - y_i)\right)^2\\
+        &amp;= \sum_{k =1}^d \left(\sum_{i=1}^n\frac{1}{\sqrt{m}} a_j \phi'({\mathbf{w}}_j^T{\mathbf{x}}_i)x_k r_i(t) \right)^2\\
+        &amp; \leq \frac{C^2}{m} \left(\sum_{k =1}^d x_k^2\right) \left(\sum_i r_i(t) \right)^2 \\
+        &amp; =\frac{C^2}{m} {\mathbf{r}}(t)^T \textbf{1}_{n \times n} {\mathbf{r}}(t)\\
+        &amp; =\frac{C^2}{m} ||n^{-1/2}  \textbf{1}_{n \times n}{\mathbf{r}}(t)||^2\\
+        &amp; \leq \frac{C^2}{mn} ||\textbf{1}_{n \times n}||^2 || {\mathbf{r}}(t)||^2\\
+        &amp; = \frac{C^2n}{m}|| {\mathbf{r}}(t)||^2.
+    \end{align*}\]</span> Therefore, for any <span class="math inline">\(r \in [m]\)</span> <span class="math display">\[
+    ||  {\mathbf{w}}_r(t) - {\mathbf{w}}_r(0)  || \leq C\sqrt{\frac{n}{m}}\int_{0}^t  L(\tau) d\tau
+    \]</span> as claimed.</p>
+</div>
+<p><a href="#lem-parametersbound">Lemma&nbsp;6</a> raises a tricky issue, in particular, it seems like we have arrived at the following circular argument.</p>
+<ul>
+<li>To bound <span class="math inline">\(L(t)\)</span> it suffices bound <span class="math inline">\(|| {\mathbf{H}}(t) - {\mathbf{H}}(0) ||\)</span>.</li>
+<li>To bound <span class="math inline">\(|| {\mathbf{H}}(t) - {\mathbf{H}}(0) ||\)</span> it suffices to bound <span class="math inline">\(|| {\mathbf{w}}_r(t) - {\mathbf{w}}_r(0) ||\)</span> for all <span class="math inline">\(r \in [m]\)</span>.</li>
+<li>To bound <span class="math inline">\(|| {\mathbf{w}}_r(t) - {\mathbf{w}}_r(0) ||\)</span> for all <span class="math inline">\(r \in [m]\)</span> it suffices to bound <span class="math inline">\(L(t)\)</span>.</li>
+</ul>
+<p>However, we can circumvent this issue using a real induction argument! We now present the main result of this section.</p>
+<div id="thm-main" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 1 </strong></span>Assume <span class="math inline">\(\phi\)</span> is continuously differentiable and that there exists a <span class="math inline">\(C\in \mathbb{R}_{&gt; 0}\)</span> such that <span class="math inline">\(|\phi'(z)|\leq C\)</span> for all <span class="math inline">\(z \in \mathbb{R}\)</span>, <span class="math inline">\(\mathbb{E}[\phi^2(Z)]\leq C\)</span> with <span class="math inline">\(Z \sim N(0,1)\)</span> and <span class="math inline">\(\phi'\)</span> is <span class="math inline">\(C\)</span>-Lipschitz. For <span class="math inline">\(\delta \in (0,1)\)</span>, let <span class="math inline">\(n \geq 2\delta^{-1}\)</span> and assume <span class="math inline">\(m \geq \max \{\frac{32C^4}{\lambda_n({\mathbf{H}}_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right), \frac{256C^6n^7 }{\lambda_n({\mathbf{H}}_{\infty})^4}\}\)</span>. Then with probability at least <span class="math inline">\(1-\delta\)</span> we have for all <span class="math inline">\(t \geq 0\)</span> <span class="math display">\[\begin{align*}
+         L(t) \leq \exp(- \lambda_n({\mathbf{H}}_{\infty}) t) L(0).
+\end{align*}\]</span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>By construction <span class="math inline">\(\lambda_{n}({\mathbf{H}}_{\infty})\geq 0\)</span>, as the case <span class="math inline">\(\lambda_{n}({\mathbf{H}}_{\infty})=0\)</span> is trivial assume <span class="math inline">\(\lambda_{n}({\mathbf{H}}_{\infty})&gt;0\)</span>. To prove the result claimed recall from <a href="#lem-unifbound">Lemma&nbsp;1</a> that it suffices to show that <span class="math inline">\(\lambda_n({\mathbf{H}}(t)) \geq \lambda_n({\mathbf{H}}_{\infty})/2\)</span> for all <span class="math inline">\(t &gt;0\)</span>. From <a href="#lem-shadowmatrix">Lemma&nbsp;2</a> for this condition to be true it suffices that <span class="math inline">\(||{\mathbf{H}}(t) - {\mathbf{H}}(0)||, ||{\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span> for all <span class="math inline">\(t \geq 0\)</span>. Note as <span class="math display">\[m \geq \frac{32C^4}{\lambda_n({\mathbf{H}}_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right)
+\]</span> then with probability at most <span class="math inline">\(\delta/2\)</span> it holds that <span class="math display">\[
+    || {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| &gt;  \lambda_n({\mathbf{H}}_{\infty})/4.
+    \]</span> In addition, as <span class="math inline">\(n\geq 2\delta^{-1}\)</span> then with probability at most <span class="math inline">\(\delta/2\)</span> we have <span class="math inline">\(L(0) \geq 2Cn^2\)</span>. Therefore and under the assumptions of the lemma, using a union bound argument it follows that <span class="math inline">\(|| {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span> and <span class="math inline">\(L(0) &lt; 2Cn^2\)</span>.</p>
+<p>We now proceed by real induction. As per the definition of an inductive set provided in <span class="citation" data-cites="clark2012instructors">Clark (<a href="#ref-clark2012instructors" role="doc-biblioref">2012</a>)</span>, define for an arbitrary <span class="math inline">\(T &gt;0\)</span> <span class="math display">\[
+    S = \{t \in [0,T]: \lambda_n({\mathbf{H}}(t)) &gt; \lambda_n({\mathbf{H}}_{\infty})/2 \}.
+    \]</span> Our goal is to show <span class="math inline">\(S = [0,T]\)</span>. To this end it suffices to prove that the following statements are true, i) <span class="math inline">\(0 \in S\)</span>, ii) for any <span class="math inline">\(t \in (0, T)\)</span> such that <span class="math inline">\(t \in S\)</span>, then there exists a <span class="math inline">\(t'&gt;t\)</span> such that <span class="math inline">\([t,t']\subset S\)</span>, ii) if <span class="math inline">\(t \in[0,T)\)</span> and <span class="math inline">\([0,t) \subset S\)</span> then <span class="math inline">\(t \in S\)</span>. For Statement i), recall for <span class="math inline">\(t=0\)</span> that <span class="math display">\[
+    |\lambda_n({\mathbf{H}}(0)) - \lambda_n({\mathbf{H}}_{\infty})| \leq || {\mathbf{H}}(0) - {\mathbf{H}}_{\infty}|| \leq  \lambda_n({\mathbf{H}}_{\infty})/4.
+    \]</span> If <span class="math inline">\(\lambda_n({\mathbf{H}}(0))&lt; \lambda_n({\mathbf{H}}_{\infty})\)</span> then <span class="math inline">\(\lambda_n({\mathbf{H}}(0)) \geq 3\lambda_n({\mathbf{H}}_{\infty})/4\)</span>, otherwise <span class="math inline">\(\lambda_n({\mathbf{H}}(0))\geq \lambda_n({\mathbf{H}}_{\infty})\)</span> implying <span class="math inline">\(0 \in S\)</span>.</p>
+<p>For Statement ii), observe if <span class="math inline">\(t \in S\)</span> then there exists an <span class="math inline">\(\epsilon &gt;0\)</span> such that <span class="math inline">\(\lambda_n({\mathbf{H}}(t))- \epsilon &gt; \lambda_n({\mathbf{H}}_{\infty})/2\)</span>. To proceed we claim that <span class="math inline">\(\lambda_n({\mathbf{H}}(t))\)</span> is continuous. Indeed, as <span class="math inline">\(\phi'\)</span> is continuous then each entry <span class="math inline">\(H_{il}(t)\)</span> is continuous. Therefore <span class="math inline">\({\mathbf{H}}(t)\)</span> is continuous with respect to the Frobenius norm and indeed any other norm as all norms are equivalent in finite dimensional spaces. Therefore, by Theorem VI.1.4 <span class="citation" data-cites="bhatia97">Bhatia (<a href="#ref-bhatia97" role="doc-biblioref">1997</a>)</span>, the eigenvalues including <span class="math inline">\(\lambda_n:\mathbb{R}_{\geq 0} \rightarrow \mathbb{R}_{\geq 0}\)</span> are continuous functions. By continuity it follows that there exists a <span class="math inline">\(\delta'&gt;0\)</span> such that for all <span class="math inline">\(\tau \in [t \pm \delta']\)</span> then <span class="math inline">\(\lambda_n({\mathbf{H}}(\tau)) \in [\lambda_n({\mathbf{H}}_{\infty})/2 \pm \epsilon]\)</span>. This in turn implies <span class="math inline">\(\lambda_n({\mathbf{H}}(\tau)) &gt; \lambda_n({\mathbf{H}}_{\infty})/2\)</span> for all <span class="math inline">\(\tau \in [t, t+\delta']\)</span>.</p>
+<p>For Statement iii), if <span class="math inline">\([0,t) \subset S\)</span> then for any <span class="math inline">\(\delta'&gt;0\)</span> it follows that <span class="math inline">\([0, t - \delta'] \subset S\)</span>. Using <a href="#lem-smoothDynamics">Lemma&nbsp;5</a> <span class="math display">\[\begin{align*}
+        ||{\mathbf{w}}_r(t) - {\mathbf{w}}_r(0) || &amp;\leq C\sqrt{\frac{n}{m}}\int_{0}^t  L(\tau) d\tau\\
+        &amp;= C\sqrt{\frac{n}{m}}\left(\int_{0}^{t-\delta'}  L(\tau) d\tau + \int_{t-\delta'}^{t}  L(\tau) d\tau\right)\\
+        &amp; \leq C\sqrt{\frac{n}{m}} L(0) \left( \int_{0}^{t-\delta'} \exp \left(- \lambda_n({\mathbf{H}}_{\infty}) \right) d\tau + \delta' \right)\\
+        &amp; \leq \sqrt{\frac{n}{m}} \frac{2C^2n^2}{\lambda_n({\mathbf{H}}_{\infty})} \left( 1 + \delta'\lambda_n({\mathbf{H}}_{\infty}) \right).
+    \end{align*}\]</span> Letting <span class="math inline">\(\delta \leq \frac{1}{2\lambda_n({\mathbf{H}}_{\infty})}\)</span>, then as <span class="math inline">\(m\geq \frac{256C^6n^7 }{\lambda_n({\mathbf{H}}_{\infty})^4}\)</span> it follows that <span class="math display">\[
+    ||{\mathbf{w}}_r(t) - {\mathbf{w}}_r(0) || \leq \frac{3R}{4}.
+    \]</span> Therefore <span class="math inline">\(||{\mathbf{H}}(t) - {\mathbf{H}}_{\infty} || \leq \lambda_n({\mathbf{H}}_{\infty})/4\)</span> and as a result we conclude that <span class="math inline">\(\lambda_n({\mathbf{H}}(t))\geq \lambda_n({\mathbf{H}}_{\infty})/2\)</span> and thus <span class="math inline">\(t \in S\)</span>. This concludes the proof by real induction. Note that as <span class="math inline">\(T\)</span> can be arbitrarily large we can further conclude that <span class="math inline">\(\lambda_n({\mathbf{H}}(t))\geq \lambda_n({\mathbf{H}}_{\infty})/2\)</span> for all <span class="math inline">\(t &gt;0\)</span>, thereby establishing a uniform lower bound on the smallest eigenvalue of <span class="math inline">\({\mathbf{H}}(t)\)</span>.</p>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p><a href="#thm-main">Theorem&nbsp;1</a> is interesting as despite the loss function being non-linear and non-convex in the model parameters, it says for sufficiently overparameterized networks and assuming <span class="math inline">\(\lambda_n({\mathbf{H}}_{\infty}) &gt; 0\)</span>, then given a sufficiently long training time one can achieve arbitrarily small loss using gradient flow! There are some notable limitations however, in particular the level of overparameterization is exceedingly severe and not representative of networks in practice. Moreover, in order to derive our results we had to limit the movement of each neuron throughout training! This condition requiring the NTK to remain close to its initialization, or equivalently each neuron to remain close to its initialization, is limiting as it rules out a rich feature learning regime in which the kernel (or weights adapt to the data).</p>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-banerjee2023neural" class="csl-entry" role="listitem">
+Banerjee, Arindam, Pedro Cisneros-Velarde, Libin Zhu, and Misha Belkin. 2023. <span>“Neural Tangent Kernel at Initialization: Linear Width Suffices.”</span> In <em>The 39th Conference on Uncertainty in Artificial Intelligence</em>. <a href="https://openreview.net/forum?id=VJaoe7Rp9tZ">https://openreview.net/forum?id=VJaoe7Rp9tZ</a>.
+</div>
+<div id="ref-bhatia97" class="csl-entry" role="listitem">
+Bhatia, Rajendra. 1997. <em>Matrix Analysis</em>. Vol. 169. Springer.
+</div>
+<div id="ref-clark2012instructors" class="csl-entry" role="listitem">
+Clark, Pete L. 2012. <span>“The Instructor’s Guide to Real Induction.”</span> <a href="https://arxiv.org/abs/1208.0973">https://arxiv.org/abs/1208.0973</a>.
+</div>
+<div id="ref-du2018gradient" class="csl-entry" role="listitem">
+Du, Simon S., Xiyu Zhai, Barnabas Poczos, and Aarti Singh. 2019. <span>“Gradient Descent Provably Optimizes over-Parameterized Neural Networks.”</span> In <em>International Conference on Learning Representations</em>. <a href="https://openreview.net/forum?id=S1eK3i09YQ">https://openreview.net/forum?id=S1eK3i09YQ</a>.
+</div>
+<div id="ref-jacot2020neural" class="csl-entry" role="listitem">
+Jacot, Arthur, Franck Gabriel, and Clément Hongler. 2020. <span>“Neural Tangent Kernel: Convergence and Generalization in Neural Networks.”</span> <a href="https://arxiv.org/abs/1806.07572">https://arxiv.org/abs/1806.07572</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
