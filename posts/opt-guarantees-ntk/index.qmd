@@ -130,7 +130,7 @@ Based on @lem-unifbound and @lem-shadowmatrix we therefore can use the following
 For neural networks we will see that a good candidate for $\rmH_{\infty}$ is the expected value of $\rmH(0)$ which coincides with the infinite width limit of the network. By making the width of the network sufficiently large we will prove the above conditions are satisfied. Finally note for the bound on the loss to be useful we require $\lambda_{n}(\rmH_{\infty})>0$! 
 
 ## Case-study: a differentiable, shallow neural network
-To illustrate how the approach for proving convergence guarantees discussed in Section \ref{opt2-subsec:outline} can be applied to neural networks, here we study potentially the simplest setting possible. Consider a two layer network
+To illustrate how the approach for proving convergence guarantees can be applied to neural networks we study potentially the simplest setting possible: consider a two layer network
 \[
 f(\theta, \rvx) = \frac{1}{\sqrt{m}}\sum_{j=1}^m a_j \phi(\rvw_j^T\rvx).
 \]
@@ -323,7 +323,7 @@ As $\phi$ is continuously differentiable then by construction so is $f$. For arb
 - To bound $|| \rmH(t) - \rmH(0) ||$ it suffices to bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$.
 - To bound $|| \rvw_r(t) - \rvw_r(0) ||$ for all $r \in [m]$ it suffices to bound $L(t)$.
 
-However, we can circumvent this issue using a real induction argument! We now present the main result of this section.
+However, we can circumvent this issue using a real induction argument! We now present the main result.
 
 :::{#thm-main}
 Assume $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
