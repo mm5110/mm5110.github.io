@@ -103,7 +103,7 @@ As a result, to prove convergence it suffices to uniformly lower bound the small
 Under the same conditions as @lem-unifbound we have $L(t) \leq L(0)$.
 :::
 
-Before proceeding a small side point to make is that we actually only need to bound the smallest eigenvalue of the eigenspace of $\rmH(t)$ in which the residue lies. To be clear, suppose $\rvr(t)$ lies in the span of the top $k(t)$ eigenvectors of $\rmH(t)$, then it would suffice to lower bound instead $\lambda_{k(t)}(\rmH(t))$. However, for neural networks, and indeed many other models, analyzing the spectrum of $\rmH(t)$ directly is difficult. In particular, before one even considers the dynamics, observe, due to the random initialization of the network parameters, that $\rmH(0)$ is a random matrix whose distribution is typically not easily analyzed. The approach we will instead pursue is as follows: i) substitute the analysis of the eigenvalues of $\rmH(0)$ with that of a simpler `proxy' matrix $\rmH_{\infty}$ (the choice of notation here will soon become clear!), which we assume for now is positive semi-definite, then ii) derive conditions to ensure that $\lambda_n(\rmH(t))$ remains close to $\lambda_n(\rmH_{\infty})$ for all $t \in [0,T]$ where $T\in \reals_{>0}$ is arbitrary.
+Before proceeding a small side point to make is that we actually only need to bound the smallest eigenvalue of the eigenspace of $\rmH(t)$ in which the residue lies. To be clear, suppose $\rvr(t)$ lies in the span of the top $k(t)$ eigenvectors of $\rmH(t)$, then it would suffice to lower bound instead $\lambda_{k(t)}(\rmH(t))$. However, for neural networks, and indeed many other models, analyzing the spectrum of $\rmH(t)$ directly is difficult. In particular, before one even considers the dynamics, observe, due to the random initialization of the network parameters, that $\rmH(0)$ is a random matrix whose distribution is typically not easily analyzed. The approach we will instead pursue is as follows: i) substitute the analysis of the eigenvalues of $\rmH(0)$ with that of a simpler 'proxy' matrix $\rmH_{\infty}$ (the choice of notation here will soon become clear!), which we assume for now is positive semi-definite, then ii) derive conditions to ensure that $\lambda_n(\rmH(t))$ remains close to $\lambda_n(\rmH_{\infty})$ for all $t \in [0,T]$ where $T\in \reals_{>0}$ is arbitrary.
 
 :::{#lem-shadowmatrix}
 Let $\rmH_{\infty} \in \reals^{n \times n}$ be positive semi-definite. Given a $T \in \reals_{>0}$, if $||\rmH(t) - \rmH(0)||,  ||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$ for all $t \in [0, T]$, then $\lambda_n(H(t)) \geq \frac{\lambda_{n}(\rmH_{\infty})}{2}$ for all $t \in [0, T]$.
@@ -124,7 +124,7 @@ Let $\rmH_{\infty} \in \reals^{n \times n}$ be positive semi-definite. Given a $
 
 Based on @lem-unifbound and @lem-shadowmatrix we therefore can use the following approach for deriving training guarantees when confronted with non-linear least squares.
 
-- Identify a suitable `proxy' matrix $\rmH_{\infty}$ which is positive semi-definite and is close to $\rmH(0)$, in particular $||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$
+- Identify a suitable 'proxy' matrix $\rmH_{\infty}$ which is positive semi-definite and is close to $\rmH(0)$, in particular $||\rmH(0) - \rmH_{\infty}|| \leq \lambda_n(\rmH_{\infty})/4$
 - Identify a parameter regime which ensures the NTK remains close to its initialization, $||\rmH(t) - \rmH(0)|| \leq \lambda_n(\rmH_{\infty})/4$.
 
 For neural networks we will see that a good candidate for $\rmH_{\infty}$ is the expected value of $\rmH(0)$ which coincides with the infinite width limit of the network. By making the width of the network sufficiently large we will prove the above conditions are satisfied. Finally note for the bound on the loss to be useful we require $\lambda_{n}(\rmH_{\infty})>0$! 
@@ -326,7 +326,7 @@ As $\phi$ is continuously differentiable then by construction so is $f$. For arb
 However, we can circumvent this issue using a real induction argument! We now present the main result. Note we present the result in terms of $\lambda_n(\rmH_{\infty})$ and assume $\lambda_n(\rmH_{\infty})>0$. This is a reasonable assumption as for generic data (where the data matrix is drawn from a set with full Lebesgue measure) the smallest eigenvalue will be strictly positive. Quantitative lower bounds can be derived by placing for instance a seperation condition on the data, as an example see Corollary I.2 in [@oymak2019moderate].
 
 :::{#thm-main}
-Assume $\lambda_n(\rmH_{\infty})>0$, $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4n^2}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
+Assume $\lambda_n(\rmH_{\infty})>0$, $\phi$ is continuously differentiable and that there exists a $C\in \reals_{> 0}$ such that $|\phi'(z)|\leq C$ for all $z \in \reals$, $\expec[\phi^2(Z)]\leq C$ with $Z \sim N(0,1)$ and $\phi'$ is $C$-Lipschitz. For $\delta \in (0,1)$, let $n \geq 2\delta^{-1}$ and assume $m \geq \max \{\frac{32C^4n^2}{\lambda_n(\rmH_{\infty})^2} \ln \left( \frac{4n^2}{\delta} \right),  \frac{256C^8 n^7 }{\lambda_n(\rmH_{\infty})^4}\}$. Then with probability at least $1-\delta$ we have for all $t \geq 0$
 \begin{align*}
          L(t) \leq \exp(- \lambda_n(\rmH_{\infty}) t) L(0). 
 \end{align*}
@@ -365,7 +365,7 @@ For Statement iii), if $[0,t) \subset S$ then for any $\delta'>0$ it follows tha
         & \leq C\sqrt{\frac{n}{m}} L(0) \left( \int_{0}^{t-\delta'} \exp \left(- \lambda_n(\rmH_{\infty}) \right) d\tau + \delta' \right)\\
         & \leq \sqrt{\frac{n}{m}} \frac{2C^2n^2}{\lambda_n(\rmH_{\infty})} \left( 1 + \delta'\lambda_n(\rmH_{\infty}) \right).
     \end{align*}
-  Letting $\delta \leq \frac{1}{2\lambda_n(\rmH_{\infty})}$, then as $m\geq \frac{256C^6n^7 }{\lambda_n(\rmH_{\infty})^4}$ it follows that
+  Letting $\delta' \leq \frac{1}{2\lambda_n(\rmH_{\infty})}$, then as $m\geq \frac{256C^8n^7 }{\lambda_n(\rmH_{\infty})^4}$ it follows that
     $$
     ||\rvw_r(t) - \rvw_r(0) || \leq \frac{3R}{4}.
     $$
