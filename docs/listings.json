@@ -3,7 +3,6 @@
     "listing": "/blog.html",
     "items": [
       "/posts/opt-guarantees-ntk/index.html",
-      "/posts/matrix-calc/index.html",
       "/posts/gibbs/index.html",
       "/posts/opt-guarantees-perceptron/index.html"
     ]
