@@ -1,0 +1,41 @@
+---
+title: "Optimization and Representation Learning with Linear Autoencoders (LAEs)"
+author: "Michael Murray"
+date: "2023-08-01"
+categories: [Autoencoders]
+bibliography: ../../references.bib
+draft: true
+---
+*Can we characterize the stationary points of an LAE? Will GD find a global minimum which generalizes well?*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+## Introduction
+- Explain what this post is about
+
+- Explain what an autoautoencoder is 
+
+-  The nonlinear case is hard to analyze, so in this post we will study the loss-landscape, training dynamics and generalization of Linear Autoencoders (LAEs).
+
+
+## Analysis of the loss-landscape: characterization of stationary points
+
+Given a training sample of $n$ points each in $\reals^d$, stored column-wise in the matrix $X \in \reals^{d \times n}$, we study the linear autoencoder $f(X+A) = DE(X+A)$ where $A \in \reals^{d \times n}$ is a noise matrix, $E \in \reals^{k \times d}$ is the encoder matrix and $D \in \reals^{d \times k} is the decoder matrix. Our objective for now is simply the sum of the least squares on each point,
+$$
+L(D,E) = || X - DE(X+A)||_F^2
+$$
+
+:::{#prp-stat-denoiser}
+Let $X \in \reals^{d \times n}$ denote the data matrix, $A \in \reals^{d \times n}$ denote the noise matrix, and $E \in \reals^{k \times d}$ and $D \in \reals^{h \times k}$ the encoder / decoder matrix of the LAE respectively. Then the stationary points of the loss
+$$
+L= ||X - DE(X+A)||_F^2,
+$$
+satisfy
+$$
+\begin{aligned}
+
+\end{aligned}
+$$
+:::

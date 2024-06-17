@@ -1,0 +1,257 @@
+---
+title: "Global optimization guarantees for shallow neural networks via the Perceptron algorithm"
+author: "Michael Murray"
+date: "2023-07-28"
+categories: [Neural Networks, Optimization]
+bibliography: ../../references.bib
+# image: "image.jpg"
+draft: false
+---
+*In this post we will look at how the proof of convergence for the Perceptron algorithm can be used to derive strong training guarantees for a shallow neural network assuming linearly separable data.*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+## Introduction
+For neural networks deriving training guarantees for reaching global optima is challenging. In another blog post we showed how such guarantees can be achieved by ensuring the network in question is sufficiently wide (this is the NTK approach). However, the typical width requirements are often unrealistic and moreover are designed in order to keep the parameters within some ball of their initialization throughout training and therefore cannot really explain the rich feature learning observed in practice. In this post we remove any width requirements at the price of having to impose significant structure on the target function and data. In particular we consider the problem of learning a binary classifier $f_{\theta}:\reals^d \rightarrow \{\pm 1 \}$ on linearly separable data. To this end let $(x_i, y_i)_{i \in [n]}$ denote the training data where $x_i \in \reals^d$ are the input features and $y_i \in \{ \pm 1\}$ the output labels. If the problem is linearly separable then there exists a $u \in \reals^d$ such that $\text{sign}(\langle a, x_i \rangle)= y_i$, or equivalently $y_i\langle a, x_i \rangle > 0$ for all $i \in [n]$. We assume the input data is bounded, i.e., $|| x_i || \leq R$ for all $i \in [n]$. Letting $f(x; \theta)$ denote the map of a shallow neural network our goal is to understand if gradient descent can find parameters $\theta$ such that $sign(f(x_i;\theta))=y_i$ for all $i \in [n]$. To achieve this we deploy a neat trick based on the Perceptron algorithm which can be seen in [@brutzkus2018sgd]. Our presentation will most closely follow that given in [@karhadkar2024benign].
+
+## Convergence of the perceptron algorithm for linearly seperable data
+
+Before we consider a shallow neural network, let's first recall the **Perceptron algorithm**.
+
+- *Inputs:* $(x_i, y_i)_{i \in [n]}$
+- *Algorithm:*
+  - *Initialize* $w(0) = 0_d$, $t = 1$
+  - *While there exists a* $\pi(t) \in [n]$ *s.t.* $y_{\pi(t)} \langle w(t), x_{\pi(t)} \rangle \leq 0$ *do*
+    - $w(t) = w(t-1) + y_{\pi(t)}x_{\pi(t)}$
+    - $t = t + 1$
+  - return $w(t)$
+
+In the above the map $\pi: \naturals \rightarrow [n]$ selects a point to update at each iteration. Furthermore observe that at each iteration the Perceptron algorithm improves its performance on at least one feature-label pair in the training set as $y_{\pi(t)} \langle w(t), x_{\pi(t)} \rangle = y_{\pi(t)}\langle w(t-1), x_{\pi(t)} \rangle + 1$. 
+
+For linearly separable data it is possible to show the Perceptron algorithm converges to a global minimizer. Recall that linearly separable means there exists a $u \in \reals^d$, $||u ||=1$ such that $y_i \langle x_i, u \rangle >0$ for all $i \in [n]$ (the requirement that $u$ is unit norm is made for convenience as we can always re-scale by dividing by $||u ||$). As the decision boundary of the linear classifier $u$ is the vector subspace orthogonal to $u$ then the shortest distance from $x_i$ to this decision boundary is simply $|\langle x_i, u \rangle|$. Let
+$$
+\gamma(u) := \min_{i \in [n]} |\langle x_i, u \rangle|,
+$$
+denote the *margin* of the linear classifier $u$. Without loss of generality we may as well consider the linear classifier with the *maximum margin*: to this end moving forward we let 
+$$
+\gamma := \max_{||u ||=1} \min_{i \in [n]} |\langle x_i, u \rangle|
+$$
+denote the max margin and $u$ the max margin classifier. For linearly separable data it is possible to show that the Perceptron algorithm terminates after a finite number of steps and successfully classifies all points in the training sample.
+
+::: {#lem-perceptron}
+If $(x_i, y_i)_{i \in [n]}$ is linearly separable then the Perceptron algorithm terminates after at most
+$T \leq \frac{R^2}{\gamma^2}$ iterations and  $$ y_i \langle x_{i} , w(T) \rangle > 0 $$ for all $i \in [n]$.
+:::
+
+::: {.proof}
+The key idea of the proof is to show that $| \langle w(t) , u \rangle  |^2$ grows faster than $|| w(t) | |^2$. By the Cauchy-Schwarz (CS) inequality, for any iteration $t \geq 1$ it must hold that
+  
+$$
+  |\langle w(t), u \rangle|^2 \leq || w(t) ||^2.
+$$ 
+Therefore, there must exist an iteration $T$ after which no further updates take place: if this was not true this would imply for some sufficiently large iteration that the CS inequality is invalid! To lower bound  $| \langle w(t) , u \rangle  |^2$ observe
+$$
+\begin{align*}
+  \langle w(t), u \rangle &\geq \langle w(t-1), u \rangle + y_{\pi(t)} \langle x_{\pi(t)} , u \rangle\\
+  & \geq \langle w(t-1), u \rangle + \gamma\\
+  & \geq \langle w(t-2), u \rangle + 2 \gamma\\
+  & \geq t \gamma.
+\end{align*}
+$$
+To upper bound $||w(t)||^2$ note
+$$
+\begin{align*}
+  ||w(t)||^2  &=  ||w(t-1) +  y_{\pi(t)}  x_{\pi(t)}||^2 \\
+  &= || w(t-1) ||^2 + 2y_{\pi(t)} \langle x_{\pi(t)}, w(t-1) \rangle + ||x_{\pi(t)}||^2\\
+  & \leq || w(t-1) ||^2 + ||x_{\pi(t)}||^2\\
+  & \leq|| w(t-1) ||^2 + R^2\\
+  & \leq || w(t-1) ||^2 +  2R^2\\
+  & \leq t R^2.
+\end{align*}
+$$
+Let $T$ denote the iteration at which the Perceptron algorithm terminates where $T = \infty$ indicates the Perceptron algorithm never terminates. Then by the CS inequality
+$$
+ T^2 \gamma^2 \leq |\langle w_t, u \rangle|^2 \leq || w_t ||^2 \leq TR^2
+$$
+which is finite! Rearranging then $T\leq \frac{R^2}{\gamma^2}$ as claimed.
+:::
+
+
+## From the perceptron to shallow neural networks
+Consider now a shallow neural network
+$$
+f(x;W,v) = v^T \sigma(Wx) = \sum_{j=1}^{2m} v_j \sigma( \langle w_j, x \rangle)
+$$
+where $W \in \reals^{2m \times d}$ is the weight matrix of the first layer, $w_j$ is the $j$th row of $W$, $v \in \reals^{2m}$ is the vector of output weights and $v_j$ is the $j$th entry of $v$. We focus on the Leaky-ReLU non-linearity $\sigma(z) = \max \{ \alpha z, z \}$ for some $\alpha \in (0,1)$. Consider learning the parameters $W$ and $v$ using gradient descent (GD) with the hinge loss (recall the hinge loss is defined as $\ell(z) = \max \{0 , 1 - z \}$). Using the minimum norm subgradient (as is standard in most automatic differentiation software) at zero we let $\ell'(z) = -1$ for $z < 1$ and is $0$ otherwise, equivalently we can write this as $\ell'(z) = - \mathbb{1}(z<1)$. Similarly $\sigma'(z) = \alpha$ for $z \leq 0$ and is $1$ otherwise. A straightforward calculation gives
+$$
+\begin{align*}
+&\frac{\partial f}{\partial w_j}(x;W,v) = v_j \sigma'(\langle w_j, x \rangle) x,\\
+&\frac{\partial f}{\partial v_j}(x;W,v) =\sigma(\langle w_j, x \rangle).\\
+\end{align*}
+$$
+Consider training the network with gradient descent in order to minimize the loss $L(W,v) = \sum_{i=1}^n \ell(y_i f(x_i, W,v))$: as
+$$
+\frac{\partial L}{\partial \theta} = \sum_{i \in [n]} \ell'(y_i f(x_i; W, v))y_i \frac{\partial f}{\partial \theta}(x_i;W,v) 
+$$
+then the gradient updates for each neuron $j \in [2m]$ are
+$$
+\begin{align*}
+& w_j(t) =  w_j(t-1) + \eta_w \sum_{i =1}^{n} \mathbb{1}[y_i f(x_i; W(t-1), v(t-1))<1]  v_j(t-1) \sigma'(\langle w_j(t-1), x_i \rangle) y_i x_i,\\
+ & v_j(t) = v_j(t-1) + \eta_v \sum_{i =1}^{n} \mathbb{1}[y_i f(x_i; W(t-1), v(t-1))<1] \sigma(\langle w_j(t-1), x_i \rangle),
+\end{align*}
+$$
+where $\eta_w, \eta_v > 0$ are the learning rates for the inner and outer weights respectively. Inspecting these equations we see that shallow networks trained with hinge loss and GD have a similar update rule to the Perceptron algorithm! Inspired by this observation we pursue the idea of comparing the growth rate of $| \langle v_j(t) w_j(t), u \rangle |^2$ versus $|| v_j(t)w_j(t) ||^2$ for each $j \in [2m]$. In particular, analogous to studying the growth of $\langle w(t), u \rangle$ for the Perceptron algorithm, we instead study
+$$
+  A(t) = \sum_{j=1}^{2m}\langle v_j(t) w_j(t), u \rangle.
+$$
+Here we use A for alignment and $u$ again denotes the unit norm weights of the max margin linear classifier. Similarly, instead of considering $||w(t)||^2$ we study
+$$
+  F(t) = || diag(v(t)) W(t) ||_F^2
+$$
+(we use F for Frobenius) where $diag(v(t))$ is a diagonal square matrix with $[diag(v(t))]_{jj} = v_j(t)$. Again by the CS inequality and assuming the data is linearly separable with max margin unit vetor $u$, then it must hold that
+$$
+A^2(t) = |\langle vec(diag(v(t)) W(t)), u \otimes 1_{2m} \rangle|^2 \leq F(t) 2m.
+$$
+
+Therefore, if we can show that $F(t)$ grows slower than $A(t)$ under the outlined gradient update rule there must be a finite iteration after which the update is zero and the parameters no longer change. We will do this by lower bounding $A(t)$ and upper bounding $F(t)$ in terms of the total number of times each point in the training set contributes to the update of the weights at time $t$, which we denote $U(t) = \sum_{\tau=1}^{t} |\mathcal{F}(\tau)|$. This is useful as we can bound the number of updates $T$ by considering the setting where only one point contributes to the update at each time step, leading to the bound $T \leq U(t)$. 
+
+### Training with frozen outer weights
+
+First we consider a simplified setting where we freeze the outer weights by setting $\eta_v = 0$: in this setting we are able to prove analogous results to the Perceptron setting. 
+
+:::{#lem-network1}
+Suppose the training data $(x_i, y_i)_{i\in [n]}$ is linearly separable, assume $\eta_v = 0$, $\eta_w \leq \frac{1}{nR}$, $v_j(0) = (-1)^j$ and $||w_j(0) || \leq  \lambda_w$ for all $j \in [2m]$. Then gradient descent will terminate after
+ $$
+ T < \frac{2 (\lambda_w \alpha \gamma +1)}{ \eta_w \alpha^2 \gamma^2}
+ $$
+iterations, at which point the network will have achieved zero training (hinge) loss.
+:::
+
+::: {.proof}
+First we lower bound $A(t)$. Let $\mathcal{F}(t) = \{ i \in [n] \; : \;  y_i f(x_i; \theta(t -1)) < 1\}$ denote the set of training points that do not have zero hinge loss at the previous iterate $t-1$ (alternatively we can view this set as the points that participate in the update of the weights at the current iterate $t$). For convenience using $\sigma'_{ji}(t) := \sigma'(\langle w_j(t), x_i \rangle)$ then recalling the gradient update rule we have
+$$
+\begin{align*}
+  w_j(t) =  w_j(t-1) + \eta_w \sum_{i \in \mathcal{F}(t)}^{n} (-1)^j \sigma'_{ji}(t-1) y_i x_i.
+\end{align*}
+$$
+As $y_i \langle x_i, u \rangle \geq \gamma$ and $\sigma'_{ji}(t) \geq \alpha >0$ then
+$$
+\begin{align*}
+  A(t) &= \sum_{j=1}^{2m} (-1)^j\langle w_j(t), u \rangle \\
+  &= A(t-1) + \eta_w \sum_{j=1}^{2m} \sum_{i \in \mathcal{F}(t)}^{n} \sigma'_{ji}(t) y_i \langle x_i, u\rangle \\
+  & \geq  A(t-1) + \eta_w \gamma \alpha \sum_{j=1}^{2m} \sum_{i \in \mathcal{F}(t)}^{n} 1\\
+  & = A(t-1) + \eta_w \gamma \alpha 2m |\mathcal{F}(t)|\\
+  & = A(0) + \eta_w \gamma \alpha 2m \sum_{\tau = 1}^{t} |\mathcal{F}(\tau)|.
+\end{align*}
+$$
+Under our assumptions on the initialization scale
+$$
+\begin{align*}
+ A(0) &= \sum_{j=1}^{2m} (-1)^j\langle w_j(0), u \rangle\\
+ & \geq  - \sum_{j=1}^{2m} | \langle w_j(0), u \rangle| \\
+ & \geq - 2m \lambda_w.
+\end{align*}
+$$
+Therefore, defining $U(t) = \sum_{\tau = 1}^{t} |\mathcal{F}(\tau)|$ we have
+$$
+  A(t) \geq -2m \lambda_w + 2m \eta_w \alpha \gamma U(t).
+$$
+Before proceeding it is worth emphasizing that we need $\alpha>0$ to make this bound non-trivial and increasing in $t$. To extend this technique to ReLU networks one might instead explore bounding for each neuron $j \in [2m]$ the set $| \mathcal{F}(t) \cap \mathcal{A}_j(t) |$, where $\mathcal{A}_j(t) = \{i \in [n]: \; \langle w_j(t), x_i \rangle > 0 \}$. 
+
+For the upper bound on $F(t)$ we again plug in the GD update rule,
+$$
+\begin{align*}
+F(t)
+&= \sum_{j=1}^{2m} ||w_j(t) ||^2\\
+&= \sum_{j=1}^{2m} || w_j(t-1) + \eta_w \sum_{i \in \mathcal{F}(t)}^{n} (-1)^j \sigma'_{ji}(t-1) y_i x_i ||^2\\
+&= \sum_{j=1}^{2m}||w_j(t-1) ||^2 + 2\eta_w \sum_{i \in \mathcal{F}(t)}^{n} \sum_{j=1}^{2m}(-1)^j\sigma'_{ji}(t-1)y_i \langle w_j(t-1),  x_i \rangle \\
+&+\eta_w^2 \sum_{j =1}^{2m} \sum_{i,k \in \mathcal{F}(t)}^{n}  (-1)^{2j}\sigma'_{ji}(t-1)\sigma'_{ki}(t-1)\langle x_i, x_k \rangle.
+\end{align*}
+$$
+The first term in the above is simply $F(t-1)$. The second term can be simplified by observing that $\sigma(z) = \sigma'(z) z$ for a piecewise linear function $\sigma$. Therefore
+$$
+\begin{align*}
+  \eta_w \sum_{i \in \mathcal{F}(t)}^{n} \sum_{j=1}^{2m}(-1)^j\sigma'_{ji}(t-1) \langle w_j(t-1),  x_i \rangle &= \eta_w \sum_{i \in \mathcal{F}(t)}^{n} \sum_{j=1}^{2m}(-1)^j\sigma(\langle w_j(t-1),  x_i \rangle)\\
+  &= \eta_w \sum_{i \in \mathcal{F}(t)}^{n} y_i f(x_i; W(t-1))\\
+  & < \eta_w |\mathcal{F}(t)|,
+\end{align*}
+$$
+where the final inequality follows from the fact that $i \in \mathcal{F}(t)$ implies $y_i f(x_i; W(t-1))<1$. Finally, the third term in the previous bound on $F(t)$ can be simplified using the inequalities $\sigma_{ji}(t-1)\leq 1$, $||x_i||\leq R$, $\eta_w\leq1/nR^2$, $|\mathcal{F}(t)| \leq n$, which imply
+$$
+\eta_w^2 \sum_{j =1}^{2m} \sum_{i,k \in \mathcal{F}(t)}^{n}  (-1)^{2j}\sigma'_{ji}(t-1)\sigma'_{ki}(t-1)\langle x_i, x_k \rangle \leq 2m\eta_w^2 R^2 |\mathcal{F}(t)|^2 \leq 2m \eta_w |\mathcal{F}(t)|.
+$$
+Note the bound placed on the step-size means we avoid having to work with $|\mathcal{F}(t)|^2$. Proceeding, it follows that
+$$
+\begin{align*}
+F(t) &< F(t-1) + (2 + 2m )\eta_w |\mathcal{F}(t)|\\
+& \leq F(t-1) + 4m \eta_w |\mathcal{F}(t)|\\
+&< F(0) + 4 m\eta_w \sum_{\tau=1}^t |\mathcal{F}(t)|\\
+& = F(0) + 4 m\eta_w  U(t)\\
+& = \sum_{j=1}^{2m} ||w_j(0)||^2 + 4 m\eta_w U(t)\\
+& \leq 2m \lambda_w^2 + 4 m\eta_w U(t).
+\end{align*}
+$$
+By the CS inequality and dividing both sides by $4m^2$ then
+$$
+\frac{A^2(t)}{4m^2} \leq \frac{F(t)}{2m}.
+$$
+Plugging in the bounds for $A(t)$ and $F(t)$, using $\lambda_w \leq 1$ and rearranging produces the following sequence of inequalities,
+$$
+\begin{align*}
+(\eta_w \alpha \gamma U(t) - \lambda_w)^2 &< \lambda_w^2 + 2 \eta_w U(t)\\
+\eta_w^2 \alpha^2 \gamma^2U^2(t) - 2 \lambda_w \eta_w \alpha \gamma U(t) + \lambda_w^2 &< \lambda_w^2 + 2 \eta_w U(t)\\
+ \eta_w \alpha^2 \gamma^2U^2(t)  &< 2 (\lambda_w \alpha \gamma +1)  U(t) ,\\
+ U(t) &\leq \frac{2 (\lambda_w \alpha \gamma +1)}{ \eta_w \alpha^2 \gamma^2}.
+\end{align*}
+$$
+To conclude, observe if $T$ is the final iterate then
+$$
+  T = \sum_{\tau = 1}^{T} 1 \leq \sum_{\tau = 1}^{T} |\mathcal{F}(\tau)| = U(T) <\frac{2 (\lambda_w \alpha \gamma +1)}{ \eta_w \alpha^2 \gamma^2}.
+$$
+
+:::
+A few reflections on this result are as follows.
+
+- **Comparing the bound for shallow network with bound for Perceptron:** as a sense check note both bounds have a term proportional to $\gamma^{-2}$ and $R^2$ (observe in the case of the shallow network this is through $\eta_w$). In addition, for the shallow network we see that a smaller $\alpha$, i.e., a Leaky ReLU activation closer to ReLU, we get a weaker bound, while at the other end if we chose a linear activation we would get a bound which is very similar! Perhaps the key difference is that through $\eta_w$ the upper bound on the number of iterations of GD scales proportional to $n$ while the bound for the Perceptron has no dependence on $n$. Given that we use full-batch GD versus single batch SGD for the Perceptron one might expect the bound for the shallow network to be proportional somehow to $1/n$, however instead the upper bound grows proportional to $n$ for the shallow network! This arises as a result of two artefacts of the proof: first, to bound $T$ in terms of $U(t)$ we use the lower bound $|\mathcal{F}(t)| \geq 1$ for all $t \leq T$, i.e., we assume only one point is involved in the update of the parameters at each time step when it could be as large as $n$. Second, we removed a factor of $|\mathcal{F}(t)|$ by using a step-size which is proportional to $1/n$. It is worth highlighting that the bound for the Perceptron is in terms of the number of non-zero updates as opposed to the number of updates. One could use exactly the same proof to bound the number of *non-zero* iterations of mini-batch SGD of size $k \in [n]$ say which would only require the $\eta_w$ proportional to $1/k$ and would thereby remove the dependence on $n$.
+
+- **Width of the network does not matter**: the particular choice of $m$ does not actually matter in terms of impacting the upper bound on the number of iterations. This should not perhaps be overly surprising as the target function is linear and could be solved by a single neuron!
+
+- **All neurons are treated the same:** the bounds we have written down are derived without having to study the individual dynamics of neurons, or even sub-groups of neurons. Equivalently put, we used the same bound for every neuron and every time step and avoided considering the activation patterns of each neuron on different data points at different time steps. Analysis of activation patterns is in general quite challenging and current works in this regard typically require additional assumptions on the data, such as the input features being nearly orthogonal, see e.g., [@NEURIPS2023_6e73c39c].
+
+- **Does not work for ReLU:** we require $\alpha>0$ as otherwise the lower bound we derived for $A(t)$ does not grow with $t$. This condition means that our results do not cover ReLU. In order to extend to ReLU a similar technique could be deployed if one where to consider instead bounding $|\mathcal{F}(t) \cap \mathcal{A}(t)|$ instead of $|\mathcal{F}(t)|$. For ReLU networks it is worth highlighting that points which lie in the intersection of each neuron's inactive halfspace are zeroed by the network and cannot be fitted: this property clearly introduces sub-optimal stationary points! By comparison, Leaky ReLU networks never zero an input unless they are exactly orthogonal to the weight vectors of every neuron, which is a null set.
+
+- **Scale of the initialization $\lambda_w$:** for linearly separable data the scale of the initialization does not impact convergence, however a larger initialization scale increases the upper bound on $U(t)$ which perhaps suggests that it slows down convergence.
+
+- **Step-size $\eta_w$:** the condition $\eta_w \leq 1/nR^2$ simplifies the upper bound on $F(t)$, in particular without this assumption the upper bound would depend on $\sum_{\tau=1}^{t}|\mathcal{F}(t)|^2$ instead of $U(t)$. The dependence of $\eta_w$ on $R^2$ is primarily for convenience in simplifying the expressions encountered in the proof and is not necessary. Observing the role of the step-size in the upper bound then, and agreeing with our intuition, the smaller the step size the larger upper bound, which in turn perhaps suggests GD will take longer to converge. If $\eta_w$ is sufficiently large relative to $\alpha$, $\gamma$ and $\lambda_w$ then the inequality $A(t)^2 \leq 2m F(t)$ can be reduced to the form
+$$
+\left(\sum_{\tau=1}^{t} |\mathcal{F}(t)| \right)^2 \leq C \sum_{\tau=1}^{t} |\mathcal{F}(t)|^2
+$$
+for some constant $C$ independent of $n$ and $t$. As the right-hand-side grows linearly with $t$ while the left-hand-side quadratically then there must be some finite $T$ at which the inequality no longer holds. At this point GD must have terminated, despite the large step-size!
+
+
+### Training both the inner and outer layers
+A natural question one might ask is what happens if you unfreeze the outer layer weights, i.e., $\era_u \geq 0$? Practically we should expect nothing to change (you can try this experimentally if you like!), however from the perspective of deriving guarantees our job becomes harder. The first challenge is actually deriving bounds for $A(t)$ and $F(t)$ which are non-trivial: generally given bounded data it will be possible to upper bound at least crudely $F(t)$, however a positive lower bound on $A(t)$ we will shortly observe is trickier. Second, even if we are able to derive upper and lower bounds this technique only works if the lower bound on $A(t)$ grows faster than $F(t)$ with $t$. 
+
+Consider the lower bound on $A(t)$: for convenience we use the notation $\phi_{ji}(t) = \phi(\langle w_j(t), x_i  \rangle)$ where $\phi \in \{\sigma, \sigma' \}$, from the update rules we derived previously we have the following.
+$$
+\begin{align*}
+A(t+1) &= \sum_{j=1}^{2m}v_j(t+1) \langle w_j(t+1) ,u \rangle\\
+& = \sum_{j=1}^{2m} \left( v_j(t) + \eta_v \sum_{i \in \mathcal{F}(t)} \sigma_{ji}(t) \right) \left(\langle w_j(t) + \eta_w \sum_{k \in \mathcal{F}(t)} v_j(t) \sigma_{jk}'(t)y_k x_k  , u \rangle \right)\\
+& = \sum_{j=1}^{2m} \left( v_j(t) + \eta_v \sum_{i \in \mathcal{F}(t)} \sigma_{ji}(t) \right) \left(\langle w_j(t), u \rangle + \eta_w \sum_{k \in \mathcal{F}(t)} v_j(t) \sigma_{jk}'(t) y_k \langle x_k ,u \rangle \right)\\
+& = \sum_{j=1}^{2m} v_j(t) \langle w_j(t), u \rangle\\
+&+ \eta_w \sum_{k \in \mathcal{F}(t)} \sum_{j=1}^{2m}v_j^2(t) \sigma_{jk}'(t) y_k \langle x_k ,u \rangle\\
+&+ \eta_v \sum_{i \in \mathcal{F}(t)} \sum_{j=1}^{2m} \sigma_{ji}(t) \langle w_j(t), u \rangle \\
+&+ \eta_v \eta_w \sum_{i,k \in \mathcal{F}(t)} \sum_{j=1}^{2m} v_j(t) \sigma_{ji}(t) \sigma_{jk}'(t) y_k \langle x_k ,u \rangle.
+\end{align*}
+$$
+The first of the above four terms is simply $A(t)$, while the second term is positive as
+$$
+\eta_w \sum_{k \in \mathcal{F}(t)} \sum_{j=1}^{2m}v_j^2(t) \sigma_{jk}'(t) y_k \langle x_k ,u \rangle \geq ||v(t) ||^2 \alpha \gamma.
+$$
+However, bounding the other two terms from below is challenging and requires a more fine-grained understanding of the dynamics of each neuron. Note in the case where the outer weights was frozen we found ourselves in the easy position where we could apply the same bound to each neuron at each time step. In this sense we were actually able to treat all neurons identically as we could uniformly (both in time and neuron index) bound the alignment with $u$ as well as the growth of the norm.
+
+
+
+

@@ -2,7 +2,7 @@
 title: "Concentration of Gibbs measures onto minimizers of objective functions"
 author: "Michael Murray"
 date: "2023-08-01"
-categories: [probability]
+categories: [Probability]
 bibliography: ../../references.bib
 ---
 *Under what conditions do Gibbs measures concentrate on the minimizers of an associated objective function in the inverse temperature limit?*
@@ -16,7 +16,7 @@ In many situations encountered in machine learning one is confronted with minimi
 $$
 p_{\beta}(\rvw) = \frac{\exp(- \beta E(\rvw))}{\int_{\rvw \in \sphere^{d-1}} \exp \left( - \beta E(\rvw)\right) dQ},
 $$
-where here $Q$ denotes the uniform measure over the unit sphere in dimension $d$. The kind of statement I've often come across, at least in the machine learning related tutorials concerning this technique, is something like *"as the free parameter (also called the inverse temperature) $\beta$ goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function"*. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in [@lap-revisited], however I confess the presentation, particularly in regard to which conditions are required where, a little confusing. On the off-chance it might be helpful to others in a similar position I thought I would present some re-phrased version of some of the results in [@lap-revisited] and write down the proof in little more detail.
+where here $Q$ denotes the uniform measure over the unit sphere in dimension $d$. The kind of statement I've often come across, at least in the machine learning related tutorials concerning this technique, is something like *"as the free parameter (also called the inverse temperature) $\beta$ goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function"*. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in [@lap-revisited] but personally found the presentation slightly confusing. On the off-chance it might be helpful to others in a similar position I thought I would write down the results in [@lap-revisited] and also write down the proof in little more detail.
 
 
 ## Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers
@@ -49,7 +49,7 @@ Before we turn to the proof, a few remarks.
 
 
 ::: {.proof}
-It suffices to show that $P(N') = 0$. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers $(a_m)_{m\in \naturals}$ such that $a_m \downarrow 0$ and $P(f^{-1}(\{ a_m \}) = 0$. Suppose then it is not is not possible to construct such a sequence, then there must exist a smallest real $\epsilon>0$ such that $P(f^{-1}(\{ \epsilon\})) = 0$ and $P(f^{-1}(\{ y \})> 0$ for all $y \in (0, \epsilon)$. In short this implies that there are an uncountable number of singletons in $(0, \epsilon)$ which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets $(S_k)_{k \in \naturals}$ of $\Omega$ defined as
+It suffices to show that $P(N') = 0$. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers $(a_m)_{m\in \naturals}$ such that $a_m \downarrow 0$ and $P(f^{-1}(\{ a_m \}) = 0$. Suppose then it is not possible to construct such a sequence, then there must exist a smallest real $\epsilon>0$ such that $P(f^{-1}(\{ \epsilon\})) = 0$ and $P(f^{-1}(\{ y \})> 0$ for all $y \in (0, \epsilon)$. In short this implies that there are an uncountable number of singletons in $(0, \epsilon)$ which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets $(S_k)_{k \in \naturals}$ of $\Omega$ defined as
 $$
 S_k = \{x \in \Omega: f(x) \in (0, \epsilon), (k+1)^{-1} < P(f(x)\leq k^{-1} \},
 $$

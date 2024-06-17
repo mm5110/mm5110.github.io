@@ -1,8 +1,8 @@
 ---
-title: "Optimization guarantees via the NTK"
+title: "Optimization guarantees for neural networks via the NTK"
 author: "Michael Murray"
 date: "2023-09-27"
-categories: [Neural Networks]
+categories: [Neural Networks, Optimization]
 bibliography: ../../references.bib
 ---
 *In this post we will look at how the Neural Tangent Kernel (NTK) can be used to derive training guarantees for sufficiently overparameterized neural networks.*

@@ -1,0 +1,273 @@
+---
+title: "Matrix calculus: tips tricks and useful identities"
+author: "Michael Murray"
+date: "2023-08-01"
+categories: [Matrices]
+bibliography: ../../references.bib
+---
+*An overview and derivation of some basic rules and applications of matrix calculus.*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+**Matrix calculus is system of notation along with a set of identities which can prove useful for organizing and manipulating expressions involving the partial derivatives of functions.** A key benefit of matrix calculus is that it allows us to to collect together partial derivatives into vectors and matrices so that they can be treated as unified object. Note we will not discuss here functional derivatives such as the Frechet derivative or other generalizations like the Gateaux derivative. As long as you are familiar with a plain old partial derivative I hope the rest of this post will be easy to follow! We will exclusively be looking at real valued scalars, vectors and matrices. Furthermore with regards to notation wise we will use both $[A]_{ij}$ and $a_{ij}$ to refer to the entry of the matrix $A$ on row $i$ and column $j$, whichever is more convenient.
+
+
+## What is a matrix derivative and why is it useful?
+
+
+In optimization, and indeed many other areas of applied maths, one often has to work with functions of multiple variables and their derivatives with respect to these variables. Organizing these partial derivatives sensibly can save a lot of time and effort and often collecting them into matrices or vectors can make sense. For example, if we have $m$ functions which each depend on the same set of $n$ variables, then these partial derivatives can be organized by placing them in an $m \times n$ matrix, where each row contains the partial derivatives of one of the functions with respect to each variable. Beyond organizing partial derivatives into matrices and vectors we can also identify identities for taking matrix and vector derivatives. For example, suppose $A \in \reals^{m \times n}$, $x \in \reals^n$ and
+$$
+y = Ax.
+$$
+Suppose we want to compute the partial derivatives of $y$ with respect to the entries $x$. Clearly $\frac{\partial y_i}{\partial x_j} = a_{ij}$, we can therefore organize these partial derivatives into a matrix we denote $\frac{\partial y}{\partial x} \in \reals^{m \times n}$ where $[\frac{\partial y}{\partial x}]_{ij} = a_{ij}$. Alternatively we can write this as
+$$
+\frac{\partial y}{\partial x} = \frac{\partial}{\partial x} Ax = A
+$$
+which agrees very nicely with our intuition!Note however that there isn't really always a nice way of organizing the partial derivatives of $y$ with respect to the entries of $A$ as
+$\frac{\partial y_i}{\partial a_{jk}} = x_k$ if $j = i$ and $\frac{\partial y_i}{\partial a_{jk}} = 0$ otherwise and we can't organize this into a matrix whose dimensions are in some sense consistent with the dimensions of either $y$ or $A$. In the rest of this note we first provide an overview of the useful categories of matrix derivative and their definitions, and then proceed to prove certain useful identities illustrating the usefullness of the notation.
+
+
+## Categories of matrix derivative
+In matrix calculus we organize partial derivatives into matrices in the broad sense: note we can interpret a vector as as a restricted type of matrix with only one row or column, and scalars also as a restricted type of matrix consisting of just a single entry. Given two matrices $X$ and $Y$ then we want to define the matrix derivative $\frac{\partial X}{\partial Y}$ in such a way that the dimensions which are in some sense consistent with $X$ and $Y$: for instance, in the example above recall the matrix derivative was a vector which matched the dimensions of $y$. Indeed, without some notion of consistency in the dimensions then deriving versions of common, useful identities becomes messy and without these identities the appeal of using the matrix calculus notation is lost. Definitions of matrix derivatives in matrix calculus therefore focus on the following two categories.
+
+- **Matrix-scalar** derivatives: here we take the partial derivatives of a scalar with respect to a the elements of a matrix or take the partial derivative of the elements of a matrix with respect to a scalar and form a matrix.
+
+- **Vector-vector** derivatives: here we take the partial derivatives of the elements of one vector with respect to the elements of another and form a matrix.
+
+
+#### Matrix-scalar derivatives
+Given a scalar $y \in \reals$ and the matrix $X \in \reals^{m \times n}$, we define the matrix $\frac{\partial y}{ \partial X} \in \reals^{m \times n}$ as
+$$
+\frac{\partial X}{ \partial y} = \begin{bmatrix}
+\frac{\partial x_{11}}{\partial y} & \frac{\partial x_{12}}{\partial y} & \cdots & \frac{\partial x_{1n}}{\partial y}\\
+\frac{\partial x_{21}}{\partial y} & \frac{\partial x_{22}}{\partial y} & \cdots & \frac{\partial x_{2n}}{\partial y}\\
+\vdots & \vdots & \ddots & \vdots\\
+\frac{\partial x_{m1}}{\partial y} & \frac{\partial x_{m2}}{\partial y} & \cdots & \frac{\partial x_{mn}}{\partial y}
+\end{bmatrix}
+$$
+as the matrix derivative of $y$ with respect to $m$. Likewise we define the matrix derivative of $X$ with respect to $y$ denoted $\frac{\partial X}{ \partial y} \in \reals^{m \times n}$ as
+$$
+\frac{\partial y}{ \partial X} = \begin{bmatrix}
+\frac{\partial y}{\partial x_{11}} & \frac{\partial y}{\partial x_{12}} & \cdots & \frac{\partial y}{\partial x_{1n}}\\
+\frac{\partial y}{\partial x_{21}} & \frac{\partial y}{\partial x_{22}} & \cdots & \frac{\partial y}{\partial x_{2n}}\\
+\vdots & \vdots & \ddots & \vdots\\
+\frac{\partial y}{\partial x_{m1}} & \frac{\partial y}{\partial x_{m2}}& \cdots & \frac{\partial y}{\partial x_{mn}}
+\end{bmatrix}
+$$
+Note this also includes vector-scalar derivatives by considering a vector as a matrix with a single column! It is worth noting that sometimes the vector-vector derivative is defined as the transpose of the above, as long as you are consistent however it does not really matter.
+
+#### Vector-vector derivatives
+Given two vectors $y \in \reals^m$ and the matrix $x \in \reals^{n}$, we define the matrix $\frac{\partial y}{ \partial X} \in \reals^{m \times n}$ as
+$$
+\frac{\partial y}{ \partial x} = \begin{bmatrix}
+\frac{\partial y_1}{\partial x_{1}} & \frac{\partial y_1}{\partial x_{2}} & \cdots & \frac{\partial y_1}{\partial x_{n}}\\
+\frac{\partial y_2}{\partial x_{1}} & \frac{\partial y_2}{\partial x_{2}} & \cdots & \frac{\partial y_2}{\partial x_{n}}\\
+\vdots & \vdots & \ddots & \vdots\\
+\frac{\partial y_m}{\partial x_{1}} & \frac{\partial y_m}{\partial x_{2}}& \cdots & \frac{\partial y_m}{\partial x_{n}}
+\end{bmatrix}
+$$
+
+
+#### Point on notation
+So far given two matrices $X$, $Y$ we denoted the matrix derivative of $X$ with respect to $Y$ as $\frac{\partial X}{\partial Y}$. In what follows for convenience we will also equally use $\partial_Y X$ to denote the same thing.
+
+## Useful identities: vector derivatives of a vector
+
+### Linear systems of equations
+
+Lets start easy, we have already seen the following nice and intuitive identity: if $y = Ax$ then $\partial_x y = A$. As a slightly more complicated consider a function $ f: \reals^d \rightarrow \reals^n$
+
+$$
+f(x) =  \begin{bmatrix}
+f_1(x_1, x_2, ... x_d) \\
+\vdots\\
+f_d(x_1, x_2, ... x_d)
+\end{bmatrix}
+$$
+
+where we assume all partial derivatives of $f_i$ for $i \in [n]$ exist with respect to $x_j$ for all $j \in[m]$.
+
+:::{#prp-lin-sys}
+Suppose $A \in \reals^{m \times n }$ and $x \in \reals^n$. If $y = Af(x)$ then
+$$
+\frac{\partial y}{\partial x} = A \frac{\partial f}{\partial x}
+$$
+:::
+::: {.proof}
+Taking the partial derivative $r \in [n]$, $c \in [d]$ then
+$$
+\left[\frac{\partial y}{\partial x}  \right]_{rc} = \frac{\partial y_r}{\partial x_{c}} = \sum_{} a_{i,l}\frac{\partial}{\partial x_{c}} [f(x)]_l 
+$$
+Therefore by definition $\frac{\partial}{\partial A} = 2A$.
+:::
+
+
+### The chain rule for vector valued functions of multiple variables
+XXX
+
+## Useful identities: matrix derivatives of a scalar
+
+### Matrix derivatives of bilinear forms
+XXX
+
+### Matrix derivatives of norms
+Analogous to the fact that $\frac{d}{dx}x^2 = 2x$ we have the following.
+
+:::{#prp-frob}
+For a matrix $A \in \reals^{n \times m}$ then
+$$
+\frac{\partial}{\partial A}|| A||_F^2 = 2A.
+$$
+:::
+::: {.proof}
+Taking the partial derivative with respect to a single element of the matrix
+$$
+\left[\frac{\partial}{\partial A}|| A||_F^2 \right]_{rc} = \frac{\partial}{\partial a_{rc}}|| A||_F^2 = \frac{\partial}{\partial a_{rc}} \sum_{i=1}^{m} \sum_{j=1}^{n} a_{ij}^2 = 2 a_{rc} = 2[A]_{rc}
+$$
+Therefore by definition $\frac{\partial}{\partial A} = 2A$.
+:::
+
+
+### Matrix derivatives of the Trace.
+Taking the matrix derivative of a Trace of a product of matrices is very common if one is working with say the Frobenius norm. Recall that the $\Tr: \reals^{d_1 \times d_1} \rightarrow \reals$ is defined as the sum of the diagonal entries,
+$$
+\Tr(A) = \sum_{i = 1}^{d_1} a_{ii}.
+$$
+By definition of the Trace the following rules are immediatly apparent for any square matrices $A,B$ of the same dimension.
+
+- $Tr(A) = \Tr(A^T)$,
+
+- $\Tr(A + B) = \Tr(A) + \Tr(B)$,
+
+The Trace and Frobenius norm are also connected, indeed
+$$
+\begin{aligned}
+\Tr(A^T A) &= \sum_{i}^{d_2}[A^TA]_{ii} = \sum_{i}^{d_2} \left( \sum_{j}^{d_1} a_{ji} a_{ji} \right)
+= \sum_{j}^{d_1}\sum_{i}^{d_2} a_{ji}^2
+= ||A||_F^2.
+\end{aligned}
+$$
+Therefore from [@prp-frob] we know that $\partial_A \Tr(A^TA) = 2A$. To motivate the particular Trace functions we study the matrix derivative of consider a least squares objective: given $W \in \reals^{d_2 \times d_1}$, $X \in \reals^{d_1 \times n}$, $Y \in \reals^{d_2 \times n}$. Then the function
+$$
+L(W) = || Y - WX ||_F^2
+$$
+can be interpreted as summing the least squares error between $W X_{:,i}$ and $Y_{:, i}$ for all $i \in [n]$. Here we could think then of $n$ as the number of points in the training sample for instance. Using this connection
+$$
+\begin{aligned}
+L(W) &= \Tr((Y - WX)^T (Y - WX))\\
+&= \Tr(Y^TY) - \Tr(Y^TWX) - Tr(X^TW^T Y) + \Tr(X^TW^T W X)\\
+&= \Tr(Y^TY) - 2\Tr(Y^TWX) + \Tr(X^TW^T W X).
+\end{aligned}
+$$
+If we want to compute the matrix derivative of least squares style problems then we need to be able to compute the matrix derivatives of traces of the form $\Tr(AB)$, $\Tr(ABC)$, $\Tr(A^T B^T C B D)$.
+
+:::{#prp-tr1}
+For matrices $A \in \reals^{n \times m}$, $B \in \reals^{m \times n}$ then
+$$
+\partial_A \Tr(AB) = B^T, \partial_B \Tr(AB) = A^T
+$$
+:::
+
+
+::: {.proof}
+Each entry of AB is of the form
+$$
+[AB]_{ij} = \sum_{l=1}^m a_{il} b_{lj}.
+$$
+Thus taking the partial derivative with respect to a single element
+$$
+\left[ \partial_A \Tr(AB) \right]_{rc} = \frac{\partial}{\partial a_{rc}}\sum_{i=1}^n \sum_{l=1}^m a_{il} b_{li} =  b_{cr} = \left[ B^T\right]_{rc}
+$$
+Therefore $\partial_A \Tr(AB) = B^T$. An identical argument gives $\partial_B \Tr(AB) = A^T$.
+:::
+
+An educated guess useful for differentiating traces of products of distinct matrices is as follows: you can treat the matrices as univariate variables and in this context differentiating removes the variable in question from the product, then you forget about the Trace and transpose the terms appropriately so that the answer has the correct dimensions. Lets see a more complicated example.
+
+:::{#prp-tr2}
+For matrices $A \in \reals^{n \times m}$, $B \in \reals^{m \times k}, C \in \reals^{k \times n}$ then
+$$
+\partial_B \Tr(ABC) = A^T C^T
+$$
+:::
+
+::: {.proof}
+Each entry of $ABC$ is of the form
+$$
+[ABC]_{ij} = \sum_{l=1}^m \sum_{h=1}^m a_{il} b_{lh} c_{hj}.
+$$
+Thus taking the partial derivative with respect to a single element
+$$
+\left[ \partial_B \Tr(ABC) \right]_{rk} = \frac{\partial}{\partial b_{rk}}\sum_{i=1}^n \sum_{l=1}^m \sum_{h=1}^m a_{il} b_{lh} c_{hi} = \sum_{i=1}^n a_{ir} c_{ki}  = \left[ A^TC^T \right]_{rc}
+$$
+Therefore $\partial_B \Tr(ABC) = A^TC^T$. 
+:::
+Finally, lets consider the following a tougher case where we no longer consider distinct matrices in the product, in particular given $A \in \reals^{m \times n}$, $B \in \reals^{K \times m}, C \in \reals^{K \times K}$ and $D\in \reals^{m \times n}$ we want to compute $\Tr(A^T B^T C B D)$. If we were to guess using our rule of thumb we might suggest that forgetting the trace and treating each matrix as a univariate variable then by analogy with the chain rule $\partial_A\Tr(A^T B^T C B D)$ might look like $A^TCBD + A^T B^T C D$. Note $CBD \in \reals^{K \times n}$ and $A^T \in \reals^{n \times m}$ so as stands the first terms dimensions don't make sense, but if we switch the groups of matrices on either side of the term we removed then the multiplication  $CBDA^T \in \reals^{K \times m}$ is consistent and matches the dimensions of $B$. Likewise switching the order of multiplication in the second term using the same principles gives us the guess $CBDA^T+ D A^T B^T C$.
+
+:::{#prp-tr3}
+For matrices $A \in \reals^{m \times n}$, $B \in \reals^{K \times m}, C \in \reals^{K \times K}$ and $D\in \reals^{m \times n}$, then
+$$
+\partial_B \Tr(A^T B^T C B D) = AD^TB^TC^T +  C^TBAD^T
+$$
+:::
+
+
+::: {.proof}
+Using the shorthand $[A]_{ij} = a_{ij} = a'_{ji} = [A^T]_{ji}$, then each entry of $A^T B^T C B D$ can be written as
+$$
+[A^T B^T C B D]_{ij} = \sum_{p=1}^m \sum_{q=1}^K \sum_{e=1}^K \sum_{g=1}^m a_{ip}' b_{pq}' c_{qe} b_{eg} d_{gj}.
+$$
+Thus taking the partial derivative with respect to a single element of $B$ and using the chain rule we have 
+$$
+\begin{aligned}
+\left[ \partial_B \Tr(A^T B^T C B D) \right]_{rk} &= \frac{\partial}{\partial b_{rk}}\sum_{i=1}^n \sum_{p=1}^m \sum_{q=1}^K \sum_{e=1}^K \sum_{g=1}^m a_{ip}' b_{pq}' c_{qe} b_{eg} d_{gi} \\
+&=\sum_{i=1}^n \sum_{p=1}^m \sum_{q=1}^K \sum_{e=1}^K \sum_{g=1}^m a_{ip}' \frac{\partial b_{pq}'}{\partial b_{kr}'} c_{qe} b_{eg} d_{gi} + \sum_{i=1}^n \sum_{p=1}^m \sum_{q=1}^K \sum_{e=1}^K \sum_{g=1}^m a_{ip}' b_{pq}' c_{qe} \frac{\partial b_{eg}}{\partial b_{rk}} d_{gi}\\
+&= \sum_{i=1}^n \sum_{e=1}^K \sum_{g=1}^m a_{ik}' c_{re} b_{eg} d_{gi} + \sum_{i=1}^n \sum_{p=1}^m \sum_{q=1}^K a_{ip}' b_{pq}' c_{qr} d_{ki}\\
+& = \sum_{e=1}^K \sum_{g=1}^m \sum_{i=1}^n c_{re} b_{eg} d_{gi} a_{ik}' + \sum_{q=1}^K\sum_{p=1}^m \sum_{i=1}^n  c_{rq}'b_{qp} a_{pi} d_{ik}'\\
+&=[CBDA^T + C^TBAD^T]_{rk}.
+\end{aligned}
+$$
+Therefore $\partial_B \Tr(A^T B^T C B D) = CBDA^T + C^TBAD^T$.
+:::
+
+Lets now use the identities we have developed to compute the derivatives of a least squares loss, common in data science and machine learning applications.
+
+:::{#prp-general-loss}
+Let $Y\in \reals^{h \times n}$, $X \in \reals^{d \times n}$, $E \in \reals^{k \times d}$ is the encoder matrix and $D \in \reals^{h \times k}$, if
+$$
+L= ||Y - DEX||_F^2,
+$$
+then
+$$
+\begin{aligned}
+&\partial_D L = 2(DEX - Y)X^TE^T,\\
+&\partial_E L = 2D^T(DEX - Y)X^T.
+\end{aligned}
+$$
+:::
+::: {.proof}
+First we rewrite $L$ in terms of a trace of a product of matrices, letting $W=DE$ then 
+$$
+\begin{aligned}
+L &= \Tr((Y - WX)^T (Y - WX))\\
+&= \Tr(Y^TY) - \Tr(Y^TWX) - Tr(X^TW^T Y) + \Tr(X^TW^T W X)\\
+&= \Tr(Y^TY) - 2\Tr(Y^TWX) + \Tr(X^TW^T W X)\\
+&= \Tr(Y^TY) - 2\Tr(Y^TDEX) + \Tr(X^T E^T D^T D E X).
+\end{aligned}
+$$
+:::
+Recall now the matrix identities $\partial_B \Tr(ABC) = C^TA^T$ and $\partial_B \Tr(A^T B^T C B D) = CBDA^T + C^TBAD^T$. As a result taking the matrix derivative with respect to $D$ we have
+$$
+\partial_D L =  -2YX^TE^T+ DEXX^TE^T + DEXX^TE^T= 2(DEX - Y)X^TE^T
+$$
+and taking the matrix derivative with respect to $E$ gives
+$$
+\partial_E L = -2D^T Y X^T +  D^TDE X X^T +  D^TD E X X^T = 2D^T(DEX - Y)X^T.
+$$
+
+### Matrix derivarives of determinants
+
+## Conclusion
+
+

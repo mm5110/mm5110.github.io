@@ -9,7 +9,7 @@
 <meta name="author" content="Michael Murray">
 <meta name="dcterms.date" content="2023-08-01">
 
-<title>Home - Concentration of Gibbs measures onto minimizers of objective functions</title>
+<title>Home - Optimization and Representation Learning with Linear Autoencoders (LAEs)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,26 +22,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -126,9 +107,9 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Concentration of Gibbs measures onto minimizers of objective functions</h1>
+      <h1 class="title">Optimization and Representation Learning with Linear Autoencoders (LAEs)</h1>
                                 <div class="quarto-categories">
-                <div class="quarto-category">Probability</div>
+                <div class="quarto-category">Autoencoders</div>
               </div>
                   </div>
   </div>
@@ -163,7 +144,7 @@ div.csl-indent {
    
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" id="toc-proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" class="nav-link" data-scroll-target="#proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers">Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers</a></li>
+  <li><a href="#analysis-of-the-loss-landscape-characterization-of-stationary-points" id="toc-analysis-of-the-loss-landscape-characterization-of-stationary-points" class="nav-link" data-scroll-target="#analysis-of-the-loss-landscape-characterization-of-stationary-points">Analysis of the loss-landscape: characterization of stationary points</a></li>
   </ul>
 </nav>
     </div>
@@ -173,7 +154,7 @@ div.csl-indent {
 
 
 
-<p><em>Under what conditions do Gibbs measures concentrate on the minimizers of an associated objective function in the inverse temperature limit?</em></p>
+<p><em>Can we characterize the stationary points of an LAE? Will GD find a global minimum which generalizes well?</em></p>
 <div class="hidden">
 %%%%% NEW MATH DEFINITIONS %%%%% $$ %
 {lemma}{Lemma}
@@ -203,72 +184,32 @@ div.csl-indent {
 </div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>In many situations encountered in machine learning one is confronted with minimizing some parameterized objective or loss function which depends on data. For example, consider finding the smallest eigenvalue of a data covariance matrix <span class="math inline">\({\mathbf{M}}\)</span> by minimizing the objective <span class="math inline">\(E({\mathbf{w}}) = \frac{1}{2}{\mathbf{w}}^T {\mathbf{M}}{\mathbf{w}}\)</span> over the unit sphere. One approach to analyzing such problems and which is particularly popular among Physicists is to reduce the problem to that of Gibbs sampling. In particular, in the example above, instead of directly studying the objective <span class="math inline">\(E\)</span> we instead consider a sequence of associated Gibbs measures with densities defined as <span class="math display">\[
-p_{\beta}({\mathbf{w}}) = \frac{\exp(- \beta E({\mathbf{w}}))}{\int_{{\mathbf{w}}\in \mathbb{S}^{d-1}} \exp \left( - \beta E({\mathbf{w}})\right) dQ},
-\]</span> where here <span class="math inline">\(Q\)</span> denotes the uniform measure over the unit sphere in dimension <span class="math inline">\(d\)</span>. The kind of statement I’ve often come across, at least in the machine learning related tutorials concerning this technique, is something like <em>“as the free parameter (also called the inverse temperature) <span class="math inline">\(\beta\)</span> goes to infinity then the limiting Gibbs measure concentrates on the minimizers of the objective function”</em>. The main idea then is that one can analyze and access the set of minimizers of the objective by instead analyzing and sampling from the limiting Gibbs measure (if this exists), which seems pretty neat! However, at least with regards to the ones I have read, many of the tutorials or notes on this subject seem to skip over the technical details: for example, what conditions are required for instance on the objective for the limiting distribution to exist, what type of convergence are we talking about and what does the limiting distribution look like? I was happy to find the answer to these in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span> but personally found the presentation slightly confusing. On the off-chance it might be helpful to others in a similar position I thought I would write down the results in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span> and also write down the proof in little more detail.</p>
+<ul>
+<li><p>Explain what this post is about</p></li>
+<li><p>Explain what an autoautoencoder is</p></li>
+<li><p>The nonlinear case is hard to analyze, so in this post we will study the loss-landscape, training dynamics and generalization of Linear Autoencoders (LAEs).</p></li>
+</ul>
 </section>
-<section id="proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers" class="level2">
-<h2 class="anchored" data-anchor-id="proving-the-limiting-gibbs-measure-assuming-it-exists-is-supported-on-the-set-of-minimizers">Proving the limiting Gibbs measure (assuming it exists) is supported on the set of minimizers</h2>
-<p>To place ourselves in a general setting we adopt the following definitions and conditions.</p>
-<ul>
-<li>Let <span class="math inline">\((\Omega, \Sigma, Q)\)</span> be a measure space where <span class="math inline">\(\Sigma\)</span> is a Borel-<span class="math inline">\(\sigma\)</span> algebra and <span class="math inline">\(Q: \Sigma \rightarrow [0,1]\)</span> is a probability measure. <!-- - Let $(\Omega, d)$ be a complete, seperable metric space. --></li>
-<li>Let <span class="math inline">\((\Omega, d)\)</span> be a seperable complete metric space and assume <span class="math inline">\(f:(\Omega,d) \rightarrow (\mathbb{R}_{\geq 0},|\cdot|)\)</span> is continuous and <span class="math inline">\(\inf_{x \in \Omega} f(x) = 0\)</span>. <!-- - Assume for any $a>0$ that $Q(\{x \in \Omega: f(x)< a \}) > 0$ *[WIP: not sure we need this]*. --></li>
-<li>Let <span class="math inline">\(N = \{x \in \Omega: f(x) = 0\}\)</span> to be the set of minimizers of <span class="math inline">\(f\)</span> and assume <span class="math inline">\(N \neq \emptyset\)</span>. We denote the compliment of <span class="math inline">\(N\)</span> as <span class="math inline">\(N'= \Omega \backslash N\)</span>.</li>
-<li>Let <span class="math inline">\(P_\beta\)</span> for <span class="math inline">\(\beta \in \mathbb{R}_{&gt;0}\)</span> denote a sequence of probability measures with Radon-Nikodym derivative <span class="math display">\[
-\frac{dP_{\beta}}{dQ} = \frac{\exp(- \beta f(x))dQ}{\int_{x \in\Omega} \exp \left( - \beta f(x)\right) dQ}.
-\]</span></li>
-</ul>
-<p>With these definitions and assumptions in mind we have the following result which is essentially a re-phrased version of Proposition and Corollary 2.1 in <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span>.</p>
-<div id="thm-thm" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 1 </strong></span>Suppose there exists a probability measure <span class="math inline">\(P: \Sigma \rightarrow [0,1]\)</span> such that <span class="math inline">\(P_\beta \rightarrow P\)</span> weakly, then <span class="math inline">\(P(N) = 1\)</span>.</p>
-</div>
-<p>Before we turn to the proof, a few remarks.</p>
-<ul>
-<li>We assume <span class="math inline">\(\Sigma\)</span> is a Borel-<span class="math inline">\(\sigma\)</span> algebra in order to use the Portmanteau Theorem.</li>
-<li>We assume <span class="math inline">\(f\)</span> is continuous (as all our measures are Borel measures this also implies <span class="math inline">\(f\)</span> is measurable) as this implies <span class="math inline">\(\partial f^{-1}(A) \subseteq f^{-1}(\partial A)\)</span> which we use in the proof.</li>
-<li>We assume there exists at least one minimizer of <span class="math inline">\(f\)</span> due to Proposition 1 of <span class="citation" data-cites="lap-revisited">(<a href="#ref-lap-revisited" role="doc-biblioref">Hwang 1980</a>)</span> (note as per comment at the end of the paper this result can be extended from Euclidean space to a complete separable metric space) as this condition is necessary for the the sequence <span class="math inline">\((P_{\beta})\)</span> to converge weakly.</li>
-<li>If a minimizer exists we can assume without loss of generality that the minimum of <span class="math inline">\(f\)</span> is <span class="math inline">\(0\)</span> as if instead we consider the Gibbs measure associated with <span class="math inline">\(f(x) - \min_{x \in \Omega}f(x)\)</span> we observe that the additional term cancels due to the normalization factor and therefore these Gibbs measures are the same.</li>
-<li>Although we assume weak convergence with additional assumptions, for instance on the underlying metric space, this assumption can be at least moderated. For instance, if we assume in addition that <span class="math inline">\((\Omega, d)\)</span> is compact then <span class="math inline">\((P_{\beta})\)</span> is tight and so by Prokhorov’s Theorem we know that <span class="math inline">\((P_{\beta})\)</span> has at the very least a weakly convergent subsequence.</li>
-</ul>
-<div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>It suffices to show that <span class="math inline">\(P(N') = 0\)</span>. We first claim it is possible to construct a strictly decreasing sequence of positive real numbers <span class="math inline">\((a_m)_{m\in \mathbb{N}}\)</span> such that <span class="math inline">\(a_m \downarrow 0\)</span> and <span class="math inline">\(P(f^{-1}(\{ a_m \}) = 0\)</span>. Suppose then it is not possible to construct such a sequence, then there must exist a smallest real <span class="math inline">\(\epsilon&gt;0\)</span> such that <span class="math inline">\(P(f^{-1}(\{ \epsilon\})) = 0\)</span> and <span class="math inline">\(P(f^{-1}(\{ y \})&gt; 0\)</span> for all <span class="math inline">\(y \in (0, \epsilon)\)</span>. In short this implies that there are an uncountable number of singletons in <span class="math inline">\((0, \epsilon)\)</span> which have nonzero measure which is ripe for implying a contradiction. There are many ways of proceeding from here, one option is to consider disjoint subsets <span class="math inline">\((S_k)_{k \in \mathbb{N}}\)</span> of <span class="math inline">\(\Omega\)</span> defined as <span class="math display">\[
-S_k = \{x \in \Omega: f(x) \in (0, \epsilon), (k+1)^{-1} &lt; P(f(x)\leq k^{-1} \},
+<section id="analysis-of-the-loss-landscape-characterization-of-stationary-points" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-of-the-loss-landscape-characterization-of-stationary-points">Analysis of the loss-landscape: characterization of stationary points</h2>
+<p>Given a training sample of <span class="math inline">\(n\)</span> points each in <span class="math inline">\(\mathbb{R}^d\)</span>, stored column-wise in the matrix <span class="math inline">\(X \in \mathbb{R}^{d \times n}\)</span>, we study the linear autoencoder <span class="math inline">\(f(X+A) = DE(X+A)\)</span> where <span class="math inline">\(A \in \mathbb{R}^{d \times n}\)</span> is a noise matrix, <span class="math inline">\(E \in \mathbb{R}^{k \times d}\)</span> is the encoder matrix and $D ^{d k} is the decoder matrix. Our objective for now is simply the sum of the least squares on each point, <span class="math display">\[
+L(D,E) = || X - DE(X+A)||_F^2
 \]</span></p>
-<p>then for any <span class="math inline">\(y \in (0, \epsilon)\)</span> there exists a <span class="math inline">\(k \in \mathbb{N}\)</span> such that <span class="math inline">\(f^{-1}(y) \in S_k\)</span> and thus <span class="math inline">\(f^{-1}((0, \epsilon)) = \bigcup_{k=1}^{\infty} S_k\)</span>. Observe for any <span class="math inline">\(x \in S_k\)</span> that <span class="math inline">\(P(f^{-1}(x)) &gt; (k+1)^{-1}\)</span>, therefore the cardinality of <span class="math inline">\(S_k\)</span> can be at most <span class="math inline">\(k+1\)</span>. As a result every <span class="math inline">\(S_k\)</span> must be finite which in turn implies <span class="math inline">\((f^{-1}((0, \epsilon)))\)</span> is also countable as it is a countable union of finite sets. However, <span class="math inline">\(P(f^{-1}(\{y \}))&gt;0\)</span> implies <span class="math inline">\(f^{-1}(y) \neq \emptyset\)</span> for all <span class="math inline">\(y \in (0, \epsilon)\)</span> and furthermore these preimages of singletons are evidently disjoint. Therefore, as <span class="math inline">\((0, \epsilon)\)</span> is uncountable and <span class="math inline">\(f^{-1}((0, \epsilon)) = \bigcup_{y \in (0, \epsilon)} f^{-1}(\{ y\})\)</span> then <span class="math inline">\(f^{-1}((0, \epsilon))\)</span> must also be uncountable, which is a contradiction. We conclude then that there exists a postitive, strictly decreasing sequence of positive reals <span class="math inline">\(a_m \downarrow 0\)</span> such that <span class="math inline">\(P(f(x) = a_m) = 0\)</span> for all <span class="math inline">\(m \in \mathbb{N}\)</span>.</p>
-<p>Define <span class="math display">\[
-N'_m = f^{-1}([a_m, \infty)) = \{x \in \Omega: f(x) \in [a_m, \infty) \}.
-\]</span> By asssumption <span class="math inline">\(f\)</span> is continuous, therefore <span class="math display">\[
-\partial N_m'  = \partial f^{-1}([a_m, \infty)) \subseteq f^{-1}(\partial [a_m, \infty)) = f^{-1}(\{a_m \}).
-\]</span> As by construction <span class="math inline">\(P(f^{-1}(\{a_m \})) = 0\)</span> it follows that <span class="math inline">\(P(\partial N_m') = 0\)</span> and thus <span class="math inline">\(N_m'\)</span> is a <span class="math inline">\(P\)</span>-continuous set for all <span class="math inline">\(m \in \mathbb{N}\)</span>. By the Portmanteau Theorem it therefore follows that <span class="math display">\[
-\lim_{\beta \rightarrow \infty} P_\beta(N_m') = P(N_m').
-\]</span> Observe <span class="math display">\[
-\begin{align*}
-  P_\beta(N_m') &amp;= \frac{\int_{N_m'}\exp(- \beta f(x))dQ}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
-  &amp; \leq \frac{\exp( -\beta a_m\} Q(N_m')}{\int_{\Omega} \exp \left( - \beta f(x)\right) dQ}\\
-  &amp; \leq \left(\int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) \right)^{-1}.
-\end{align*}
-\]</span> Furthermore, as <span class="math display">\[
-\begin{align*}
-  \int_{\Omega} \exp \left( - \beta (f(x) - a_m)\right) &amp;\geq \int_{f^{-1}([0,a_m/2])} \exp \left( - \beta (f(x) - a_m)\right)\\
-  &amp; \geq \exp \left(\frac{\beta a_m}{2} \right) Q(f^{-1}([0,a_m/2]))\\
-  &amp; \geq \exp \left(\frac{\beta a_m}{2} \right)
-\end{align*}
-\]</span> then it holds that <span class="math inline">\(P_\beta(N_m') \leq \exp \left( - \frac{\beta a_m}{2} \right)\)</span> and as a result for any <span class="math inline">\(m \in \mathbb{N}\)</span> we have <span class="math display">\[
-P(N_m') = \lim_{\beta \rightarrow \infty} P_\beta(N_m') = \lim_{\beta \rightarrow \infty}\exp \left(-\frac{\beta a_m}{2} \right)  = 0.
-\]</span> By construction <span class="math inline">\((N_m')_{m \in \mathbb{N}}\)</span> is an increasing sequence of sets, <span class="math inline">\(N' = \bigcup_{m = 1}^{\infty} N_m'\)</span> and therefore <span class="math inline">\(P(N') = \lim_{m \rightarrow \infty} P(N_m')\)</span>. Hence we conclude <span class="math display">\[
-P(N') = \lim_{m \rightarrow \infty} P(N_m') = 0.
-\]</span></p>
-</div>
+<div id="prp-stat-denoiser" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 1 </strong></span>&nbsp;</p>
+Let <span class="math inline">\(X \in \mathbb{R}^{d \times n}\)</span> denote the data matrix, <span class="math inline">\(A \in \mathbb{R}^{d \times n}\)</span> denote the noise matrix, and <span class="math inline">\(E \in \mathbb{R}^{k \times d}\)</span> and <span class="math inline">\(D \in \mathbb{R}^{h \times k}\)</span> the encoder / decoder matrix of the LAE respectively. Then the stationary points of the loss <span class="math display">\[
+L= ||X - DE(X+A)||_F^2,
+\]</span> satisfy $$
+<span class="math display">\[\begin{aligned}
 
+\end{aligned}\]</span>
+<p>$$</p>
+</div>
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-lap-revisited" class="csl-entry" role="listitem">
-Hwang, Chii-Ruey. 1980. <span>“<span class="nocase">Laplace’s Method Revisited: Weak Convergence of Probability Measures</span>.”</span> <em>The Annals of Probability</em> 8 (6): 1177–82. <a href="https://doi.org/10.1214/aop/1176994579">https://doi.org/10.1214/aop/1176994579</a>.
-</div>
-</div></section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
