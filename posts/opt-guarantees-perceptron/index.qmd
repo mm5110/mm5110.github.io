@@ -1,7 +1,7 @@
 ---
 title: "Global optimization guarantees for shallow neural networks via the Perceptron algorithm"
 author: "Michael Murray"
-date: "2023-07-28"
+date: "2024-06-17"
 categories: [Neural Networks, Optimization]
 bibliography: ../../references.bib
 # image: "image.jpg"

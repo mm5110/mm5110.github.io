@@ -2,9 +2,9 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/opt-guarantees-perceptron/index.html",
       "/posts/opt-guarantees-ntk/index.html",
-      "/posts/gibbs/index.html",
-      "/posts/opt-guarantees-perceptron/index.html"
+      "/posts/gibbs/index.html"
     ]
   }
 ]
