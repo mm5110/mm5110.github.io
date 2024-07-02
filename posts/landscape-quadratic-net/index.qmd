@@ -1,0 +1,283 @@
+---
+title: "A simple neural network with a benign loss landscape"
+author: "Michael Murray"
+date: "2024-06-27"
+categories: [Neural Networks, Optimization]
+bibliography: ../../references.bib
+# image: "image.jpg"
+draft: false
+---
+*We look at an example of a simple network whose loss landscape, albeit non-convex, is relatively benign from an optimization perspective. This post is based on Theorem 2.1 of [@quad-network-landscape]. *
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+## Introduction
+A surprising aspect when it comes to training neural networks is that first order optimization methods appear to be pretty effective despite the fact that the loss landscape they traverse is typically non-convex. A nice line of work, in particular [@pmlr-v49-lee16], [@escape_saddles] and related, state results under mild conditions on the initialization and objective function to the effect that if gradient descent converges then it converges to a local minimum almost surely. However, although roughly speaking perturbed versions of gradient descent are able to escape saddles, there is still the question of **why do first order methods not get stuck in bad local minima?** A popular hypothesis for explaining this is that at least for some networks, e.g., those which are sufficiently overparameterized, then local minima are sufficiently `rare' versus global minima that they are unlikely to be encountered during training. 
+
+Here we look at a simple example which illustrates a particularly strong flavor of this idea: in short, for a sufficiently wide, shallow network with quadratic activations then for general data it can be shown that all local minima are global and have zero loss (Theorem 2.1 of [@quad-network-landscape])! 
+
+## Preliminaries
+
+### Points on notation
+Given a matrix $A \in \R^{m \times d}$ then $a \in \R^{d}$ denotes its $i$th row. We denote the entry at the $i$th row and $j$th column either as $[A]_{ij}$ or $a_{ij}$.  Given a scalar function $f:\R^{m \times d} \rightarrow \R$ we use $\partial_A f(A) \in \R^{m \times d}$ to denote the matrix-scalar derivative of $f$ with respect to $A$, in particular $[\partial_A f(A)]_{ij} = \frac{\partial f(A)}{\partial A_ij}$. Given a matrix $A \in \R^{m \times d}$ we use $vec(A) \in \R^{md}$ to denote the vectorized or flattened version of $A$. Given a matrix or vector $A \in \R^{m \times d}$ and a scalar function $f(A)$ then we use $\nabla_A f(A)$ to denote the gradient, equivalently $\nabla_A f(A) = \partial_{vec(A)} f(A)$. We use $A \otimes B$ denote the Kronecker product between matrices $A$ and $B$. We use $A \star B$ denote the Khatri-Rao product between matrices $A$ and $B$. If it is not clear from the context what the dimensions or shape of a tensor are we will use a subscript to clarify, this is most common when working with the 0 tensor. 
+
+### Data, network and loss
+Consider a training sample of $n$ input-label pairs $(x_i, y_i)_{i \in [n]}$ where $x_i \in \R^d$ and $y_i \in \R$, we use $X \in \R^{d \times n}$ to denote the matrix of training inputs stored column-wise. Let $f:\R^d \times \R^{2m \times d} \rightarrow \R$ be a neural network defined as
+$$
+f(x;W) = \frac{1}{2} \sum_{j=1}^{2m}(-1)^j (w_j^Tx)^2
+$$
+where $w_j$ denotes the $j$th row of $W$. We seek to minimize the squared error loss $L:\R^{2m \times d} \rightarrow \R$ of this network over the training sample,
+$$
+L(W) = \frac{1}{2} \sum_{i =1}^n ( f(x_i, W) - y_i )^2.
+$$
+Observe that $L$ is twice differentiable, we denote the gradient of $L$ as $\nabla L : \R^{2m \times d} \rightarrow \R^{2md}$ and the Hessian as $\nabla^2L: \R^{2m \times d} \rightarrow \R^{2md \times 2md}$.
+
+### First order derivatives
+Let $r(W) \in \R^n$ be the residual vector with entries $r_i(W):= f(x_i;W) - y_i$, then for any $W \in \R^{2m \times d}$ the matrix-scalar derivative $\partial_W L: \R^{2m \times d} \rightarrow \R^{2m \times d}$ is 
+$$
+\partial_W L(W) = \sum_{i=1}^n r_i(W) \partial_W f(x_i; W).
+$$
+As $\frac{\partial f(x_i; W)}{\partial w_r} = (-1)^r (w_r^T x_i) x_i$, then letting $D \in \R^{2m \times 2m}$ be a diagonal matrix with non-zero entries $D_{jj} = (-1)^j$ we have
+$$
+\begin{align*}
+\partial_W f(x_i; W) = DW x_i x_i^T.
+\end{align*}
+$$
+Therefore
+$$
+\begin{align*}
+\partial_W L(W) &= \sum_{i=1}^n r_i(W) \partial_W f(x_i; W)
+= DW \sum_{i=1}^n r_i(W)  x_i x_i^T.
+\end{align*}
+$$
+Similarly as $\nabla_W f(x; W) = (DW x_i) \otimes x_i$
+$$
+\begin{align*}
+\nabla L(W) = \sum_{i=1}^n r_i(W) \nabla_W f(x_i; W)
+&= \sum_{i=1}^n r_i(W) (DW x_i) \otimes x_i.
+\end{align*}
+$$
+We can also write this in terms of the Jacobian $J_F(W)\in \R^{2md \times n}$ of the network on the training sample: if $F(W) := [f(x_1; W), f(x_2;W)... f(x_n; W) ]^T \in \R^{n}$ then  
+$$
+\begin{align*}
+J_F(W) &:= \nabla_W F(W)\\
+&= [\nabla_W f(x_1; W),  \nabla_W f(x_2; W)... \nabla_W f(x_n; W)]\\
+&= [DWx_1 \otimes x_1, DWx_2 \otimes x_2... DWx_n \otimes x_n] \\
+&= DWX \star X.
+\end{align*}
+$$
+As a result 
+$$
+\nabla L(W) = J_F(W)r(W).
+$$
+
+### Second order derivatives
+Turning our attention to the Hessian, observe as $L(W) = \frac{1}{2} \sum_{i=1}^n r_i(W)^2$ then
+$$
+\begin{align*}
+\frac{\partial^2 L(W)}{\partial w_{rj} w_{lk}} &= \frac{\partial}{\partial w_{rj}} \sum_{i=1}^n r_i(W) \frac{\partial f(x_i; W)}{\partial w_{lk}}\\
+&= \sum_{i=1}^n \frac{\partial f(x_i; W)}{\partial w_{rj}} \frac{\partial f(x_i; W)}{\partial w_{lk}} +  \sum_{i=1}^n r_i(W) \frac{\partial^2 f(x_i; W)}{\partial w_{rj}\partial w_{lk}}
+\end{align*}
+$$
+Recall $\frac{\partial f(x_i;W)}{\partial w_{rj}} = (-1)^r (w_r^T x_i) x_{ij}$, as a result for $r \neq l$ then $\frac{\partial^2 f(x_i;W)}{\partial w_{rj} \partial w_{lk}} = 0$ while $\frac{\partial^2 f(x_i;W)}{\partial w_{rj} \partial w_{rk}} = (-1)^r x_{ij} x_{ik}$. Therefore
+$$
+ \frac{\partial^2 L(W)}{\partial w_{rj} w_{lk}} = \sum_{i=1}^n (-1)^{r + l} (w_r^T x_i) (w_l^T x_i) x_{ij}x_{ik} + \mathbb{1}_{r = l} r_i(W) (-1)^r x_{ij} x_{ik}.
+$$
+As a result
+$$
+ \frac{\partial^2 L(W)}{\partial w_{r} w_{l}} = \sum_{i=1}^n (-1)^{r + l} (w_r^T x_i) (w_l^T x_i) x_{i}x_{i}^T + \mathbb{1}_{r = l} r_i(W) (-1)^r x_{i} x_{i}^T.
+$$
+Based on this observe
+$$
+\begin{align*}
+  &vec(U)^T \nabla_W^2 L(W) vec(U) \\
+  &= \sum_{r=1}^{2m}\sum_{l=1}^{2m} u_r^T \frac{\partial^2 L(W)}{\partial w_{r} w_{l}} u_l\\
+  &= \sum_{r=1}^{2m}\sum_{l=1}^{2m} \left( \sum_{i=1}^n (-1)^{r + l} (w_r^T x_i) (w_l^T x_i) (u_r^T x_{i})(x_{i}^Tu_l) + \mathbb{1}_{r = l} r_i(W) (-1)^r (u_r^T x_{i})(x_{i}^Tu_l) \right)\\
+  &=  \sum_{i=1}^n \sum_{r=1}^{2m}(-1)^r (w_r^T x_i) (u_r^T x_{i}) \sum_{l=1}^{2m}(-1)^l(x_{i}^Tu_l)(w_l^T x_i) + \sum_{i=1}^n r_i(W)  \sum_{r=1}^{2m}(-1)^r (u_r^T x_{i}) \sum_{l=1}^{2m} \mathbb{1}_{r = l} (x_{i}^Tu_l) \\
+  &= \sum_{i=1}^n \left(\sum_{r=1}^{2m}(-1)^r (w_r^T x_i) (u_r^T x_{i})\right)^2 + \sum_{i=1}^n r_i(W)  \sum_{r=1}^{2m}(-1)^r (u_r^T x_{i})^2 \\
+  &= \sum_{i=1}^n \left( x_i^T W^T D U x_i\right)^2 + \sum_{i=1}^n r_i(W) x_i^T U^T D U x_i.
+\end{align*}
+$$
+
+### Recap on stationary points
+
+- A stationary point $W$ of $L$ satisfies $\nabla L(W) = 0$. A stationary point is either a local minimum, global minimum or saddle.
+
+- The stationary points of a sufficiently smooth function can be classified based on their local curvature / second order information.
+  - If $\nabla^2 L(W) \succ 0$ then is an (isolated) local minimum.
+  - If $\nabla^2 L(W) \prec 0$ then is an (isolated) local maximum.
+  - if $\nabla^2 L(W) \succcurlyeq 0$ then could either be a saddle or a (non-isolated) local minimum,
+  - if $\nabla^2 L(W) \preccurlyeq 0$ then could be either a saddle or a (non-isolated) local maximum.
+  - If $\nabla^2 L(W)$ has both positive and negative eigenvalues then is a saddle point.
+
+- In keeping with convention we define a **strict saddle** as any point having at least one direction of negative curvature, i.e., $\lambda_{min}(\nabla^2 L(W)) < 0$. Roughly speaking strict saddles are nice as GD can escape them almost surely [@pmlr-v49-lee16], [@escape_saddles] given a random initialization.
+  
+
+
+
+
+## All local minima are global and all saddles are strict saddles
+
+The following is a rephrased version of Theorem 2.1 [@quad-network-landscape].
+
+:::{#thm-quad}
+If $m \geq d$ then the following three properties hold for $L(W)$.
+
+1. All local minima are global and all saddle points are strict saddle points.
+
+2. In addition  if $d \geq 3$ and $n \lesssim d^2$ then for almost all $X\in \R^{d \times n}$ any global optimum $W^*$ of $L$ satisfies $L(W^*)=0$.
+:::
+
+
+**The outline of the proof for [@thm-quad] is as follows.**
+
+a) Any stationary point satisfies $DW \sum_{i=1}^n r_i(W) x_i x_i^T = 0$.
+
+b) If in addition $\nabla L(W)=0$ and $\nabla^2L(W) \succcurlyeq 0$ then this implies $\sum_{i=1}^n r_i(W) x_i x_i^T = 0$.
+
+c) By [@lem-proxy] if $\sum_{i=1}^n r_i(W) x_i x_i^T = 0$ then $W$ is a global minimizer.
+
+d) Furthermore if $W$ is a stationary point and $J_F(W)$ is full rank then as $\nabla L(W) = J_F(W) r(W) = 0$ this implies $r(W) = 0$ and therefore $W$ is also global minimizer with $0$ loss. 
+
+### Supporting Lemmas
+
+#### Certificate for global optimality
+
+The following lemma gives a sufficient condition for global optimality. Abstracting the argument, this is achieved by decomposing the loss into the composition of two functions, $L(W) = L_G(G(W))$, we can therefore interpret $L$ as a particular restriction of $L_G$. Note that any global minimizer of $L$ must also be a global minimizer of $L_G$. This allows us to substitute the problem of finding a global certificate for $L$ (which might be hard!) with the problem of finding a global certificate for $L_G$ (which hopefully is a lot easier...). In the setting studied here we can relax the problem by using a more arbitrary quadratic form instead of a neural network with quadratic activations. Moreover the proxy loss $L_G$ is convex in the parameters of this quadratic form and hence a global certificate for $L_G$ in this setting is easy to derive!
+
+:::{#lem-proxy}
+If $\tilde{W} \in \R^{2m \times d}$ satisfies 
+$$
+  \sum_{i=1}^n r_i(\tilde{W}) x_i x_i^T = 0
+$$
+then $\tilde{W}$ is a global minimizer of $L(W)$. 
+:::
+:::{.proof}
+
+First of all we note the obvious: a shallow network with quadratic activations is a quadratic form with respect to the input data, indeed $f(x;W) = x^TW^TDWx$. As a result we can re-write the condition of the lemma as
+$$
+\sum_{i=1}^n r_i(\tilde{W}) x_i x_i^T = \sum_{i=1}^n (x_i^T \tilde{W}^T D \tilde{W} x_i - y_i)x_i x_i^T =0.
+$$
+We now relax the problem by instead considering a predictor $g(x;M) = x^T M x$ instead of $f(x;W)$ and look at the squared error in this context,
+$$
+\begin{align*}
+ L_g(M) &:= \frac{1}{2} \sum_{i=1}^n (g(x_i, M) - y_i)^2.
+ \end{align*}
+$$
+
+As $g$ is affine in $M$ then $(g(x; M) - y)^2$  is a composition of a convex function with an affine function and therefore is convex. It follows that $L_g$ is differentiable and convex as it is a positively weighted sum of convex, differentiable functions. As a result any global minimizer $M^*$ of $L_g$ satisfies $\nabla L_g(M^*)= 0_{2md}$ or equivalently $\partial_M L_g(M^*)= 0_{2m \times d}$, which in turn implies
+$$
+\sum_{i=1}^n(g(x_i, M^*) - y_i) x_i x_i^T = 0.
+$$
+Now consider the square matrix $\tilde{W}^T D \tilde{W}$: based on the above observation if
+$$
+  \sum_{i=1}^n(g(x_i, \tilde{W}^T D \tilde{W}) - y_i) x_i x_i^T  = \sum_{i=1}^n(x_i^T \tilde{W}^T D \tilde{W} x_i - y_i) x_i x_i^T= 0
+$$
+then $\tilde{W}^T D \tilde{W}$ is a global minimizer of $L_g$. By construction $L(W) = L_g(W^T D W)$ for all $W \in \R^{2m \times d}$, therefore if $\tilde{W}^T D \tilde{W}$ is a global minimizer of $L_g$ then $\tilde{W}$ is a global minimzer of $L$ as
+$$
+ L(\tilde{W}) = L_g(\tilde{W}^T D \tilde{W}) \leq L_g(W^T D W) = L(W)
+$$
+for all $W \in \R^{2m \times d}$.
+:::
+
+
+#### Proving $X \star X$ is full rank almost everywhere
+We will show all local minima satisfy the condition $(X \star X)r(W) = 0_{d^2}$. Assuming $d^2 \geq n$ then $X \star X \in \R^{d^2 \times n}$ is a tall matrix. If $rank(X \star X) = n$ then this implies $null(X \star X) = \emptyset$ and therefore $(X \star X)r(W) = 0_{d^2}$ implies $r(W) = 0$ which in turn implies $W$ is a global minimum. Let $A \in \R^{m \times n}$ be a rectangular matrix where without loss of generality we assume $m\geq n$ (note the column and row rank are equal and therefore we can always instead study $A^T$ if is this is not true). $A$ is full rank if and only if there exists a square submatrix formed by selecting a subset of size $n$ out of $m$ possible rows which is full rank. Therefore $A$ is not full rank, or singular, if and only if all possible square submatrices formed by selecting $n$ out of $m$ possible rows are not full rank. Recall also a square matrix $B \R^{n \times n}$ is singular if and only its determinant is zero. Recall the determinant of $B$ is a polynomial in the entries of the $B$ and for any non-zero polynomial its zero-set has Lebesgue measure 0. To abstract the argument we are about to present let $G:\R^p \rightarrow \R^{m \times n}$ with $m \geq n$ output matrices whose entries are polynomials of the elements of the input $\theta$. Consider the Lebesgue product measure on $\R^p$, which we denote $\mu$, and for $S \subseteq [m]$ let $G(\theta)_S)$ denote submatrix of $G(\theta)$ formed by taking only those rows with index in $S$. The kind of result we are after is often derived using the following argument.
+
+1) Define $p(\theta) = \sum_{S \subset [n], |S| = n} det(G(\theta)_S)$.
+
+2) As $p$ is a sum of polynomials of the elements of $G(\theta)$ and the elements of $G(\theta)$ are themselves polynomial in $\theta$ then $p$ is polynomial in $\theta$.
+
+3) By construction $rank(G(\theta)) < n$ if and only if $p(\theta) = 0$.
+
+4) Let $Z(p) = \{ \theta \in \R^p: p(\theta) = 0 \}$ be the zero set of $p$. If there exists a $\theta$ such that $p(\theta) \neq 0$ then $\mu(Z(p)) = 0$.
+
+
+We now apply this argument to our setting. It is worth remarking that in Theorem 2.1 of [@quad-network-landscape] it is stated that $n\geq d$ but this is not necessary (which should be intuitive!).
+
+:::{#lem-ae-full-rank}
+  If $d \geq 3$ and $n \lesssim d^2$ then for almost every $X \in \R^{d \times n}$ we have $rank(X \star X) = n$.
+:::
+
+
+:::{.proof}
+By the argument above it suffices to find just one $X$ such that $rank(X \star X) = n$. We consider two cases, $n\leq d$ and $d < n \leq cd^2$ for some constant $c \in (0,1]$. For the first case, consider $X = [e_1, e_2... e_n]$ where $e_i$ is the standard basis with a one at index $i$ and zero everywhere else. Then $X \star X = [e_1, e_2... e_n]$ (here the $e_i$ are being used interchangeably to represent the standard basis vectors in both $\R^d$ and $\R^{d^2})$ which clearly is rank $n$. For the other case, consider $X$ with unique columns of the form $e_i + e_j$ for $i,j \in [n]$ with $i <j$. Let $p(i,j) = d(i-1) +j$. Note $[(e_i + e_j) \otimes (e_i + e_j)]_{p(k,l)} = 1$ if and only if $k=l$ and $j = l$. Denoting $S = \{e_i + e_j: \; 1\leq i < j \leq n \}$ then any $X$ formed from $n$ of the $|S| = (d - 1)(d-2)/2$ elements of $S$ generates an $X \star X$ which is full rank. Note for $|S| >0$ we require $d \geq 3$.
+:::
+
+### Proof of [@thm-quad]
+::: {.proof}
+Note as the loss is twice differentiable any local minima or (non-strict) saddle must satisfy the following conditions,
+  $$
+  \begin{align*}
+    \nabla L (W) &= 0,\\
+     \nabla^2L(W) &\succcurlyeq 0.
+  \end{align*}
+  $$
+For Statement 1 it suffices to show any $W$ satisfying these conditions in turn satisfies 
+$$
+ \sum_{i=1}^n r_i(W) x_i x_i^T = 0
+$$
+and therefore by [@lem-proxy] must be a global minimum. If $W$ is a stationary point then
+$$
+\begin{align*}
+\nabla L(W) = DW \sum_{i=1}^n r_i(W) x_i x_i^T = 0
+\end{align*}
+$$
+Recall $DW \in \R^{2m \times d}$ and $m \geq d$. If $DW$ is full rank then it has a left inverse, i.e., there exists a matrix $H$ such that $HDW = I$. As a result, if $W$ is stationary and $DW$ is full rank then
+$$
+HDW\sum_{i=1}^n r_i(W) x_i x_i^T = \sum_{i=1}^n r_i(W) x_i x_i^T = 0. 
+$$
+Suppose instead that $DW$ is not full rank. As $W$ is either a local minimum or a non-strict saddle then $\nabla^2L(W) \succcurlyeq 0$ which in turn implies 
+$$
+\sum_{i=1}^n \left( x_i^T D W^T U x_i\right)^2 + \sum_{i=1}^n r_i(W) x_i^T U^T D U x_i \geq 0
+$$
+for any $U \in \R^{2m \times d}$. Consider $U = ab^T$ for some $a \in R^{2m}$, $b \in \R^{d}$. Then
+$$
+\begin{align*}
+\sum_{i=1}^n \left( x_i^T  W^TD U x_i\right)^2 + \sum_{i=1}^n r_i(W) x_i^T U^T D U x_i & = \sum_{i=1}^n \left( x_i^T  W^TD a b^T x_i\right)^2 + \sum_{i=1}^n r_i(W) x_i^T b a^T D a b^T x_i\\
+&= \sum_{i=1}^n \left( x_i^T  W^TD a b^T x_i\right)^2 + (a^T D a) \sum_{i=1}^n r_i(W) x_i^T b  b^T x_i\\
+&= \sum_{i=1}^n \left( x_i^T  W^T D a b^T x_i\right)^2 + (a^T D a) b^T \left(\sum_{i=1}^n r_i(W) x_i x_i^T\right) b\\
+& \geq 0.
+\end{align*}
+$$
+Let $E(W^TD), O(W^T D) \in \R^{m \times d}$ denote the submatrices of $W^T d$ formed by taking only the even and odd columns. Again as $DW$ is not full rank it must hold that both $E(DW)$ and $O(DW)$ are not full rank. Therefore let $a_1 \in \R^{2m}$ be a vector whose even indexed elements are all zero and whose odd indexed elements form a subvector which lies in the nullspace of $O(DW)$. Likewise, let $a_1 \in \R^{2m}$ be a vector whose odd indexed elements are all zero and whose even indexed elements form a subvector which lies in the nullspace of $E(DW)$. Then $a_1, a_2 \in null(W^T D)$ and as a result the left-hand-side of the above inequality simplifies significantly,
+$$ 
+\begin{align*}
+\left(a_1^TDa_1 \right) b^T \left(\sum_{i=1}^n r_i(W) x_i x_i^T\right) b &\geq 0\\
+\left(a_2^TDa_2 \right) b^T \left(\sum_{i=1}^n r_i(W) x_i x_i^T\right) b &\geq 0
+\end{align*}
+$$
+for all $b \in \R^d$. Furthermore
+$$
+\begin{align*}
+a_1^T D a_1  &= -\sum_{i} a_{1i}^2 < 0\\
+a_2^T D a_2  &= \sum_{i} a_{2i}^2 > 0
+\end{align*}
+$$
+and therefore 
+$$ 
+\begin{align*}
+\left(a_1^TDa_1 \right) b^T \left(\sum_{i=1}^n r_i(W) x_i x_i^T\right) b & \leq 0,\\
+\left(a_2^TDa_2 \right) b^T \left(\sum_{i=1}^n r_i(W) x_i x_i^T\right) b & \geq  0
+\end{align*}
+$$
+for all $b \in \R^d$. This is possible if and only if $\sum_{i=1}^n r_i(W) x_i x_i^T = 0$. This concludes the proof of Statement 1.
+
+For Statement 2, observe
+$$
+  \begin{align*}
+    \sum_{i=1}^n r_i(W) x_i x_i^T = 0_{d \times d}
+  \end{align*}
+$$
+is equivalent to 
+$$
+(X \star X)r(W) = 0_{d^2},
+$$
+recall we use subscripts to clarify the shape of the tensor in question. It suffices to prove that $(X \star X) \in \R^{d^2 \times n}$ is full rank as this would then imply $r(W) = 0$, or equivalently or $f(x_i, W) = y_i$ for all $i \in [n]$. As long as $d\geq 3$ and $n \lesssim d^2$ then this is true for almost every $X\in \R^{d \times n}$ as per [@lem-ae-full-rank].
+:::
+
+## Discussion
+In this post we have illustrated under relatively mild conditions that a shallow network with quadratic activations has a benign loss landscape in the sense that all global minima are local and all saddles are strict saddles. Interestingly there are analogues with deep linear networks for which likewise all local minima are global, however not all saddles are strict. One of the key tricks we saw as per [@lem-proxy] was to find a proxy problem for which global certificates are easy to derive and whose global minimizers are a super set of the global minimizers of the network loss. It would be interesting to see where and how this idea could be extended to other settings.
+

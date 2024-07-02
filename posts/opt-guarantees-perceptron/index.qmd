@@ -232,7 +232,7 @@ for some constant $C$ independent of $n$ and $t$. As the right-hand-side grows l
 
 
 ### Training both the inner and outer layers
-A natural question one might ask is what happens if you unfreeze the outer layer weights, i.e., $\era_u \geq 0$? Practically we should expect nothing to change (you can try this experimentally if you like!), however from the perspective of deriving guarantees our job becomes harder. The first challenge is actually deriving bounds for $A(t)$ and $F(t)$ which are non-trivial: generally given bounded data it will be possible to upper bound at least crudely $F(t)$, however a positive lower bound on $A(t)$ we will shortly observe is trickier. Second, even if we are able to derive upper and lower bounds this technique only works if the lower bound on $A(t)$ grows faster than $F(t)$ with $t$. 
+A natural question one might ask is what happens if you unfreeze the outer layer weights, i.e., $\eta_u \geq 0$? Practically we should expect nothing to change (you can try this experimentally if you like!), however from the perspective of deriving guarantees our job becomes harder. The first challenge is actually deriving bounds for $A(t)$ and $F(t)$ which are non-trivial: generally given bounded data it will be possible to upper bound at least crudely $F(t)$, however a positive lower bound on $A(t)$ we will shortly observe is trickier. Second, even if we are able to derive upper and lower bounds this technique only works if the lower bound on $A(t)$ grows faster than $F(t)$ with $t$. 
 
 Consider the lower bound on $A(t)$: for convenience we use the notation $\phi_{ji}(t) = \phi(\langle w_j(t), x_i  \rangle)$ where $\phi \in \{\sigma, \sigma' \}$, from the update rules we derived previously we have the following.
 $$
