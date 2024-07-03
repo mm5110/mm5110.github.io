@@ -5,7 +5,6 @@ date: "2024-06-27"
 categories: [Neural Networks, Optimization]
 bibliography: ../../references.bib
 # image: "image.jpg"
-draft: false
 ---
 *We look at an example of a simple network whose loss landscape, albeit non-convex, is relatively benign from an optimization perspective. This post is based on Theorem 2.1 of [@quad-network-landscape]. *
 
