@@ -4,7 +4,7 @@ author: "Michael Murray"
 date: "2024-07-02"
 categories: [Matrices]
 bibliography: ../../references.bib
-draft: false
+draft: true
 ---
 *An overview and derivation of some basic rules and applications of matrix calculus.*
 
