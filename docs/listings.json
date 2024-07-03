@@ -2,6 +2,8 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/matrix-calc/index.html",
+      "/posts/landscape-quadratic-net/index.html",
       "/posts/opt-guarantees-perceptron/index.html",
       "/posts/opt-guarantees-ntk/index.html",
       "/posts/gibbs/index.html"
