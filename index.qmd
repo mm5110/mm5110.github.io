@@ -15,11 +15,24 @@ about:
     - text: Email
       href: mailto:mmurray@math.ucla.edu
 ---
-# Bio
-I am a Hedrick Assistant Adjunct Professor at UCLA where I am fortunate enough to work with Deanna Needell and Guido Montufar. Prior to this I studied under Jared Tanner at Oxford where I obtained a DPhil in Maths.
-
 # Research overview
-My research is mostly concerned with using maths to better understand and improve deep learning algorithms. Examples of specific topics include the role of overparameterization, principled design of network architectures and transitions between benign and non-benign forms of overfitting. See my research page for specifics on current and past projects. An up-to-date list of my publications can be found on Google scholar.
+I use maths to better understand and improve deep learning algorithms.
+
+1)  **Theoretical foundations:** develop theory to reconcile modern phenomena with conventional machine learning wisdom. 
+
+2) **Improving efficiency:** use intuition from theory to identify algorithmic innovations to lower training and inference costs. 
+
+
+# Bio Sketch
+
+- Lecturer in Mathematics, University of Bath 
+*(September 2024 - current)*
+- Hedrick Assistant Adjunct Professor, mentored by Deanna Needell and Guido Montufar, UCLA
+*(July 2021 - June 2024)*
+- DPhil in Mathematics, supervised by Jared Tanner, University of Oxford               
+*(September 2017 - June 2021)*
+
+
 
 ---
 

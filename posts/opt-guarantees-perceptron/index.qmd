@@ -122,7 +122,7 @@ Therefore, if we can show that $F(t)$ grows slower than $A(t)$ under the outline
 First we consider a simplified setting where we freeze the outer weights by setting $\eta_v = 0$: in this setting we are able to prove analogous results to the Perceptron setting. 
 
 :::{#lem-network1}
-Suppose the training data $(x_i, y_i)_{i\in [n]}$ is linearly separable, assume $\eta_v = 0$, $\eta_w \leq \frac{1}{nR}$, $v_j(0) = (-1)^j$ and $||w_j(0) || \leq  \lambda_w$ for all $j \in [2m]$. Then gradient descent will terminate after
+Suppose the training data $(x_i, y_i)_{i\in [n]}$ is linearly separable, assume $\eta_v = 0$, $\eta_w \leq \frac{1}{nR^2}$, $v_j(0) = (-1)^j$ and $||w_j(0) || \leq  \lambda_w$ for all $j \in [2m]$. Then gradient descent will terminate after
  $$
  T < \frac{2 (\lambda_w \alpha \gamma +1)}{ \eta_w \alpha^2 \gamma^2}
  $$

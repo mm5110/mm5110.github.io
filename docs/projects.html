@@ -108,9 +108,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#research-perspective" id="toc-research-perspective" class="nav-link active" data-scroll-target="#research-perspective">Research perspective</a></li>
-  <li><a href="#current-projects" id="toc-current-projects" class="nav-link" data-scroll-target="#current-projects">Current projects</a></li>
-  <li><a href="#previous-projects" id="toc-previous-projects" class="nav-link" data-scroll-target="#previous-projects">Previous projects</a></li>
+  <li><a href="#high-level-perspective" id="toc-high-level-perspective" class="nav-link active" data-scroll-target="#high-level-perspective">High level perspective</a></li>
+  <li><a href="#themes" id="toc-themes" class="nav-link" data-scroll-target="#themes">Themes</a></li>
   </ul>
 </nav>
     </div>
@@ -134,32 +133,22 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="research-perspective" class="level2">
-<h2 class="anchored" data-anchor-id="research-perspective">Research perspective</h2>
-<p>Broadly speaking, most of my work concerns using maths to better understand the behaviour and improve the performance of algorithms for machine learning and data science. I am particularly interested in deep learning for two reasons: first because it offers game-changing performance across so many important applications like computer vision and drug prediction, and second because the fact that it works so well challenges some of the conventional wisdoms concerning machine learning. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making it safer, more reliable and less costly to train and use in terms of time, energy and memory.</p>
+<section id="high-level-perspective" class="level2">
+<h2 class="anchored" data-anchor-id="high-level-perspective">High level perspective</h2>
+<p>I use maths to better understand and improve the performance of algorithms for machine learning and data science, notably deep learning. I am particularly interested in deep learning for two reasons: first because it offers state-of-the-art performance across so many important applications (e.g., natural language processing, computer vision, drug prediction etc.), and second because the fact that it works so well challenges a number of aspects of conventional machine learning wisdom. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making such systems safer, more reliable and less costly to train and use in terms of time, energy and memory.</p>
 </section>
-<section id="current-projects" class="level2">
-<h2 class="anchored" data-anchor-id="current-projects">Current projects</h2>
-<section id="implict-and-explicit-regularization-of-denoising-neural-networks" class="level4">
-<h4 class="anchored" data-anchor-id="implict-and-explicit-regularization-of-denoising-neural-networks">Implict and explicit regularization of denoising neural networks</h4>
+<section id="themes" class="level2">
+<h2 class="anchored" data-anchor-id="themes">Themes</h2>
+<p>To date my research roughly speaking falls into the following two categories. An up-to-date list of my publications can be found on Google scholar.</p>
+<section id="theoretical-foundations-of-deep-learning" class="level4">
+<h4 class="anchored" data-anchor-id="theoretical-foundations-of-deep-learning">Theoretical foundations of deep learning</h4>
+<p>The success of many of today’s cutting edge machine learning systems rely on variants of deep neural networks. These models are typically highly overparameterized and are trained by minimizing a non-convex, often non-smooth objective using only first order information with little if any explicit form of regularization. Furthermore, the amount of data available for training is often relatively small relative to the dimension of the data. As a result, the success of these models appears to contradict certain aspects of conventional machine learning wisdom and there is a need for reconcilliation.</p>
+<p>Examples of specific topics include identifying transitions between benign, tempered and no-overfitting outcomes, characterizing local minima in the loss landscape of neural networks, analysis of the spectrum of the NTK to gain insight into the role of overparameterization and implicit versus explicit forms of regularization resulting from the interplay of initialization, learning algorithm, architecture and data.</p>
 </section>
-<section id="geometric-ntk" class="level4">
-<h4 class="anchored" data-anchor-id="geometric-ntk">Geometric NTK</h4>
-</section>
-<section id="benign-overfitting-linearly-seperable-data-models-and-beyond" class="level4">
-<h4 class="anchored" data-anchor-id="benign-overfitting-linearly-seperable-data-models-and-beyond">Benign overfitting: linearly seperable data models and beyond</h4>
-</section>
-<section id="training-guarantees-in-the-mildly-overparameterized-regime" class="level4">
-<h4 class="anchored" data-anchor-id="training-guarantees-in-the-mildly-overparameterized-regime">Training guarantees in the mildly overparameterized regime</h4>
-</section>
-</section>
-<section id="previous-projects" class="level2">
-<h2 class="anchored" data-anchor-id="previous-projects">Previous projects</h2>
-<section id="how-does-the-choice-of-activation-function-impact-training" class="level4">
-<h4 class="anchored" data-anchor-id="how-does-the-choice-of-activation-function-impact-training">How does the choice of activation function impact training?</h4>
-</section>
-<section id="encoder-blind-compressed-sensing" class="level4">
-<h4 class="anchored" data-anchor-id="encoder-blind-compressed-sensing">Encoder blind compressed sensing</h4>
+<section id="improving-the-efficiency-of-deep-learning-algorithms" class="level4">
+<h4 class="anchored" data-anchor-id="improving-the-efficiency-of-deep-learning-algorithms">Improving the efficiency of deep learning algorithms</h4>
+<p>Today’s massive, cutting edge deep learning based systems are enormously expensive to train and use. Algorithmic innovation based on intuition gained from mathematical theory has the potential to significantly lower costs in terms of memory, compute time and energy as well as unlock new applications.</p>
+<p>Examples of specific topics include principles for architecture design (including the role of the activation function), how to initialize neural networks for efficient forward and backward propagation early during training as well as encouraging the selection of sparsifiable / compressible networks through regularization.</p>
 <hr>
 
 

@@ -289,7 +289,7 @@ A^2(t) = |\langle vec(diag(v(t)) W(t)), u \otimes 1_{2m} \rangle|^2 \leq F(t) 2m
 <h3 class="anchored" data-anchor-id="training-with-frozen-outer-weights">Training with frozen outer weights</h3>
 <p>First we consider a simplified setting where we freeze the outer weights by setting <span class="math inline">\(\eta_v = 0\)</span>: in this setting we are able to prove analogous results to the Perceptron setting.</p>
 <div id="lem-network1" class="theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 2 </strong></span>Suppose the training data <span class="math inline">\((x_i, y_i)_{i\in [n]}\)</span> is linearly separable, assume <span class="math inline">\(\eta_v = 0\)</span>, <span class="math inline">\(\eta_w \leq \frac{1}{nR}\)</span>, <span class="math inline">\(v_j(0) = (-1)^j\)</span> and <span class="math inline">\(||w_j(0) || \leq \lambda_w\)</span> for all <span class="math inline">\(j \in [2m]\)</span>. Then gradient descent will terminate after <span class="math display">\[
+<p><span class="theorem-title"><strong>Lemma 2 </strong></span>Suppose the training data <span class="math inline">\((x_i, y_i)_{i\in [n]}\)</span> is linearly separable, assume <span class="math inline">\(\eta_v = 0\)</span>, <span class="math inline">\(\eta_w \leq \frac{1}{nR^2}\)</span>, <span class="math inline">\(v_j(0) = (-1)^j\)</span> and <span class="math inline">\(||w_j(0) || \leq \lambda_w\)</span> for all <span class="math inline">\(j \in [2m]\)</span>. Then gradient descent will terminate after <span class="math display">\[
 T &lt; \frac{2 (\lambda_w \alpha \gamma +1)}{ \eta_w \alpha^2 \gamma^2}
 \]</span> iterations, at which point the network will have achieved zero training (hinge) loss.</p>
 </div>

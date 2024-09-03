@@ -2,31 +2,26 @@
 title: "Research"
 ---
 
-## Research perspective
+## High level perspective
 
-Broadly speaking, most of my work concerns using maths to better understand the behaviour and improve the performance of algorithms for machine learning and data science. I am particularly interested in deep learning for two reasons: first because it offers game-changing performance across so many important applications like computer vision and drug prediction, and second because the fact that it works so well challenges some of the conventional wisdoms concerning machine learning. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making it safer, more reliable and less costly to train and use in terms of time, energy and memory.
-
-## Current projects
-
-#### Implict and explicit regularization of denoising neural networks
+I use maths to better understand and improve the performance of algorithms for machine learning and data science, notably deep learning. I am particularly interested in deep learning for two reasons: first because it offers state-of-the-art performance across so many important applications (e.g., natural language processing, computer vision, drug prediction etc.), and second because the fact that it works so well challenges a number of aspects of conventional machine learning wisdom. I think mathematics will allow us to not only better understand deep learning, thereby helping us extract and generalize principles for successful learning systems, but will also play a crucial role in making such systems safer, more reliable and less costly to train and use in terms of time, energy and memory.
 
 
-#### Geometric NTK
+## Themes
+
+To date my research roughly speaking falls into the following two categories. An up-to-date list of my publications can be found on Google scholar.
+
+#### Theoretical foundations of deep learning
+
+The success of many of today's cutting edge machine learning systems rely on variants of deep neural networks. These models are typically highly overparameterized and are trained by minimizing a non-convex,  often non-smooth objective using only first order information with little if any explicit form of regularization. Furthermore, the amount of data available for training is often relatively small relative to the dimension of the data. As a result, the success of these models appears to contradict certain aspects of conventional machine learning wisdom and there is a need for reconcilliation.
+
+Examples of specific topics include identifying transitions between benign, tempered and no-overfitting outcomes, characterizing local minima in the loss landscape of neural networks, analysis of the spectrum of the NTK to gain insight into the role of overparameterization and implicit versus explicit forms of regularization resulting from the interplay of initialization, learning algorithm, architecture and data. 
 
 
-#### Benign overfitting: linearly seperable data models and beyond
+#### Improving the efficiency of deep learning algorithms
 
+Today's massive, cutting edge deep learning based systems are enormously expensive to train and use. Algorithmic innovation based on intuition gained from mathematical theory has the potential to significantly lower costs in terms of memory, compute time and energy as well as unlock new applications. 
 
-#### Training guarantees in the mildly overparameterized regime
-
-
-## Previous projects
-
-#### How does the choice of activation function impact training?
-
-#### Encoder blind compressed sensing
-
-
-
+Examples of specific topics include principles for architecture design (including the role of the activation function), how to initialize neural networks for efficient forward and backward propagation early during training as well as encouraging the selection of sparsifiable / compressible networks through regularization.
 
 ------------------------------------------------------------------------

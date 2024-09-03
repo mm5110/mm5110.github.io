@@ -1,0 +1,44 @@
+---
+title: "Flat minimizers 1: overview and introduction to the basic arguments in their favor"
+author: "Michael Murray"
+date: "2024-07-02"
+categories: [Matrices]
+bibliography: ../../references.bib
+draft: true
+---
+*In this post we explore the potential benefits of finding flat as opposed to sharp minimizers. In particular we will see that flat minimizers typically correspond to `simple' solutions. For simplicity we focus on flatness as measured using the Euclidean metric.*
+
+::: {.hidden}
+{{< include ../../_math_commands.tex >}}
+:::
+
+## Introduction
+- Flat minimizers: can perturb in some (ideally) large ball and loss does not change much.
+- Sharp minimizers: a small perturbation can lead to a big increase in loss!
+- history of idea that flat minimizers are good / beneficial
+- main takeaway: flat minimizers find 'simple' solutions 
+- outline of rest of post
+
+
+
+
+
+## Perturbation perspective: flat minimizers correspond to `smooth' solutions
+- Mathematical characterization based on trace: consider smooth function, look at 2nd order Taylor series expansion, when trace is small error difference in loss between points is also small.
+- Bound on trace in turn bounds the gradient of the model on the training data.
+- If the function is sufficiently `smooth' then can bound the gradient everywhere and therefore conclude that is smooth everywhere.
+- example: polynomial regression with square loss
+
+
+## Perturbation perspective: flat minimizers are robust to perturbations of the input
+
+
+
+## Bayesian perspective: flat minimizers correspond to 
+
+
+
+## Information theory perspective: flat minimizers are compressible 
+
+
+## 
