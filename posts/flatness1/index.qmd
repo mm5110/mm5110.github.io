@@ -1,44 +1,190 @@
 ---
-title: "Flat minimizers 1: overview and introduction to the basic arguments in their favor"
+title: "On some elementary properties of Hopfield networks"
 author: "Michael Murray"
 date: "2024-07-02"
 categories: [Matrices]
 bibliography: ../../references.bib
-draft: true
+draft: false
 ---
-*In this post we explore the potential benefits of finding flat as opposed to sharp minimizers. In particular we will see that flat minimizers typically correspond to `simple' solutions. For simplicity we focus on flatness as measured using the Euclidean metric.*
+*In this post we derive some basic mathematical properties of asynchronous Hopfield networks from first principles.*
 
 ::: {.hidden}
 {{< include ../../_math_commands.tex >}}
 :::
 
-## Introduction
-- Flat minimizers: can perturb in some (ideally) large ball and loss does not change much.
-- Sharp minimizers: a small perturbation can lead to a big increase in loss!
-- history of idea that flat minimizers are good / beneficial
-- main takeaway: flat minimizers find 'simple' solutions 
-- outline of rest of post
+
+Hopfield networks where introduced in 1982 by John Hopfield as a model for biological computation, they are also often viewed as the precursor to Boltzmann machines. The purpose of this post is to derive some of their basic mathematical properties and results in a simple setting: namely binary (as opposed to polar) Hopfield networks equipped with an asynchronous update rule trained with a minimum probability flow objective. The content of this post is based primarily on [@inbook-hillar] as well as discussions with Chris Hillar.
+
+**Disclaimer:** this post is not at all intended as a full survey or review of Hopfield networks and there are doubtless many important topics, ideas and references that have been completely omitted. 
+
+## What is a Hopfield network and how does it work?
+In its most elementary form, a Hopfield network $H_{\theta}:\{0,1 \}^n \rightarrow \{0,1 \}^n$ is a parameterized model which maps binary vectors onto binary vectors. The parameters of a Hopfield network are used to define a function referred to as the *energy function* of the network: this energy function combined with a recurrence relation allows one to define an input-output map for a Hopfield network.
+
+#### Energy function
+Let $\text{Symm}_0(d)\subset \R^{n \times n}$ be the set of symmetric $n \times n$ matrices whose diagonal entries are zero. The energy function $E:\{0,1\}^n \times \text{Symm}_0(n)  \times \R^d \rightarrow \{0,1\}^n$ of a Hopfield network is defined as
+$$
+E(x; \theta) = -\frac{1}{2} x^T W x + h^Tx,
+$$
+note for convenience we use $\theta = (W, h)$. We often refer to $E$ as the 'energy' due to its use in modelling the energy configuration of ferromagnetic materials (see the Lenz-Ising model): roughly speaking we can view $x$ as encoding the magnetic state of an object, $W$ as capturing the magnetic properties of the object (namely the magnetic interaction or coupling between different atoms or nodes) and $h$ as modelling the effect of an external magnetic field. In order to connect with probabilistic models we can also think about $E$ generating a probability distribution over the different possible states of the system states.
 
 
+#### Recurrence dynamics
+Consider a network of $n$ nodes where each node can store the value 0 or 1, the state of this network is therefore described by an $n$-dimensional binary vector. To turn this network into a Hopfield network we add recurrence dynamics which allow the value of each node (and hence the state of the network) to evolve in time. In what follows we denote the $i$th entry of a vector $x$ as $x_i$, the $j$th row of $W$ as $W_j$, and use $\s1(\omega)$ to denote the indicator function which is one if the event $\omega$ is true and zero otherwise. Given an input vector $x \in \{ 0,1 \}^n$ the network generates a sequence of binary vectors $(x(k))_{k \in \sZ_{\geq 0}}$ as follows: let $x(0) = x$, then for all $k\geq 1$ and $i\in[n]$
+$$
+x_i(k) = \begin{cases}
+&\s1(W_i^Tx(k-1)> h_i), \quad k \; \text{mod} \; i = 0,\\
+&x_i(k-1), \quad \text{otherwise}.\\
+\end{cases}
+$$
+In particular, at each iteration the value at most one node can change: whether this update occurs or not is based on i) the connection of the node to other nodes in the network as encoded by $W_i$, the current value of the other nodes as encoded by $x(k-1)$, and the inherent tendency of the node to activate which is captured by the $h_i$. This update is referred to as asynchronous due to the fact that different nodes cannot be updated during the same iteration.
+
+#### Defining the input-output map of a Hopfield network: convergence of asynchronus recurrence dynamics to a fixed point
+How does a Hopfield network compute? Initialized with a given input, the above recurrence relation, or update rule, is iterated until a fixed point is hit. This fixed point is the binary vector outputted by the Hopfield network for a given input. There are a number of interpretations of this: one way is to think of these fixed points as 'memories, the network therefore associates each input with a memory thereby implementing a form of associative memory. Alternatively, one can think of all inputs that converge to the same fixed point, or attractor, as being noisy versions of the same underlying binary vector. Under this interpretation the network is performing a de-noising or error correction function. However, for any of this to make sense or be practical, we need to prove that for any input binary input vector the aforementioned recurrence relation converges to a fixed point after a finite number of steps. To this end, it will first prove useful to analyze the difference in energy of two states that differ by at most one bit, or equivalently, have a hamming distance of one.
+ 
+:::{#prp-bit-diff}
+Suppose $x,x' \in \{0,1 \}^n$ differ by exactly one bit, meaning there exists an $i \in [n]$ such that $x_j \neq x_j'$ iff $j = i$. Then
+$$
+E(x; \theta ) - E(x'; \theta ) = (1 - 2x_i)\left(W_i^Tx - h_i\right).
+$$
+:::
+
+::: {.proof}
+First note as $x_i \neq x_i'$ then $x_i'- x_i = 1 - 2x_i$. In addition, note that $x_jx_l = x_lx_j$ if $l,j \neq i$ and also recall $W_{ii}=0$. As a result using the symmetry of $W$ and the fact that $W_{ii}=0$ we have
+$$
+ \begin{align*}
+ E(x; \theta ) - E(x'; \theta ) = &= -\frac{1}{2} \sum_{l,j \in [n]}W_{lj}(x_l x_j - x_l' x_j') + \sum_{l \in [n]}h_l(x_l - x_l')\\
+  &= -\frac{1}{2} \left(\sum_{j \in [n]} W_{ji}(x_j x_i - x_j' x_i') +  \sum_{l \in [n]} W_{il}(x_i x_l - x_i' x_l')\right)+ h_i(x_i - x_i')\\
+  &= - \sum_{j \in [n]} W_{ij}(x_j x_i - x_j' x_i') + h_i(x_i - x_i') \\
+  &= ( x_i'- x_i)  \left( \sum_{j \in [n], j \neq i} W_{ij}x_j - h_i\right)\\
+  & = (1 - 2x_i)\left(W_i^Tx- h_i\right).
+\end{align*}
+$$
+QED.
+:::
+Now we are ready to establish a fundamental property: each update or change to the state either keeps the energy the same or decreases it!
+
+:::{#prp-energy}
+For any given $k \geq 0$ let $i \in [n]$ be such that $k +1 \; \text{mod} \; i = 0$. At iteration $k+1$ of the recurrence dynamics one of the following three cases must hold.
+
+1) *No update:*  if $x(k+1) = x(k)$ then $E(x(k+1); \theta ) = E(x(k); \theta)$.
+2) *$i$th bit is turned off:* if  $x(k+1)=0$ and $x(k)=1$ then $E(x(k+1); \theta ) \leq E(x(k); \theta)$, note equality occurs if and only if $W_i^T x(k) = h_i$.
+3) *$i$th bit is turned on:* if $x(k+1)=1$ and $x(k)=0$ then $E(x(k+1); \theta ) < E(x(k); \theta)$.
+:::
+
+::: {.proof}
+Case 1) is trivial. For 2) and 3), if $x(k+1) \neq x(k)$  then as per the update rule the hamming distance between $x(k+1)$ and $x(k)$ must be exactly one. Applying [@prp-bit-diff], as well as noting that $W_{ii} = 0$ implies $W_i^T x(k+1) = W_i^Tx(k)$, then 
+$$
+\begin{align*}
+E(x(k+1); \theta) - E(x(k); \theta) = (1 - 2x_i(k+1))\left(W_i^T x(k)- h_i\right)
+\end{align*}
+$$
+Focusing on case 2), if $x_i(k+1) = 0$ then by the update rule this implies $W_i^T x(k) - h_i \leq 0$ and $1 - 2x_i(k+1) = 1$, as a result
+$$
+E(x(k+1); \theta) - E(x(k); \theta) \leq 0.
+$$
+If $x_i(k+1) = 1$ then by the update rule this implies $W_i^T x(k) - h_i > 0$ and $1 - 2x_i(k+1) = -1$, this implies
+$$
+E(x(k+1); \theta) - E(x(k); \theta) < 0.
+$$
+QED.
+:::
+The fact that the energy does not increase will be crucial for proving convergence, indeed, without this property it is possible for the state of the network to oscillate in time and fail to converge. In light of this we now make a few remarks concerning the structure of $W$.
+
+- **Symmetry:** without symmetry the there can be updates resulting in an increase in energy. To see this suppose for ease that the diagonals of $W$ are still zero, then for two states $x,x'$ with a hamming distance of one and letting $\tilde{W}_i \in \{ 0,1\}^n$ match the $i$th column of $W$, we have
+$$
+ \begin{align*}
+ E(x; \theta ) - E(x'; \theta )
+  &= - \sum_{j \in [n], j \neq i} \frac{W_{ij} + W_{ji}}{2}(x_j x_i - x_j' x_i') + h_i(x_i - x_i') \\
+  &= ( x_i'- x_i)  \left( \sum_{j \in [n]} \frac{W_{ij} + W_{ji}}{2}x_j - h_i\right)\\
+  & = (1 - 2x_i)\left(\frac{1}{2}(W_i + \tilde{W}_i)^T x- h_i\right).
+\end{align*}
+$$
+One can easily construct examples where an update leads to an increase in energy in this setting: for example, consider $\tilde{W}_i = -3W_i$, then
+$$
+ \begin{align*}
+ E(x(k+1); \theta ) - E(x(k); \theta )
+  & = -(1 - 2x_i(k+1))\left(W_i^T x(k)- h_i\right).
+\end{align*}
+$$
+Now if $x_i(k+1) = 1$ then $W_i^T x(k)- h_i>0$ and so $E(x(k+1); \theta ) > E(x(k); \theta )$.
+
+- **Zero valued self-connections:** suppose $W$ is still symmetric but there may be some $i \in [n]$ such that  $W_{ii}\neq 0$. If $x_i(k) = 0$ then there is no difference versus the update with $W_{ii}=0$. However, if $x_i(k)=1$ then, keeping the other parameters the same, $W_{ii}>0$ means $W_i^T x(k)$ is bigger which makes it harder for the the $i$th bit to change to $0$. Similarly, if $W_{ii}<0$ then $W_i^Tx(k)$ is smaller which makes it easier for the $i$th bit to flip back to $0$. Intuitively we therefore might expect $W_{ii}>0$ to make states with many ones more sticky while $W_{ii}<0$ to make states with many ones less sticky (here sticky means harder to leave). Considering the energy change across an iteration, for $W_{ii}\neq 0$ we have
+$$
+\begin{align*}
+ E(x(k+1); \theta ) - E(x(k); \theta ) &= (1 - 2x_i(k+1))\left(W_i^T x(k)  - h_i - W_{ii}x_i(k))\right)\\
+\end{align*}
+$$
+From this we can again construct a scenario where the energy increases across an iteration: suppose $x_i(k+1) = 0$ and $x_i(k)=1$, then $W_i^T x(k) - h_i \leq 0$ and therefore
+$$
+E(x(k+1); \theta ) - E(x(k); \theta ) = - |W_i^T x(k) - h_i| - W_{ii}.
+$$
+If $W_{ii} < - | W_i^T x(k) - h_i|$ then $E(x(k+1); \theta ) > E(x(k); \theta )$. Negative valued self-connections or diagonal entries can therefore potentially lead to increases in the energy, oscillations in the dynamics and a failure to converge. Positive entries on the diagonal do not have this problem but on the other hand encourage states with a higher density to be attractors. As this is somewhat arbitrary and perhaps even downright problematic for certain applications (if we want to store say a sparse binary vector as a memory) it is easier to consider zero valued self-connections.
+
+We are now ready to prove the desired convergence result for the asynchronous recurrence dynamics. This result follows from [@prp-energy], indeed, as the energy cannot increase the only way the dynamics can fail to converge is if the network state indefinitely moves around some subset of states all of which have same energy. The trick to proving convergence then is to show that such dynamics are impossible: indeed, by [@prp-energy] the only way the network state can change but the energy remain the same is if a bit is switched off, however, this contradicts the idea we can revisit a state or oscillate between states!
+
+:::{#prp-convergence}
+For any $x \in \{0,1\}^n$ there exists a $K \in \sZ_{\geq 0}$ and an $x^* \in \{0,1\}^n$ such that $x(k) = x^*$ for all $k \geq K$.
+:::
+
+::: {.proof}
+Consider the subset $S(x) \subset \{0,1\}^n$, defined as the set of states which are revisited indefinitely by the recurrence dynamics for a given input or initial state $x$,
+$$
+S(x) = \{ z \in \{0,1\}^n: \forall K \geq 0 \; \exists k \geq K \; s.t. \; x(k) = z \}.
+$$
+Clearly as $x(k) \in \{0,1\}^n$ then $|S(x)| \geq 1$. We first we prove that $E(z_1; \theta) = E(z_2; \theta)$ for all $z_1,z_2 \in S(x)$. Proceeding by contradiction, assume that there exists a pair $z_1, z_2 \in S(x)$ such that $E(z_1; \theta) < E(z_2; \theta)$. Let $k \geq 0$ be an iteration where $x(k) = z_1$, then by the construction of $S(x)$ there exists some $k'>k$ such that $x(k') = z_2$. By assumption this implies $E(x(k); \theta) < E(x(k'); \theta)$, however, this is a contradiction as by iterating [@prp-energy] we have for any $k \geq 0$ the sequence of inequalities $E(x(k); \theta) \leq E(x(k+1); \theta) \leq  ...\leq E(x(k'); \theta)$. As a result for any pair $z_1, z_2 \in S(x)$ we have $E(z_1; \theta) = E(z_2; \theta)$.
+
+It suffices to show for any arbitrary $x \in \{0,1 \}^n$ that $|S(x)| = 1$. Consider the compliment $S^c(x) = \{ 0,1\}^n \backslash S(x)$: if $z \in \{ 0,1\}^n \in S^c(x)$ then there exists an iteration $K(z,x) \geq 0$ such that for all $k > K(z,x)$ we have $x(k) \neq z$. Define $K(x) = \max_{z \in S^c} K(z,x) + 1$ which by definition must be finite, then by construction for all $k\geq K(x)$ we have $x(k) \in S(x)$. Let
+$$
+\calK(x) = \{k \in \sZ_{\geq K(x)}: x(k+1) \neq x(k) \}
+$$
+If $|S(x)| \geq 2$ then there does not exists an $M \in \sZ_{\geq 0}$ such that $|\calK| \leq M$, indeed, if the number of updates (i.e., iteratations where a bit change occurs) is bounded then it must follow that $|S(x)| =1$! Let $k \in \calK(x)$: by definition then $x(k+1), x(k) \in S(x)$, which implies $E(x(k+1); \theta) = E(x(k), \theta)$, and by the update rule there exists an $i \in [n]$ such that $x_j(k) \neq x_j(k'+1)$ iff $i \neq j$. By [@prp-energy] equality can can only hold if $x_i(k)=1$ and $x_i(k+1) = 0$: to be clear, this therefore implies at any iteration $k \in \calK(x)$ that a bit must be turned off. However, there are only $n$ bits in total which implies $|\calK(x)| \leq n$ which in turn contradicts $|S(x)| \geq 2$. As a result we conclude $|S(x)|=1$ and convergence occurs after $K(x)< \infty$ iterations. QED.
+:::
+In light of [@prp-convergence], then given a set of parameters $\theta = (W, h)$, where $W \in \text{Symm}_0(n)$ and $h \in \R^d$, for any $x \in \{0,1 \}^n$ there exists a $K \in \sZ_{\geq 0}$ and an $x^* \in \{0,1 \}^n$ such that $x(k) = x^*$ for all $k \geq K$. We define the input-output map of the Hopfield network $H_{\theta}: \{0,1\}^n \rightarrow \{ 0,1\}^n$ parameterized by $\theta$ as $H_{\theta}(x) = x^*$. As a small remark, for synchronous updates it is bit trickier to define the input-output map as their dynamics do not necessarily converge to a fixed point, indeed, they can also converge to limit cycle of length 2 [@bruck-hopfiel-convergence]!
+ 
+
+## Training a Hopfield network via a minimum probability flow (MPF) approach
+Training a Boltzmann network can perhaps best be described as configuring the parameters in order that a given set of target binary vectors are the fixed points of the recurrence dynamics described above. Let $\calT \subset \{ 0,1\}^n$ denote the set of target binary vectors we want to store in our Hopfield network with input-output map $H_{\theta}$: we say that $H_{\theta}$ **memorizes** $\calT$ if $x = H_{\theta}(x)$ for all $x \in \calT$. There are a number of ways a Hopfield network can be trained to memorize a target set, here we present just one method taken from [@hillar2015efficientoptimalbinaryhopfield], which is based on minimum probability flows [@mpf-dickstein]. let $\calN (x) = \{x' \in \{0,1 \}^n: \sum_{i=1}^n |x_i - x_i'| = 1 \}$ denote the set of binary vectors which are a hamming distance of exactly one away from $x$ and define $\Theta = \text{Symm}_0(n)  \times \R^d$. Now consider the loss function $L: \Theta \rightarrow \R_{>0}$, defined as
+$$
+L(\theta) = \sum_{x \in \calT} \sum_{x' \in \calN(x)} \exp\left( \frac{E(x;\theta ) - E(x'; \theta)}{2} \right).
+$$
+We refer to this as the minimum probability flow (MPF) loss, which is motivated by considering the KL-divergence between the data distribution and the gibbs measure associated with $E$ (see [@mpf-dickstein], [@hillar2015efficientoptimalbinaryhopfield] ). Intuitively such a loss makes sense for the following reasons.
+
+i) The fixed points of the asynchronous dynamics for a set of parameters $\theta$ correspond to those states $x \in \{0,1\}^n$ must be local minima, i.e., $E(x; \theta) \leq E(x';\theta)$ for all $x' \in \calN(x)$. However, not all local minima are guaranteed to be fixed points, in particular, as per [@prp-energy] it is possible to move to a state with the same energy by turning a bit off. However, if a state is a strict local minimum of the energy function this is sufficient to ensure it is fixed point: note we call a state $x \in \{ 0,1\}^n$ a strict local minimum if $E(x; \theta) < E(x';\theta)$ for all $x' \in \calN(x)$. Following this, we say $H_{\theta}$ **strictly memorizes** $\calT$ if $x$ is a strict local minimum for all $x \in \calT$.
+
+ii) Therefore, to ensure our Hopfield network memorizes $\calT \subset \{ 0,1\}^n$ it suffices to choose $\theta$ such that $x$ is a strict local minimum of $E$ for all $x \in \calT$.
+
+iii) By inspection, the loss $L$ is small whenever $\theta$ is such that $E(x'; \theta)$ is large relative to $E(x; \theta)$ for all $x \in \calT$ and $x' \in \calN(x)$. Moreover, again by inspection if $L(\theta) < 1$ then it must hold that $\exp\left( \frac{E(x;\theta ) - E(x'; \theta)}{2} \right)<1$ and therefore $E(x; \theta) < E(x';\theta)$ for all $x \in \calT$ and $x' \in \calN(x)$. To be clear, $L(\theta) < 1$ is a sufficient condition to conclude $H_{\theta}$ strictly memorizes $\calT$. 
+
+Depending on the nature of $\calT$ it may not be possible to store all of its elements as strict local minima of a Hopfield network with a given number of nodes $n$. However, whenever this is possible we can find the appropriate parameters by minimizing $L$. The following proposition highlights that the MPF loss $L$ is amenable to optimization.
+
+:::{#prp-mpf}
+The MPF loss $L$ defined for a set $\calT \subset \{0,1 \}^n$ has the following properties.
+
+1) $L$ is infinitely differentiable and convex with respect to the parameters.
+2) Suppose there exist parameters $\hat{\theta}$ such that $\calT$ is strictly memorized by $H_{\hat{\theta}}$, if $\theta^* \in \text{inf}_{\theta \in \Theta} L(\theta)$ then $\calT$ is also strictly memorized by $H_{\theta^*}$. 
+:::
+::: {.proof}
+Statement 1) is easy, the exponential function is infinitely differentiable and convex in its exponent and $E(x;\theta)$ is affine in the parameters $\theta$. The composition of a smooth, convex function with an affine function is smooth and convex, furthermore a positively weighted sum of smooth convex functions is also smooth and convex. Turning our attention to 2), for any $\theta \in \Theta$ let
+$$
+\delta(\theta) := \max_{x \in \calT} \max_{x' \in \calN(x)} \left(\frac{E(x;\theta) -  E(x';\theta)}{2} \right).
+$$
+Note by construction
+$$
+L(\theta) \leq n|\calT|\exp(\delta(\theta)).
+$$
+Moreover, as the energy function is a linear in the parameters we have for any positive scalar $\alpha \in \R_{>0}$ that $\delta(\alpha \theta) = \alpha \delta( \theta)$. By assumption there exist parameters $\hat{\theta} \in \Theta$ such that for all $x \in \calT$ we have $E(x;\hat{\theta}) < E(x';\hat{\theta})$ for all $x' \in \calN(x)$, thus $\delta(\hat{\theta})< 0$. Let $\alpha' = -\delta^{-1}(\hat{\theta})\ln(2n|\calT|)$, then by the definition of $\theta^*$ being a minimizer of $L$ we have
+$$
+L(\theta^*) \leq L(\alpha' \hat{\theta}) \leq n|\calT|\exp(\alpha' \delta( \hat{\theta}))= \frac{1}{2}.
+$$
+As previously observed, $L(\theta^*)<1$ is sufficient to conclude that $H_{\theta^*}$ strictly memorizes $\calT$. *As a quick aside, note if we instead assume that $H_{\hat{\theta}}$ only memorizes $\calT$, then it is possible that $\delta(\hat{\theta})=0$ and this argument would breakdown!* QED.
+:::
+
+So far so good, but even if we can minimize the MPF loss to ensure a set of target states is strictly memorized by a Hopfield network, then, and as with any machine learning model, what guarantees do we have that the model will perform well on other inputs? In particular, even if all target states are fixed points it may not be the case that all fixed points are a target state. We refer to fixed points outside the target set as spurious as they artefacts arising during training. Furthermore note that if a spurious fixed point has a large basin of attraction then many inputs will be mapped to an output which potentially has no practical meaning or interpretation. In addition, even if we avoid spurious fixed points we still it seems have few controls over the basins of attraction of our targets, i.e., which inputs are mapped to which target states.
 
 
+## Summary
+In this post we have shown how the input-output map of a Hopfield network can be defined using an asynchronous recurrence relation, and also how a Hopfield network can be trained so that certain target states correspond to the fixed points of the dynamics!
 
-## Perturbation perspective: flat minimizers correspond to `smooth' solutions
-- Mathematical characterization based on trace: consider smooth function, look at 2nd order Taylor series expansion, when trace is small error difference in loss between points is also small.
-- Bound on trace in turn bounds the gradient of the model on the training data.
-- If the function is sufficiently `smooth' then can bound the gradient everywhere and therefore conclude that is smooth everywhere.
-- example: polynomial regression with square loss
+ 
 
 
-## Perturbation perspective: flat minimizers are robust to perturbations of the input
-
-
-
-## Bayesian perspective: flat minimizers correspond to 
-
-
-
-## Information theory perspective: flat minimizers are compressible 
-
-
-## 

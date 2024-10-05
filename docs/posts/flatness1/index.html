@@ -9,7 +9,7 @@
 <meta name="author" content="Michael Murray">
 <meta name="dcterms.date" content="2024-07-02">
 
-<title>Home - Flat minimizers 1: overview and introduction to the basic arguments in their favor</title>
+<title>Home - On some elementary properties of Hopfield networks</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,7 +22,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -107,7 +126,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Flat minimizers 1: overview and introduction to the basic arguments in their favor</h1>
+      <h1 class="title">On some elementary properties of Hopfield networks</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">Matrices</div>
               </div>
@@ -143,12 +162,9 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#perturbation-perspective-flat-minimizers-correspond-to-smooth-solutions---mathematical-characterization-based-on-trace-consider-smooth-function-look-at-2nd-order-taylor-series-expansion-when-trace-is-small-error-difference-in-loss-between-points-is-also-small.---bound-on-trace-in-turn-bounds-the-gradient-of-the-model-on-the-training-data.---if-the-function-is-sufficientlysmooth-then-can-bound-the-gradient-everywhere-and-therefore-conclude-that-is-smooth-everywhere." id="toc-perturbation-perspective-flat-minimizers-correspond-to-smooth-solutions---mathematical-characterization-based-on-trace-consider-smooth-function-look-at-2nd-order-taylor-series-expansion-when-trace-is-small-error-difference-in-loss-between-points-is-also-small.---bound-on-trace-in-turn-bounds-the-gradient-of-the-model-on-the-training-data.---if-the-function-is-sufficientlysmooth-then-can-bound-the-gradient-everywhere-and-therefore-conclude-that-is-smooth-everywhere." class="nav-link" data-scroll-target="#perturbation-perspective-flat-minimizers-correspond-to-smooth-solutions---mathematical-characterization-based-on-trace-consider-smooth-function-look-at-2nd-order-taylor-series-expansion-when-trace-is-small-error-difference-in-loss-between-points-is-also-small.---bound-on-trace-in-turn-bounds-the-gradient-of-the-model-on-the-training-data.---if-the-function-is-sufficientlysmooth-then-can-bound-the-gradient-everywhere-and-therefore-conclude-that-is-smooth-everywhere.">Perturbation perspective: flat minimizers correspond to <code>smooth' solutions - Mathematical characterization based on trace: consider smooth function, look at 2nd order Taylor series expansion, when trace is small error difference in loss between points is also small. - Bound on trace in turn bounds the gradient of the model on the training data. - If the function is sufficiently</code>smooth’ then can bound the gradient everywhere and therefore conclude that is smooth everywhere.</a></li>
-  <li><a href="#perturbation-perspective-flat-minimizers-are-robust-to-perturbations-of-the-input" id="toc-perturbation-perspective-flat-minimizers-are-robust-to-perturbations-of-the-input" class="nav-link" data-scroll-target="#perturbation-perspective-flat-minimizers-are-robust-to-perturbations-of-the-input">Perturbation perspective: flat minimizers are robust to perturbations of the input</a></li>
-  <li><a href="#bayesian-perspective-flat-minimizers-correspond-to" id="toc-bayesian-perspective-flat-minimizers-correspond-to" class="nav-link" data-scroll-target="#bayesian-perspective-flat-minimizers-correspond-to">Bayesian perspective: flat minimizers correspond to</a></li>
-  <li><a href="#information-theory-perspective-flat-minimizers-are-compressible" id="toc-information-theory-perspective-flat-minimizers-are-compressible" class="nav-link" data-scroll-target="#information-theory-perspective-flat-minimizers-are-compressible">Information theory perspective: flat minimizers are compressible</a></li>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#what-is-a-hopfield-network-and-how-does-it-work" id="toc-what-is-a-hopfield-network-and-how-does-it-work" class="nav-link active" data-scroll-target="#what-is-a-hopfield-network-and-how-does-it-work">What is a Hopfield network and how does it work?</a></li>
+  <li><a href="#training-a-hopfield-network-via-a-minimum-probability-flow-mpf-approach" id="toc-training-a-hopfield-network-via-a-minimum-probability-flow-mpf-approach" class="nav-link" data-scroll-target="#training-a-hopfield-network-via-a-minimum-probability-flow-mpf-approach">Training a Hopfield network via a minimum probability flow (MPF) approach</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   </ul>
 </nav>
     </div>
@@ -158,7 +174,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p><em>In this post we explore the potential benefits of finding flat as opposed to sharp minimizers. In particular we will see that flat minimizers typically correspond to `simple’ solutions. For simplicity we focus on flatness as measured using the Euclidean metric.</em></p>
+<p><em>In this post we derive some basic mathematical properties of asynchronous Hopfield networks from first principles.</em></p>
 <div class="hidden">
 %%%%% NEW MATH DEFINITIONS %%%%% $$ %
 {lemma}{Lemma}
@@ -186,38 +202,154 @@ ul.task-list li input[type="checkbox"] {
 <p>% </p>
 <p>% Caligraphic letters $$</p>
 </div>
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Hopfield networks where introduced in 1982 by John Hopfield as a model for biological computation, they are also often viewed as the precursor to Boltzmann machines. The purpose of this post is to derive some of their basic mathematical properties and results in a simple setting: namely binary (as opposed to polar) Hopfield networks equipped with an asynchronous update rule trained with a minimum probability flow objective. The content of this post is based primarily on <span class="citation" data-cites="inbook-hillar">(<a href="#ref-inbook-hillar" role="doc-biblioref">Hillar and Marzen 2017</a>)</span> as well as discussions with Chris Hillar.</p>
+<p><strong>Disclaimer:</strong> this post is not at all intended as a full survey or review of Hopfield networks and there are doubtless many important topics, ideas and references that have been completely omitted.</p>
+<section id="what-is-a-hopfield-network-and-how-does-it-work" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-hopfield-network-and-how-does-it-work">What is a Hopfield network and how does it work?</h2>
+<p>In its most elementary form, a Hopfield network <span class="math inline">\(H_{\theta}:\{0,1 \}^n \rightarrow \{0,1 \}^n\)</span> is a parameterized model which maps binary vectors onto binary vectors. The parameters of a Hopfield network are used to define a function referred to as the <em>energy function</em> of the network: this energy function combined with a recurrence relation allows one to define an input-output map for a Hopfield network.</p>
+<section id="energy-function" class="level4">
+<h4 class="anchored" data-anchor-id="energy-function">Energy function</h4>
+<p>Let <span class="math inline">\(\text{Symm}_0(d)\subset \mathbb{R}^{n \times n}\)</span> be the set of symmetric <span class="math inline">\(n \times n\)</span> matrices whose diagonal entries are zero. The energy function <span class="math inline">\(E:\{0,1\}^n \times \text{Symm}_0(n) \times \mathbb{R}^d \rightarrow \{0,1\}^n\)</span> of a Hopfield network is defined as <span class="math display">\[
+E(x; \theta) = -\frac{1}{2} x^T W x + h^Tx,
+\]</span> note for convenience we use <span class="math inline">\(\theta = (W, h)\)</span>. We often refer to <span class="math inline">\(E\)</span> as the ‘energy’ due to its use in modelling the energy configuration of ferromagnetic materials (see the Lenz-Ising model): roughly speaking we can view <span class="math inline">\(x\)</span> as encoding the magnetic state of an object, <span class="math inline">\(W\)</span> as capturing the magnetic properties of the object (namely the magnetic interaction or coupling between different atoms or nodes) and <span class="math inline">\(h\)</span> as modelling the effect of an external magnetic field. In order to connect with probabilistic models we can also think about <span class="math inline">\(E\)</span> generating a probability distribution over the different possible states of the system states.</p>
+</section>
+<section id="recurrence-dynamics" class="level4">
+<h4 class="anchored" data-anchor-id="recurrence-dynamics">Recurrence dynamics</h4>
+<p>Consider a network of <span class="math inline">\(n\)</span> nodes where each node can store the value 0 or 1, the state of this network is therefore described by an <span class="math inline">\(n\)</span>-dimensional binary vector. To turn this network into a Hopfield network we add recurrence dynamics which allow the value of each node (and hence the state of the network) to evolve in time. In what follows we denote the <span class="math inline">\(i\)</span>th entry of a vector <span class="math inline">\(x\)</span> as <span class="math inline">\(x_i\)</span>, the <span class="math inline">\(j\)</span>th row of <span class="math inline">\(W\)</span> as <span class="math inline">\(W_j\)</span>, and use <span class="math inline">\({\mathbb{1}}(\omega)\)</span> to denote the indicator function which is one if the event <span class="math inline">\(\omega\)</span> is true and zero otherwise. Given an input vector <span class="math inline">\(x \in \{ 0,1 \}^n\)</span> the network generates a sequence of binary vectors <span class="math inline">\((x(k))_{k \in {\mathbb{Z}}_{\geq 0}}\)</span> as follows: let <span class="math inline">\(x(0) = x\)</span>, then for all <span class="math inline">\(k\geq 1\)</span> and <span class="math inline">\(i\in[n]\)</span> <span class="math display">\[
+x_i(k) = \begin{cases}
+&amp;{\mathbb{1}}(W_i^Tx(k-1)&gt; h_i), \quad k \; \text{mod} \; i = 0,\\
+&amp;x_i(k-1), \quad \text{otherwise}.\\
+\end{cases}
+\]</span> In particular, at each iteration the value at most one node can change: whether this update occurs or not is based on i) the connection of the node to other nodes in the network as encoded by <span class="math inline">\(W_i\)</span>, the current value of the other nodes as encoded by <span class="math inline">\(x(k-1)\)</span>, and the inherent tendency of the node to activate which is captured by the <span class="math inline">\(h_i\)</span>. This update is referred to as asynchronous due to the fact that different nodes cannot be updated during the same iteration.</p>
+</section>
+<section id="defining-the-input-output-map-of-a-hopfield-network-convergence-of-asynchronus-recurrence-dynamics-to-a-fixed-point" class="level4">
+<h4 class="anchored" data-anchor-id="defining-the-input-output-map-of-a-hopfield-network-convergence-of-asynchronus-recurrence-dynamics-to-a-fixed-point">Defining the input-output map of a Hopfield network: convergence of asynchronus recurrence dynamics to a fixed point</h4>
+<p>How does a Hopfield network compute? Initialized with a given input, the above recurrence relation, or update rule, is iterated until a fixed point is hit. This fixed point is the binary vector outputted by the Hopfield network for a given input. There are a number of interpretations of this: one way is to think of these fixed points as ’memories, the network therefore associates each input with a memory thereby implementing a form of associative memory. Alternatively, one can think of all inputs that converge to the same fixed point, or attractor, as being noisy versions of the same underlying binary vector. Under this interpretation the network is performing a de-noising or error correction function. However, for any of this to make sense or be practical, we need to prove that for any input binary input vector the aforementioned recurrence relation converges to a fixed point after a finite number of steps. To this end, it will first prove useful to analyze the difference in energy of two states that differ by at most one bit, or equivalently, have a hamming distance of one.</p>
+<div id="prp-bit-diff" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 1 </strong></span>Suppose <span class="math inline">\(x,x' \in \{0,1 \}^n\)</span> differ by exactly one bit, meaning there exists an <span class="math inline">\(i \in [n]\)</span> such that <span class="math inline">\(x_j \neq x_j'\)</span> iff <span class="math inline">\(j = i\)</span>. Then <span class="math display">\[
+E(x; \theta ) - E(x'; \theta ) = (1 - 2x_i)\left(W_i^Tx - h_i\right).
+\]</span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>First note as <span class="math inline">\(x_i \neq x_i'\)</span> then <span class="math inline">\(x_i'- x_i = 1 - 2x_i\)</span>. In addition, note that <span class="math inline">\(x_jx_l = x_lx_j\)</span> if <span class="math inline">\(l,j \neq i\)</span> and also recall <span class="math inline">\(W_{ii}=0\)</span>. As a result using the symmetry of <span class="math inline">\(W\)</span> and the fact that <span class="math inline">\(W_{ii}=0\)</span> we have <span class="math display">\[
+\begin{align*}
+E(x; \theta ) - E(x'; \theta ) = &amp;= -\frac{1}{2} \sum_{l,j \in [n]}W_{lj}(x_l x_j - x_l' x_j') + \sum_{l \in [n]}h_l(x_l - x_l')\\
+  &amp;= -\frac{1}{2} \left(\sum_{j \in [n]} W_{ji}(x_j x_i - x_j' x_i') +  \sum_{l \in [n]} W_{il}(x_i x_l - x_i' x_l')\right)+ h_i(x_i - x_i')\\
+  &amp;= - \sum_{j \in [n]} W_{ij}(x_j x_i - x_j' x_i') + h_i(x_i - x_i') \\
+  &amp;= ( x_i'- x_i)  \left( \sum_{j \in [n], j \neq i} W_{ij}x_j - h_i\right)\\
+  &amp; = (1 - 2x_i)\left(W_i^Tx- h_i\right).
+\end{align*}
+\]</span> QED.</p>
+</div>
+<p>Now we are ready to establish a fundamental property: each update or change to the state either keeps the energy the same or decreases it!</p>
+<div id="prp-energy" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 2 </strong></span>For any given <span class="math inline">\(k \geq 0\)</span> let <span class="math inline">\(i \in [n]\)</span> be such that <span class="math inline">\(k +1 \; \text{mod} \; i = 0\)</span>. At iteration <span class="math inline">\(k+1\)</span> of the recurrence dynamics one of the following three cases must hold.</p>
+<ol type="1">
+<li><em>No update:</em> if <span class="math inline">\(x(k+1) = x(k)\)</span> then <span class="math inline">\(E(x(k+1); \theta ) = E(x(k); \theta)\)</span>.</li>
+<li><em><span class="math inline">\(i\)</span>th bit is turned off:</em> if <span class="math inline">\(x(k+1)=0\)</span> and <span class="math inline">\(x(k)=1\)</span> then <span class="math inline">\(E(x(k+1); \theta ) \leq E(x(k); \theta)\)</span>, note equality occurs if and only if <span class="math inline">\(W_i^T x(k) = h_i\)</span>.</li>
+<li><em><span class="math inline">\(i\)</span>th bit is turned on:</em> if <span class="math inline">\(x(k+1)=1\)</span> and <span class="math inline">\(x(k)=0\)</span> then <span class="math inline">\(E(x(k+1); \theta ) &lt; E(x(k); \theta)\)</span>.</li>
+</ol>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Case 1) is trivial. For 2) and 3), if <span class="math inline">\(x(k+1) \neq x(k)\)</span> then as per the update rule the hamming distance between <span class="math inline">\(x(k+1)\)</span> and <span class="math inline">\(x(k)\)</span> must be exactly one. Applying <a href="#prp-bit-diff">Proposition&nbsp;1</a>, as well as noting that <span class="math inline">\(W_{ii} = 0\)</span> implies <span class="math inline">\(W_i^T x(k+1) = W_i^Tx(k)\)</span>, then <span class="math display">\[
+\begin{align*}
+E(x(k+1); \theta) - E(x(k); \theta) = (1 - 2x_i(k+1))\left(W_i^T x(k)- h_i\right)
+\end{align*}
+\]</span> Focusing on case 2), if <span class="math inline">\(x_i(k+1) = 0\)</span> then by the update rule this implies <span class="math inline">\(W_i^T x(k) - h_i \leq 0\)</span> and <span class="math inline">\(1 - 2x_i(k+1) = 1\)</span>, as a result <span class="math display">\[
+E(x(k+1); \theta) - E(x(k); \theta) \leq 0.
+\]</span> If <span class="math inline">\(x_i(k+1) = 1\)</span> then by the update rule this implies <span class="math inline">\(W_i^T x(k) - h_i &gt; 0\)</span> and <span class="math inline">\(1 - 2x_i(k+1) = -1\)</span>, this implies <span class="math display">\[
+E(x(k+1); \theta) - E(x(k); \theta) &lt; 0.
+\]</span> QED.</p>
+</div>
+<p>The fact that the energy does not increase will be crucial for proving convergence, indeed, without this property it is possible for the state of the network to oscillate in time and fail to converge. In light of this we now make a few remarks concerning the structure of <span class="math inline">\(W\)</span>.</p>
 <ul>
-<li>Flat minimizers: can perturb in some (ideally) large ball and loss does not change much.</li>
-<li>Sharp minimizers: a small perturbation can lead to a big increase in loss!</li>
-<li>history of idea that flat minimizers are good / beneficial</li>
-<li>main takeaway: flat minimizers find ‘simple’ solutions</li>
-<li>outline of rest of post</li>
+<li><p><strong>Symmetry:</strong> without symmetry the there can be updates resulting in an increase in energy. To see this suppose for ease that the diagonals of <span class="math inline">\(W\)</span> are still zero, then for two states <span class="math inline">\(x,x'\)</span> with a hamming distance of one and letting <span class="math inline">\(\tilde{W}_i \in \{ 0,1\}^n\)</span> match the <span class="math inline">\(i\)</span>th column of <span class="math inline">\(W\)</span>, we have <span class="math display">\[
+\begin{align*}
+E(x; \theta ) - E(x'; \theta )
+&amp;= - \sum_{j \in [n], j \neq i} \frac{W_{ij} + W_{ji}}{2}(x_j x_i - x_j' x_i') + h_i(x_i - x_i') \\
+&amp;= ( x_i'- x_i)  \left( \sum_{j \in [n]} \frac{W_{ij} + W_{ji}}{2}x_j - h_i\right)\\
+&amp; = (1 - 2x_i)\left(\frac{1}{2}(W_i + \tilde{W}_i)^T x- h_i\right).
+\end{align*}
+\]</span> One can easily construct examples where an update leads to an increase in energy in this setting: for example, consider <span class="math inline">\(\tilde{W}_i = -3W_i\)</span>, then <span class="math display">\[
+\begin{align*}
+E(x(k+1); \theta ) - E(x(k); \theta )
+&amp; = -(1 - 2x_i(k+1))\left(W_i^T x(k)- h_i\right).
+\end{align*}
+\]</span> Now if <span class="math inline">\(x_i(k+1) = 1\)</span> then <span class="math inline">\(W_i^T x(k)- h_i&gt;0\)</span> and so <span class="math inline">\(E(x(k+1); \theta ) &gt; E(x(k); \theta )\)</span>.</p></li>
+<li><p><strong>Zero valued self-connections:</strong> suppose <span class="math inline">\(W\)</span> is still symmetric but there may be some <span class="math inline">\(i \in [n]\)</span> such that <span class="math inline">\(W_{ii}\neq 0\)</span>. If <span class="math inline">\(x_i(k) = 0\)</span> then there is no difference versus the update with <span class="math inline">\(W_{ii}=0\)</span>. However, if <span class="math inline">\(x_i(k)=1\)</span> then, keeping the other parameters the same, <span class="math inline">\(W_{ii}&gt;0\)</span> means <span class="math inline">\(W_i^T x(k)\)</span> is bigger which makes it harder for the the <span class="math inline">\(i\)</span>th bit to change to <span class="math inline">\(0\)</span>. Similarly, if <span class="math inline">\(W_{ii}&lt;0\)</span> then <span class="math inline">\(W_i^Tx(k)\)</span> is smaller which makes it easier for the <span class="math inline">\(i\)</span>th bit to flip back to <span class="math inline">\(0\)</span>. Intuitively we therefore might expect <span class="math inline">\(W_{ii}&gt;0\)</span> to make states with many ones more sticky while <span class="math inline">\(W_{ii}&lt;0\)</span> to make states with many ones less sticky (here sticky means harder to leave). Considering the energy change across an iteration, for <span class="math inline">\(W_{ii}\neq 0\)</span> we have <span class="math display">\[
+\begin{align*}
+E(x(k+1); \theta ) - E(x(k); \theta ) &amp;= (1 - 2x_i(k+1))\left(W_i^T x(k)  - h_i - W_{ii}x_i(k))\right)\\
+\end{align*}
+\]</span> From this we can again construct a scenario where the energy increases across an iteration: suppose <span class="math inline">\(x_i(k+1) = 0\)</span> and <span class="math inline">\(x_i(k)=1\)</span>, then <span class="math inline">\(W_i^T x(k) - h_i \leq 0\)</span> and therefore <span class="math display">\[
+E(x(k+1); \theta ) - E(x(k); \theta ) = - |W_i^T x(k) - h_i| - W_{ii}.
+\]</span> If <span class="math inline">\(W_{ii} &lt; - | W_i^T x(k) - h_i|\)</span> then <span class="math inline">\(E(x(k+1); \theta ) &gt; E(x(k); \theta )\)</span>. Negative valued self-connections or diagonal entries can therefore potentially lead to increases in the energy, oscillations in the dynamics and a failure to converge. Positive entries on the diagonal do not have this problem but on the other hand encourage states with a higher density to be attractors. As this is somewhat arbitrary and perhaps even downright problematic for certain applications (if we want to store say a sparse binary vector as a memory) it is easier to consider zero valued self-connections.</p></li>
 </ul>
+<p>We are now ready to prove the desired convergence result for the asynchronous recurrence dynamics. This result follows from <a href="#prp-energy">Proposition&nbsp;2</a>, indeed, as the energy cannot increase the only way the dynamics can fail to converge is if the network state indefinitely moves around some subset of states all of which have same energy. The trick to proving convergence then is to show that such dynamics are impossible: indeed, by <a href="#prp-energy">Proposition&nbsp;2</a> the only way the network state can change but the energy remain the same is if a bit is switched off, however, this contradicts the idea we can revisit a state or oscillate between states!</p>
+<div id="prp-convergence" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 3 </strong></span>For any <span class="math inline">\(x \in \{0,1\}^n\)</span> there exists a <span class="math inline">\(K \in {\mathbb{Z}}_{\geq 0}\)</span> and an <span class="math inline">\(x^* \in \{0,1\}^n\)</span> such that <span class="math inline">\(x(k) = x^*\)</span> for all <span class="math inline">\(k \geq K\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Consider the subset <span class="math inline">\(S(x) \subset \{0,1\}^n\)</span>, defined as the set of states which are revisited indefinitely by the recurrence dynamics for a given input or initial state <span class="math inline">\(x\)</span>, <span class="math display">\[
+S(x) = \{ z \in \{0,1\}^n: \forall K \geq 0 \; \exists k \geq K \; s.t. \; x(k) = z \}.
+\]</span> Clearly as <span class="math inline">\(x(k) \in \{0,1\}^n\)</span> then <span class="math inline">\(|S(x)| \geq 1\)</span>. We first we prove that <span class="math inline">\(E(z_1; \theta) = E(z_2; \theta)\)</span> for all <span class="math inline">\(z_1,z_2 \in S(x)\)</span>. Proceeding by contradiction, assume that there exists a pair <span class="math inline">\(z_1, z_2 \in S(x)\)</span> such that <span class="math inline">\(E(z_1; \theta) &lt; E(z_2; \theta)\)</span>. Let <span class="math inline">\(k \geq 0\)</span> be an iteration where <span class="math inline">\(x(k) = z_1\)</span>, then by the construction of <span class="math inline">\(S(x)\)</span> there exists some <span class="math inline">\(k'&gt;k\)</span> such that <span class="math inline">\(x(k') = z_2\)</span>. By assumption this implies <span class="math inline">\(E(x(k); \theta) &lt; E(x(k'); \theta)\)</span>, however, this is a contradiction as by iterating <a href="#prp-energy">Proposition&nbsp;2</a> we have for any <span class="math inline">\(k \geq 0\)</span> the sequence of inequalities <span class="math inline">\(E(x(k); \theta) \leq E(x(k+1); \theta) \leq ...\leq E(x(k'); \theta)\)</span>. As a result for any pair <span class="math inline">\(z_1, z_2 \in S(x)\)</span> we have <span class="math inline">\(E(z_1; \theta) = E(z_2; \theta)\)</span>.</p>
+<p>It suffices to show for any arbitrary <span class="math inline">\(x \in \{0,1 \}^n\)</span> that <span class="math inline">\(|S(x)| = 1\)</span>. Consider the compliment <span class="math inline">\(S^c(x) = \{ 0,1\}^n \backslash S(x)\)</span>: if <span class="math inline">\(z \in \{ 0,1\}^n \in S^c(x)\)</span> then there exists an iteration <span class="math inline">\(K(z,x) \geq 0\)</span> such that for all <span class="math inline">\(k &gt; K(z,x)\)</span> we have <span class="math inline">\(x(k) \neq z\)</span>. Define <span class="math inline">\(K(x) = \max_{z \in S^c} K(z,x) + 1\)</span> which by definition must be finite, then by construction for all <span class="math inline">\(k\geq K(x)\)</span> we have <span class="math inline">\(x(k) \in S(x)\)</span>. Let <span class="math display">\[
+\mathcal{K}(x) = \{k \in {\mathbb{Z}}_{\geq K(x)}: x(k+1) \neq x(k) \}
+\]</span> If <span class="math inline">\(|S(x)| \geq 2\)</span> then there does not exists an <span class="math inline">\(M \in {\mathbb{Z}}_{\geq 0}\)</span> such that <span class="math inline">\(|\mathcal{K}| \leq M\)</span>, indeed, if the number of updates (i.e., iteratations where a bit change occurs) is bounded then it must follow that <span class="math inline">\(|S(x)| =1\)</span>! Let <span class="math inline">\(k \in \mathcal{K}(x)\)</span>: by definition then <span class="math inline">\(x(k+1), x(k) \in S(x)\)</span>, which implies <span class="math inline">\(E(x(k+1); \theta) = E(x(k), \theta)\)</span>, and by the update rule there exists an <span class="math inline">\(i \in [n]\)</span> such that <span class="math inline">\(x_j(k) \neq x_j(k'+1)\)</span> iff <span class="math inline">\(i \neq j\)</span>. By <a href="#prp-energy">Proposition&nbsp;2</a> equality can can only hold if <span class="math inline">\(x_i(k)=1\)</span> and <span class="math inline">\(x_i(k+1) = 0\)</span>: to be clear, this therefore implies at any iteration <span class="math inline">\(k \in \mathcal{K}(x)\)</span> that a bit must be turned off. However, there are only <span class="math inline">\(n\)</span> bits in total which implies <span class="math inline">\(|\mathcal{K}(x)| \leq n\)</span> which in turn contradicts <span class="math inline">\(|S(x)| \geq 2\)</span>. As a result we conclude <span class="math inline">\(|S(x)|=1\)</span> and convergence occurs after <span class="math inline">\(K(x)&lt; \infty\)</span> iterations. QED.</p>
+</div>
+<p>In light of <a href="#prp-convergence">Proposition&nbsp;3</a>, then given a set of parameters <span class="math inline">\(\theta = (W, h)\)</span>, where <span class="math inline">\(W \in \text{Symm}_0(n)\)</span> and <span class="math inline">\(h \in \mathbb{R}^d\)</span>, for any <span class="math inline">\(x \in \{0,1 \}^n\)</span> there exists a <span class="math inline">\(K \in {\mathbb{Z}}_{\geq 0}\)</span> and an <span class="math inline">\(x^* \in \{0,1 \}^n\)</span> such that <span class="math inline">\(x(k) = x^*\)</span> for all <span class="math inline">\(k \geq K\)</span>. We define the input-output map of the Hopfield network <span class="math inline">\(H_{\theta}: \{0,1\}^n \rightarrow \{ 0,1\}^n\)</span> parameterized by <span class="math inline">\(\theta\)</span> as <span class="math inline">\(H_{\theta}(x) = x^*\)</span>. As a small remark, for synchronous updates it is bit trickier to define the input-output map as their dynamics do not necessarily converge to a fixed point, indeed, they can also converge to limit cycle of length 2 <span class="citation" data-cites="bruck-hopfiel-convergence">(<a href="#ref-bruck-hopfiel-convergence" role="doc-biblioref">Bruck 1990</a>)</span>!</p>
 </section>
-<section id="perturbation-perspective-flat-minimizers-correspond-to-smooth-solutions---mathematical-characterization-based-on-trace-consider-smooth-function-look-at-2nd-order-taylor-series-expansion-when-trace-is-small-error-difference-in-loss-between-points-is-also-small.---bound-on-trace-in-turn-bounds-the-gradient-of-the-model-on-the-training-data.---if-the-function-is-sufficientlysmooth-then-can-bound-the-gradient-everywhere-and-therefore-conclude-that-is-smooth-everywhere." class="level2">
-<h2 class="anchored" data-anchor-id="perturbation-perspective-flat-minimizers-correspond-to-smooth-solutions---mathematical-characterization-based-on-trace-consider-smooth-function-look-at-2nd-order-taylor-series-expansion-when-trace-is-small-error-difference-in-loss-between-points-is-also-small.---bound-on-trace-in-turn-bounds-the-gradient-of-the-model-on-the-training-data.---if-the-function-is-sufficientlysmooth-then-can-bound-the-gradient-everywhere-and-therefore-conclude-that-is-smooth-everywhere.">Perturbation perspective: flat minimizers correspond to <code>smooth' solutions - Mathematical characterization based on trace: consider smooth function, look at 2nd order Taylor series expansion, when trace is small error difference in loss between points is also small. - Bound on trace in turn bounds the gradient of the model on the training data. - If the function is sufficiently</code>smooth’ then can bound the gradient everywhere and therefore conclude that is smooth everywhere.</h2>
-<ul>
-<li>example: polynomial regression with square loss</li>
-</ul>
 </section>
-<section id="perturbation-perspective-flat-minimizers-are-robust-to-perturbations-of-the-input" class="level2">
-<h2 class="anchored" data-anchor-id="perturbation-perspective-flat-minimizers-are-robust-to-perturbations-of-the-input">Perturbation perspective: flat minimizers are robust to perturbations of the input</h2>
+<section id="training-a-hopfield-network-via-a-minimum-probability-flow-mpf-approach" class="level2">
+<h2 class="anchored" data-anchor-id="training-a-hopfield-network-via-a-minimum-probability-flow-mpf-approach">Training a Hopfield network via a minimum probability flow (MPF) approach</h2>
+<p>Training a Boltzmann network can perhaps best be described as configuring the parameters in order that a given set of target binary vectors are the fixed points of the recurrence dynamics described above. Let <span class="math inline">\(\mathcal{T}\subset \{ 0,1\}^n\)</span> denote the set of target binary vectors we want to store in our Hopfield network with input-output map <span class="math inline">\(H_{\theta}\)</span>: we say that <span class="math inline">\(H_{\theta}\)</span> <strong>memorizes</strong> <span class="math inline">\(\mathcal{T}\)</span> if <span class="math inline">\(x = H_{\theta}(x)\)</span> for all <span class="math inline">\(x \in \mathcal{T}\)</span>. There are a number of ways a Hopfield network can be trained to memorize a target set, here we present just one method taken from <span class="citation" data-cites="hillar2015efficientoptimalbinaryhopfield">(<a href="#ref-hillar2015efficientoptimalbinaryhopfield" role="doc-biblioref">Hillar, Sohl-Dickstein, and Koepsell 2015</a>)</span>, which is based on minimum probability flows <span class="citation" data-cites="mpf-dickstein">(<a href="#ref-mpf-dickstein" role="doc-biblioref">Sohl-Dickstein, Battaglino, and DeWeese 2011</a>)</span>. let <span class="math inline">\(\mathcal{N}(x) = \{x' \in \{0,1 \}^n: \sum_{i=1}^n |x_i - x_i'| = 1 \}\)</span> denote the set of binary vectors which are a hamming distance of exactly one away from <span class="math inline">\(x\)</span> and define <span class="math inline">\(\Theta = \text{Symm}_0(n) \times \mathbb{R}^d\)</span>. Now consider the loss function <span class="math inline">\(L: \Theta \rightarrow \mathbb{R}_{&gt;0}\)</span>, defined as <span class="math display">\[
+L(\theta) = \sum_{x \in \mathcal{T}} \sum_{x' \in \mathcal{N}(x)} \exp\left( \frac{E(x;\theta ) - E(x'; \theta)}{2} \right).
+\]</span> We refer to this as the minimum probability flow (MPF) loss, which is motivated by considering the KL-divergence between the data distribution and the gibbs measure associated with <span class="math inline">\(E\)</span> (see <span class="citation" data-cites="mpf-dickstein">(<a href="#ref-mpf-dickstein" role="doc-biblioref">Sohl-Dickstein, Battaglino, and DeWeese 2011</a>)</span>, <span class="citation" data-cites="hillar2015efficientoptimalbinaryhopfield">(<a href="#ref-hillar2015efficientoptimalbinaryhopfield" role="doc-biblioref">Hillar, Sohl-Dickstein, and Koepsell 2015</a>)</span> ). Intuitively such a loss makes sense for the following reasons.</p>
+<ol type="i">
+<li><p>The fixed points of the asynchronous dynamics for a set of parameters <span class="math inline">\(\theta\)</span> correspond to those states <span class="math inline">\(x \in \{0,1\}^n\)</span> must be local minima, i.e., <span class="math inline">\(E(x; \theta) \leq E(x';\theta)\)</span> for all <span class="math inline">\(x' \in \mathcal{N}(x)\)</span>. However, not all local minima are guaranteed to be fixed points, in particular, as per <a href="#prp-energy">Proposition&nbsp;2</a> it is possible to move to a state with the same energy by turning a bit off. However, if a state is a strict local minimum of the energy function this is sufficient to ensure it is fixed point: note we call a state <span class="math inline">\(x \in \{ 0,1\}^n\)</span> a strict local minimum if <span class="math inline">\(E(x; \theta) &lt; E(x';\theta)\)</span> for all <span class="math inline">\(x' \in \mathcal{N}(x)\)</span>. Following this, we say <span class="math inline">\(H_{\theta}\)</span> <strong>strictly memorizes</strong> <span class="math inline">\(\mathcal{T}\)</span> if <span class="math inline">\(x\)</span> is a strict local minimum for all <span class="math inline">\(x \in \mathcal{T}\)</span>.</p></li>
+<li><p>Therefore, to ensure our Hopfield network memorizes <span class="math inline">\(\mathcal{T}\subset \{ 0,1\}^n\)</span> it suffices to choose <span class="math inline">\(\theta\)</span> such that <span class="math inline">\(x\)</span> is a strict local minimum of <span class="math inline">\(E\)</span> for all <span class="math inline">\(x \in \mathcal{T}\)</span>.</p></li>
+<li><p>By inspection, the loss <span class="math inline">\(L\)</span> is small whenever <span class="math inline">\(\theta\)</span> is such that <span class="math inline">\(E(x'; \theta)\)</span> is large relative to <span class="math inline">\(E(x; \theta)\)</span> for all <span class="math inline">\(x \in \mathcal{T}\)</span> and <span class="math inline">\(x' \in \mathcal{N}(x)\)</span>. Moreover, again by inspection if <span class="math inline">\(L(\theta) &lt; 1\)</span> then it must hold that <span class="math inline">\(\exp\left( \frac{E(x;\theta ) - E(x'; \theta)}{2} \right)&lt;1\)</span> and therefore <span class="math inline">\(E(x; \theta) &lt; E(x';\theta)\)</span> for all <span class="math inline">\(x \in \mathcal{T}\)</span> and <span class="math inline">\(x' \in \mathcal{N}(x)\)</span>. To be clear, <span class="math inline">\(L(\theta) &lt; 1\)</span> is a sufficient condition to conclude <span class="math inline">\(H_{\theta}\)</span> strictly memorizes <span class="math inline">\(\mathcal{T}\)</span>.</p></li>
+</ol>
+<p>Depending on the nature of <span class="math inline">\(\mathcal{T}\)</span> it may not be possible to store all of its elements as strict local minima of a Hopfield network with a given number of nodes <span class="math inline">\(n\)</span>. However, whenever this is possible we can find the appropriate parameters by minimizing <span class="math inline">\(L\)</span>. The following proposition highlights that the MPF loss <span class="math inline">\(L\)</span> is amenable to optimization.</p>
+<div id="prp-mpf" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 4 </strong></span>The MPF loss <span class="math inline">\(L\)</span> defined for a set <span class="math inline">\(\mathcal{T}\subset \{0,1 \}^n\)</span> has the following properties.</p>
+<ol type="1">
+<li><span class="math inline">\(L\)</span> is infinitely differentiable and convex with respect to the parameters.</li>
+<li>Suppose there exist parameters <span class="math inline">\(\hat{\theta}\)</span> such that <span class="math inline">\(\mathcal{T}\)</span> is strictly memorized by <span class="math inline">\(H_{\hat{\theta}}\)</span>, if <span class="math inline">\(\theta^* \in \text{inf}_{\theta \in \Theta} L(\theta)\)</span> then <span class="math inline">\(\mathcal{T}\)</span> is also strictly memorized by <span class="math inline">\(H_{\theta^*}\)</span>.</li>
+</ol>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Statement 1) is easy, the exponential function is infinitely differentiable and convex in its exponent and <span class="math inline">\(E(x;\theta)\)</span> is affine in the parameters <span class="math inline">\(\theta\)</span>. The composition of a smooth, convex function with an affine function is smooth and convex, furthermore a positively weighted sum of smooth convex functions is also smooth and convex. Turning our attention to 2), for any <span class="math inline">\(\theta \in \Theta\)</span> let <span class="math display">\[
+\delta(\theta) := \max_{x \in \mathcal{T}} \max_{x' \in \mathcal{N}(x)} \left(\frac{E(x;\theta) -  E(x';\theta)}{2} \right).
+\]</span> Note by construction <span class="math display">\[
+L(\theta) \leq n|\mathcal{T}|\exp(\delta(\theta)).
+\]</span> Moreover, as the energy function is a linear in the parameters we have for any positive scalar <span class="math inline">\(\alpha \in \mathbb{R}_{&gt;0}\)</span> that <span class="math inline">\(\delta(\alpha \theta) = \alpha \delta( \theta)\)</span>. By assumption there exist parameters <span class="math inline">\(\hat{\theta} \in \Theta\)</span> such that for all <span class="math inline">\(x \in \mathcal{T}\)</span> we have <span class="math inline">\(E(x;\hat{\theta}) &lt; E(x';\hat{\theta})\)</span> for all <span class="math inline">\(x' \in \mathcal{N}(x)\)</span>, thus <span class="math inline">\(\delta(\hat{\theta})&lt; 0\)</span>. Let <span class="math inline">\(\alpha' = -\delta^{-1}(\hat{\theta})\ln(2n|\mathcal{T}|)\)</span>, then by the definition of <span class="math inline">\(\theta^*\)</span> being a minimizer of <span class="math inline">\(L\)</span> we have <span class="math display">\[
+L(\theta^*) \leq L(\alpha' \hat{\theta}) \leq n|\mathcal{T}|\exp(\alpha' \delta( \hat{\theta}))= \frac{1}{2}.
+\]</span> As previously observed, <span class="math inline">\(L(\theta^*)&lt;1\)</span> is sufficient to conclude that <span class="math inline">\(H_{\theta^*}\)</span> strictly memorizes <span class="math inline">\(\mathcal{T}\)</span>. <em>As a quick aside, note if we instead assume that <span class="math inline">\(H_{\hat{\theta}}\)</span> only memorizes <span class="math inline">\(\mathcal{T}\)</span>, then it is possible that <span class="math inline">\(\delta(\hat{\theta})=0\)</span> and this argument would breakdown!</em> QED.</p>
+</div>
+<p>So far so good, but even if we can minimize the MPF loss to ensure a set of target states is strictly memorized by a Hopfield network, then, and as with any machine learning model, what guarantees do we have that the model will perform well on other inputs? In particular, even if all target states are fixed points it may not be the case that all fixed points are a target state. We refer to fixed points outside the target set as spurious as they artefacts arising during training. Furthermore note that if a spurious fixed point has a large basin of attraction then many inputs will be mapped to an output which potentially has no practical meaning or interpretation. In addition, even if we avoid spurious fixed points we still it seems have few controls over the basins of attraction of our targets, i.e., which inputs are mapped to which target states.</p>
 </section>
-<section id="bayesian-perspective-flat-minimizers-correspond-to" class="level2">
-<h2 class="anchored" data-anchor-id="bayesian-perspective-flat-minimizers-correspond-to">Bayesian perspective: flat minimizers correspond to</h2>
-</section>
-<section id="information-theory-perspective-flat-minimizers-are-compressible" class="level2">
-<h2 class="anchored" data-anchor-id="information-theory-perspective-flat-minimizers-are-compressible">Information theory perspective: flat minimizers are compressible</h2>
-</section>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>In this post we have shown how the input-output map of a Hopfield network can be defined using an asynchronous recurrence relation, and also how a Hopfield network can be trained so that certain target states correspond to the fixed points of the dynamics!</p>
 
 
+
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-bruck-hopfiel-convergence" class="csl-entry" role="listitem">
+Bruck, J. 1990. <span>“On the Convergence Properties of the Hopfield Model.”</span> <em>Proceedings of the IEEE</em> 78 (10): 1579–85. <a href="https://doi.org/10.1109/5.58341">https://doi.org/10.1109/5.58341</a>.
+</div>
+<div id="ref-inbook-hillar" class="csl-entry" role="listitem">
+Hillar, Christopher, and Sarah Marzen. 2017. <span>“Neural Network Coding of Natural Images with Applications to Pure Mathematics.”</span> In <em>Contemporary Mathematics</em>, 189–221. <a href="https://doi.org/10.1090/conm/685/13814">https://doi.org/10.1090/conm/685/13814</a>.
+</div>
+<div id="ref-hillar2015efficientoptimalbinaryhopfield" class="csl-entry" role="listitem">
+Hillar, Christopher, Jascha Sohl-Dickstein, and Kilian Koepsell. 2015. <span>“Efficient and Optimal Binary Hopfield Associative Memory Storage Using Minimum Probability Flow.”</span> <a href="https://arxiv.org/abs/1204.2916">https://arxiv.org/abs/1204.2916</a>.
+</div>
+<div id="ref-mpf-dickstein" class="csl-entry" role="listitem">
+Sohl-Dickstein, Jascha, Peter B. Battaglino, and Michael R. DeWeese. 2011. <span>“New Method for Parameter Estimation in Probabilistic Models: Minimum Probability Flow.”</span> <em>Phys. Rev. Lett.</em> 107 (November): 220601. <a href="https://doi.org/10.1103/PhysRevLett.107.220601">https://doi.org/10.1103/PhysRevLett.107.220601</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

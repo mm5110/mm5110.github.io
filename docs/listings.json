@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/flatness1/index.html",
       "/posts/landscape-quadratic-net/index.html",
       "/posts/opt-guarantees-perceptron/index.html",
       "/posts/opt-guarantees-ntk/index.html",
