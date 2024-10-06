@@ -1,8 +1,8 @@
 ---
 title: "On some elementary properties of Hopfield networks"
 author: "Michael Murray"
-date: "2024-07-02"
-categories: [Matrices]
+date: "2024-10-04"
+categories: [Neural Networks, Recurrent Dynamics, Hopfield Networks]
 bibliography: ../../references.bib
 draft: false
 ---
